@@ -4,17 +4,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 # from ..serializers import UserSerializer
+from app.models import teacher
 from app.models.teacher import Teacher
-# from app.serializers_f.teacher_serializer import TeacherAddUserSerializer
-from app.serializers_f import user_serializer
-from app.serializers_f.user_serializer import UserSerializer
+from app.serializers_f.teacher_serializer import TeacherAddUserSerializer, TeacherSerializer
 from drf_yasg.utils import swagger_auto_schema
 
-class UserCreateView(APIView):
-    @swagger_auto_schema(request_body=UserSerializer)
+class TeacherCreateView(APIView):
+    @swagger_auto_schema(request_body=TeacherAddUserSerializer)
     def post(self,request):
-        serializer = UserSerializer(data=request.data)
+
+        serializer = TeacherAddUserSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
+            teacher = serializer.save()
+            return Response(TeacherSerializer(teacher).data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
