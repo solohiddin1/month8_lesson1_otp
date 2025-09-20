@@ -1,11 +1,26 @@
 from rest_framework import serializers
-# from models.user import User
+from app.models.user import User
 
 class SendEmail(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.CharField()
     otp = serializers.CharField(max_length=4)
 
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
+    # password = serializers.CharField(write_only=True)
+
+
+class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ["email", "phone_number", "password"]
+
+    def create(self, validated_data):
+        return User.objects.create_user(
+            phone_number=validated_data["phone_number"],
+            email=validated_data.get("email"),
+            password=validated_data["password"],
+        )
