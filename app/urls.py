@@ -1,12 +1,16 @@
 from django.urls import path
-from app.views.user import UserCreateView
+from app.views.user import UserCreateView, userlogin
 from app.views.teacher import TeacherCreateView
-from app.views.user import verify, login,register
+from app.views.user import verify, login,register, verify_user_email, change_password, loginexistinguser
 
 urlpatterns = [
-    path('user/',UserCreateView.as_view()),
-    path('teacher/',TeacherCreateView.as_view()),
-    path('login/',login,name='login'),
-    path('verify/',verify,name='verify'),
-    path('register/',register)
+    # path('user/',UserCreateView.as_view()),
+    # path('teacher/',TeacherCreateView.as_view()),
+    # path('login/',login,name='login'),
+    # path('verify/',verify,name='verify'),
+    # path('register_user/',register,name='register'),
+    path('userlogin/',userlogin,name='userlogin'),
+    path('verify_user_otp/',verify_user_email,name='verify_user_otp'),
+    path('change_password/',change_password,name='change_password'),
+    path('login_existing_user/',loginexistinguser,name='login_existing_user'),
 ]

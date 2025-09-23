@@ -16,12 +16,13 @@ class BaseModel(models.Model):
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, phone_number, email=None, password=None, **extra_fields):
+    def create_user(self, phone_number, email=None, **extra_fields):
         if not phone_number:
             raise ValueError('Phone_number maydoni bo`lishi kerak emas!')
         # phone_number = self.normalize_phone_number(phone_number)
         user = self.model(phone_number=phone_number, email=email, **extra_fields)
-        user.set_password(password)
+        
+        user.set_password('123456')
         user.save(using=self._db)
         return user
 
