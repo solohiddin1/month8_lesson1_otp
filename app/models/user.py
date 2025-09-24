@@ -16,7 +16,7 @@ class BaseModel(models.Model):
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, phone_number, email=None, **extra_fields):
+    def create_user(self, phone_number, email=None,password = None ,**extra_fields):
         if not phone_number:
             raise ValueError('Phone_number maydoni bo`lishi kerak emas!')
         # phone_number = self.normalize_phone_number(phone_number)
@@ -43,11 +43,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         regex=r'^\+998\d{9}$',
         message="Telefon raqam '+998XXXXXXXXX' formatida bo'lishi kerak!"
     )
-    email = models.EmailField(unique=True, null=True, blank=True)
+    email = models.EmailField(unique=True, default=None)
     phone_number = models.CharField(validators=[phone_regex], max_length=13, unique=True)
+    email_verified = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     is_student = models.BooleanField(default=False)
     is_teacher = models.BooleanField(default=False)
 
