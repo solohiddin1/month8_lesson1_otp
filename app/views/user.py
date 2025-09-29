@@ -1,28 +1,21 @@
 from django.http import response
-# from requests import request
 from rest_framework.response import Response
 from rest_framework.schemas import openapi
 from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.status import HTTP_400_BAD_REQUEST
-# from ..serializers import UserSerializer
 from app.models.teacher import Teacher
-# from app.serializers_f.teacher_serializer import TeacherAddUserSerializer
 from app.serializers_f import user_serializer
 from app.serializers_f.user_serializer import UserSerializer
 from drf_yasg.utils import swagger_auto_schema
 from app.models import User
-
 from rest_framework import permissions
 from rest_framework.decorators import api_view, APIView, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login as django_login
-
-
-
 from django.core.mail import send_mail
 from django.conf import settings
 import random
@@ -213,6 +206,7 @@ def change_password(request):
     
     if user:
         user.set_password(new_password)
+        user.is_active = True
         user.save()
         django_login(request._request, user)  # Log the user in
         token, created = Token.objects.get_or_create(user=user)
@@ -229,6 +223,7 @@ class UserCreateView(APIView):
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
 
 @swagger_auto_schema(method="delete", 
     # manual_parameters = [

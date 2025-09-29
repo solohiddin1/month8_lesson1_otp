@@ -1,7 +1,7 @@
 from email.policy import default
 from django.db import models
 from config.config import settings
-from app.models.user import User
+from app.models.teacher import Teacher
 from app.models.groups import Group
 
 
@@ -16,7 +16,7 @@ class Lesson(models.Model):
     days_week = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    teacher = models.ForeignKey('User', on_delete=models.CASCADE, related_name='lessons')
+    teacher = models.ForeignKey('Teacher', on_delete=models.CASCADE, related_name='lessons')
     group = models.ForeignKey('Group', on_delete=models.CASCADE, related_name='lessons')
 
     def __str__(self):

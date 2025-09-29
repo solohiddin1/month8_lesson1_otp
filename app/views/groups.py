@@ -27,44 +27,44 @@ class GroupDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = GroupSerializer
     permission_classes = [AllowAny]
 
-# class CreateGroupView(APIView):
-    # serializer_class = GroupSerializer
-    # permission_classes = [AllowAny]
-# 
-    # @swagger_auto_schema(request_body=GroupSerializer)
-    # def post(self,request):
-        # serializer = GroupSerializer(data=request.data)
-        # 
-        # if serializer.is_valid():
-            # serializer.save()
-            # return Response({"success":True,"message":"Group craeted"})
-        # return Response({"success":False,"errors":serializer.errors},status=400)
-# 
-    # def get(self,request):
-        # try:
-            # groups = Group.objects.all()
-        # except Exception as e:
-            # return Response({"errors":str(e)})
-        # 
-        # serializer = GroupSerializer(groups, many=True)
-        # return Response(serializer.data,status=200)
-# 
-    # @swagger_auto_schema(request_body=GroupSerializer)
-    # def put(self,request,pk):
-        # try:
-            # group = Group.objects.get(pk=pk)
-        # except Group.DoesNotExist:
-            # return Response({"message":"group not found"},status=404)
-        # serializer = GroupSerializer(data=request.data)
-        # if serializer.is_valid():
-            # serializer.save()
-            # return Response(serializer.data)
-        # return Response({"errors":serializer.errors})
-# 
-    # def delete(self,request,pk):
-        # try:
-            # group = Group.objects.get(pk=pk)
-        # except Group.DoesNotExist:
-            # return Response({"error":"Group not found!"},status=status.HTTP_404_NOT_FOUND)
-        # group.delete()
-        # return Response({"message":"group deleted successfully"},status=status.HTTP_200_OK) 
+class CreateGroupView(APIView):
+    serializer_class = GroupSerializer
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(request_body=GroupSerializer)
+    def post(self,request):
+        serializer = GroupSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"success":True,"message":"Group craeted"})
+        return Response({"success":False,"errors":serializer.errors},status=400)
+
+    def get(self,request):
+        try:
+            groups = Group.objects.all()
+        except Exception as e:
+            return Response({"errors":str(e)})
+        
+        serializer = GroupSerializer(groups, many=True)
+        return Response(serializer.data,status=200)
+
+    @swagger_auto_schema(request_body=GroupSerializer)
+    def put(self,request,pk):
+        try:
+            group = Group.objects.get(pk=pk)
+        except Group.DoesNotExist:
+            return Response({"message":"group not found"},status=404)
+        serializer = GroupSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response({"errors":serializer.errors})
+
+    def delete(self,request,pk):
+        try:
+            group = Group.objects.get(pk=pk)
+        except Group.DoesNotExist:
+            return Response({"error":"Group not found!"},status=status.HTTP_404_NOT_FOUND)
+        group.delete()
+        return Response({"message":"group deleted successfully"},status=status.HTTP_200_OK) 
