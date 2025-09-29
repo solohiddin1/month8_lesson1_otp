@@ -1,6 +1,5 @@
 from django.http import response
 # from requests import request
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.schemas import openapi
 from drf_yasg import openapi
@@ -123,7 +122,7 @@ def userlogin(request):
         if user:
             otp = random.randint(1000, 9999)
             cache.set(email,otp,timeout=300)
-
+            print("start email")
             send_mail(
                  "Your code sent",
                     f"Your code is {otp}. It is valid for 5 minutes.",

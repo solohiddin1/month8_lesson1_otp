@@ -2,30 +2,31 @@ This is a Django project for managing users (students and teachers) with OTP-bas
 
 ## Features
 
-- User registration (students)  
-- OTP login via email  
-- Custom user model with phone number and email  
-- Group and lesson management  
-- File uploads (images & videos for lessons)  
-- Swagger API documentation  
+- User registration (students)
+- OTP login via email
+- Custom user model with phone number and email
+- Group and lesson management
+- File uploads (images & videos for lessons)
+- Swagger API documentation
 
 ## Tech Stack
 
-- Python 3.13  
-- Django  
-- Django REST Framework  
-- SQLite (default DB)  
-- Pydantic settings  
-- Email backend for OTP  
-- Optional: RabbitMQ for async tasks  
+- Python 3.13
+- Django
+- Django REST Framework
+- SQLite (default DB)
+- Pydantic settings
+- Email backend for OTP
+- Optional: RabbitMQ for async tasks
 
 ## Installation
 
 1. Clone the repository:
 
 ### bash
-git clone <repo-url>
-cd <project-folder>
+
+git clone `<repo-url>`
+cd `<project-folder>`
 
     Create a virtual environment and install dependencies:
 
