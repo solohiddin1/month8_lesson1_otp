@@ -1,3 +1,9 @@
+import email
+from hmac import new
+import re
+from django.http import response
+from django.shortcuts import render
+from django.views.decorators.csrf import requires_csrf_token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -99,6 +105,7 @@ def userlogin(request):
         return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
     return Response(serializer.errors, status=400)
 
+
 @swagger_auto_schema(method='post', request_body=SendEmail)
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -127,27 +134,6 @@ def verify_user_email(request):
     return Response({'success': False, 'message': 'Invalid or expired OTP.'}, status=400)
 
 
-@swagger_auto_schema(method='post', request_body=LoginUserSerializer)
-@api_view(['POST'])
-def loginexistinguser(request):
-    serializer = LoginUserSerializer(data=request.data)
-    print('user here')
-    if serializer.is_valid():
-        print('user here2 ---')
-        email = serializer.validated_data.get("email")
-        password = serializer.validated_data.get("password")
-        print(email,password,'email password ---')
-        
-        user = authenticate(request=request._request, email=email, password=password)
-        
-    
-        if user:
-            django_login(request._request, user)  # Log the user in
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'success': True, 'message': 'user logged in successfully.', 'token': token.key})
-        return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
-    return Response(serializer.errors, status=400)
-
 
 @swagger_auto_schema(method='post', request_body=ChangePasswordSerializer)
 @api_view(['POST'])
@@ -168,19 +154,144 @@ def change_password(request):
         print(e)
         return Response({"error":str(e)})
     
-    user = authenticate(request._request,email=email,password=old_password)
-    print('user here!')
-    if not user1.email_verified:
-        return Response({'success': False, 'message': 'email not verified'}, status=HTTP_400_BAD_REQUEST)
-    
-    print(f"user { user}")
-    
-    if user:
-        user.set_password(new_password)
-        user.is_active = True
-        user.save()
-        django_login(request._request, user)  # Log the user in
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'success': True, 'message': 'Password changed successfully.',"token":token.key})
+    if old_password == new_password:
+        return Response({"message":"please enter new password"},status=status.HTTP_400_BAD_REQUEST)
+    if new_password != confirm_password:
+        return Response({"message":"new password should match to confirm password!"},status=status.HTTP_400_BAD_REQUEST)
 
-    return Response({"success":False, "errors" : serializer.errors},status=400)
+    user = authenticate(request._request,email=email,password=old_password)
+    if user:
+        print('user here!')
+        if not user1.email_verified:
+            return Response({'success': False, 'message': 'email not verified'}, status=HTTP_400_BAD_REQUEST)
+        
+        print(f"user { user}")
+        
+        if user:
+            user.set_password(new_password)
+            user.is_active = True
+            user.save()
+            django_login(request._request, user)  # Log the user in
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'success': True, 'message': 'Password changed successfully.',"token":token.key})
+
+        return Response({"success":False, "errors" : serializer.errors},status=400)
+    else:
+        return Response({"error":"password is incorrect"})
+
+
+# @swagger_auto_schema(method='post', request_body=LoginSerializer)
+# @api_view(['POST'])
+# @permission_classes([AllowAny])
+# def forgot_password(request):
+#     serializer = LoginSerializer(data=request.data)
+    
+#     print(request.data)
+#     if serializer.is_valid():
+#         email = serializer.validated_data['email']
+#         try:
+#             user = User.objects.get(email=serializer.validated_data['email'])
+#         except Exception as e:
+#             return Response({"error":str(e)})
+#         if user:
+#             otp = random.randint(1000,9999)
+#             cache.set(email,otp,timeout=300)
+#             print("otp sent")
+#             send_mail(
+#                  "Your code sent",
+#                     f"Your code is {otp}. It is valid for 5 minutes.",
+#                     settings.EMAIL_HOST_USER,
+#                     [email],
+#                     fail_silently=False,
+#                     )
+#             return Response({"message":"please verify your email, we sent code to your email"}) 
+#         return Response({"error":"User not found"})
+#     return Response({"error":serializer.errors})
+
+
+
+
+
+# from django.contrib.auth.models import User
+from django.utils.http import urlsafe_base64_decode
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from app.utils import generate_reset_password_link
+
+token_generator = PasswordResetTokenGenerator()
+
+@permission_classes([AllowAny])
+@swagger_auto_schema(method='post',request_body=LoginSerializer)
+@api_view(['POST'])
+def forgot_password(request):
+    email = request.data.get("email")
+    try:
+        user = User.objects.get(email=email)
+        reset_link = generate_reset_password_link(user, request)
+        # TODO: send reset_link by email (SendGrid, SMTP, etc.)
+        send_mail(
+                 "Reset your password ",
+                    f"Your reset password link. {reset_link}",
+                    settings.EMAIL_HOST_USER,
+                    [email],
+                    fail_silently=False,
+            )
+        return Response({"reset_link": reset_link})
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+
+from rest_framework import serializers
+
+class Reset(serializers.Serializer):
+    new_password = serializers.CharField()
+
+
+@permission_classes([AllowAny])
+@swagger_auto_schema(method='post',request_body=Reset)
+@api_view(['POST'])
+def reset_password(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+        print(user)
+        print(user.email)
+    except Exception:
+        return Response({"error": "Invalid link"}, status=400)
+
+    if token_generator.check_token(user, token):
+        new_password = request.data.get("password")
+        user.set_password(new_password)
+        user.save()
+        return Response({"message": "Password reset successful","password":new_password})
+    return Response({"error": "Invalid or expired token"}, status=400)
+
+
+
+
+
+def reset_page(request,uiid,token):
+    return render(request,'reset_password.html',{"uiid":uiid,"token":token})
+
+
+# @swagger_auto_schema(method='post', request_body=LoginUserSerializer)
+# @api_view(['POST'])
+# def loginexistinguser(request):
+#     serializer = LoginUserSerializer(data=request.data)
+#     print('user here')
+#     if serializer.is_valid():
+#         print('user here2 ---')
+#         email = serializer.validated_data.get("email")
+#         password = serializer.validated_data.get("password")
+#         print(email,password,'email password ---')
+        
+#         user = authenticate(request=request._request, email=email, password=password)
+        
+    
+#         if user:
+#             django_login(request._request, user)  # Log the user in
+#             token, created = Token.objects.get_or_create(user=user)
+#             return Response({'success': True, 'message': 'user logged in successfully.', 'token': token.key})
+#         return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
+#     return Response(serializer.errors, status=400)

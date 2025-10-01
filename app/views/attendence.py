@@ -1,11 +1,19 @@
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import  swagger_auto_schema
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from app.models.attendence import Attendence
 from app.models.groups import Group
+from app.pagination import CustomPagination
 from app.serializers_f.attendence import AttendenceSerializer
 from rest_framework.response import Response
 from rest_framework import status
+
+
+class AttendenceGetView(ListAPIView):
+    queryset = Attendence.objects.all()
+    serializer_class = AttendenceSerializer
+    pagination_class = CustomPagination
 
 class AttendenceView(APIView):
     @swagger_auto_schema(request_body=AttendenceSerializer)
