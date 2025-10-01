@@ -12,19 +12,44 @@ class LoginSerializer(serializers.Serializer):
 
 
 
-class StudentRegisterSerializer(serializers.ModelSerializer):
-    # password = serializers.CharField(write_only=True)
 
-    class Meta:
-        model = User
-        fields = ["email", "phone_number"]
 
-    def create(self, validated_data):
-        return User.objects.create_user(
-            phone_number=validated_data["phone_number"],
-            email=validated_data.get("email"),
-            # password=validated_data["password"],
-        )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# class StudentRegisterSerializer(serializers.ModelSerializer):
+#     # password = serializers.CharField(write_only=True)
+
+#     class Meta:
+#         model = User
+#         fields = ["email", "phone_number"]
+
+#     def create(self, validated_data):
+#         return User.objects.create_user(
+#             phone_number=validated_data["phone_number"],
+#             email=validated_data.get("email"),
+#             # password=validated_data["password"],
+#         )
     
 
 
