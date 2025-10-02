@@ -1,10 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title> Home</title>
-</head>
-<body>
-    <h2>Home</h2>
-        Qale
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block header %}Welcome Home{% endblock %}
+
+{% block content %}
+<p>You are logged in as {{ request.user.email }}</p>
+<button id="logoutBtn">Logout</button>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        window.location.href = "/userlogin/view/";
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", async function() {
+        try {
+            const response = await fetch("/api/logout/", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Token ${token}`,
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                localStorage.removeItem("token");
+                window.location.href = "/userlogin/";
+            } else {
+                alert(data.message || "Logout failed");
+            }
+        } catch (error) {
+            alert("Something went wrong!");
+        }
+    });
+});
+</script>
+{% endblock %}

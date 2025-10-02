@@ -73,6 +73,10 @@ def verify(request):
         return Response({'success': False, 'message': 'Invalid or expired OTP.'}, status=400)
    
 
+def userlogin_view(request):
+    return render(request,'login.html')
+
+
 @swagger_auto_schema(method='post', request_body=LoginUserSerializer)
 @api_view(['POST'])
 def userlogin(request):
@@ -114,7 +118,9 @@ def verify_user_email(request):
     otp = request.data.get('otp')
 
     cached_otp = cache.get(email)
+    print(cached_otp)
     if cached_otp and str(cached_otp) == str(otp):
+        print("email cache")
         cache.delete(email)
 
         user = User.objects.filter(email=email).first()
@@ -130,27 +136,35 @@ def verify_user_email(request):
 
     return Response({'success': False, 'message': 'Invalid or expired OTP.'}, status=400)
 
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    # delete user's token
+    request.user.auth_token.delete()
+    return Response({"success": True, "message": "Logged out successfully"})
 
 @swagger_auto_schema(method='post', request_body=ChangePasswordSerializer)
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def change_password(request):
+    print('111111')
 
     serializer = ChangePasswordSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     email = serializer.validated_data['email']
     old_password = serializer.validated_data['old_password']
     new_password = serializer.validated_data['new_password']
-    # print(new_password)
     confirm_password = serializer.validated_data['confirm_password']
+    print(new_password)
+    print('user changing password')
 
     try:
         user1 = User.objects.get(email=email)
+    
     except Exception as e:
         print(e)
         return Response({"error":str(e)})
-    
+    print(user1)
     if old_password == new_password:
         return Response({"message":"please enter new password"},status=status.HTTP_400_BAD_REQUEST)
     if new_password != confirm_password:
@@ -175,6 +189,10 @@ def change_password(request):
         return Response({"success":False, "errors" : serializer.errors},status=400)
     else:
         return Response({"error":"password is incorrect"})
+
+
+def change_password_page(request):
+    return render(request,'change_password.html')
 
 
 # @swagger_auto_schema(method='post', request_body=LoginSerializer)
@@ -297,28 +315,36 @@ def reset_page(request,uiid64,token):
 # @permission_classes(IsAuthenticated)
 from django.contrib.auth.decorators import login_required
 
-# @login_required(login_url='/user_login/')
-@login_required
+# @login_required
+# @login_required(login_url='/userlogin/')
+
+# @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def home(request):
+
+
     return render(request,"home.html")
 
-# @swagger_auto_schema(method='post', request_body=LoginUserSerializer)
-# @api_view(['POST'])
-# def loginexistinguser(request):
-#     serializer = LoginUserSerializer(data=request.data)
-#     print('user here')
-#     if serializer.is_valid():
-#         print('user here2 ---')
-#         email = serializer.validated_data.get("email")
-#         password = serializer.validated_data.get("password")
-#         print(email,password,'email password ---')
+@swagger_auto_schema(method='post', request_body=LoginUserSerializer)
+@api_view(['POST'])
+def loginexistinguser(request):
+    serializer = LoginUserSerializer(data=request.data)
+    print('user here')
+    if serializer.is_valid():
+        print('user here2 ---')
+        email = serializer.validated_data.get("email")
+        password = serializer.validated_data.get("password")
+        print(email,password,'email password ---')
         
-#         user = authenticate(request=request._request, email=email, password=password)
+        user = authenticate(request=request._request, email=email, password=password)
         
+        userin = User.objects.get(email=email)
+        if not userin.email_verified:
+            return Response({"error": "email is not verified"}, status=status.HTTP_400_BAD_REQUEST)
     
-#         if user:
-#             django_login(request._request, user)  # Log the user in
-#             token, created = Token.objects.get_or_create(user=user)
-#             return Response({'success': True, 'message': 'user logged in successfully.', 'token': token.key})
-#         return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
-#     return Response(serializer.errors, status=400)
+        if user:
+            django_login(request._request, user)  # Log the user in
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'success': True, 'message': 'user logged in successfully.', 'token': token.key})
+        return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
+    return Response(serializer.errors, status=400)
