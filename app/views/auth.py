@@ -1,8 +1,5 @@
-import email
-from hmac import new
-import re
 from django.http import response
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import requires_csrf_token
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,7 +10,7 @@ from drf_yasg.utils import swagger_auto_schema
 from app.models import User
 from rest_framework import permissions
 from rest_framework.decorators import api_view, APIView, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login as django_login
@@ -217,7 +214,7 @@ from django.utils.http import urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.auth.tokens import PasswordResetTokenGenerator, default_token_generator
 from app.utils import generate_reset_password_link
 
 token_generator = PasswordResetTokenGenerator()
@@ -246,6 +243,7 @@ from rest_framework import serializers
 
 class Reset(serializers.Serializer):
     new_password = serializers.CharField()
+    conf_password = serializers.CharField()
 
 
 @permission_classes([AllowAny])
@@ -268,12 +266,41 @@ def reset_password(request, uidb64, token):
     return Response({"error": "Invalid or expired token"}, status=400)
 
 
+def reset_page(request,uiid64,token):
+    if request.method == 'POST':
+        password = request.POST.get("password")
+        conf_password = request.POST.get("conf_password")
+
+        if password != conf_password:
+            return render(request,'reset_password.html',{
+                "error":"passwords dont match",
+                "uiid64":uiid64,
+                "token":token
+                }
+            )
+        try:
+            uid = urlsafe_base64_decode(uiid64).decode()
+            user = User.objects.get(pk=uid)
+        except Exception as e:
+            return render(request,'reset_password.html',{"error":"Invalid link"})
+
+        if default_token_generator.check_token(user,token):
+            user.set_password(conf_password)
+            user.save()
+            return redirect('home')
+        else:
+            return render(request,'reset_password.html',{"error":"Token expired"})
+        
+    return render(request,'reset_password.html',{"uiid64":uiid64,"token":token})
 
 
+# @permission_classes(IsAuthenticated)
+from django.contrib.auth.decorators import login_required
 
-def reset_page(request,uiid,token):
-    return render(request,'reset_password.html',{"uiid":uiid,"token":token})
-
+# @login_required(login_url='/user_login/')
+@login_required
+def home(request):
+    return render(request,"home.html")
 
 # @swagger_auto_schema(method='post', request_body=LoginUserSerializer)
 # @api_view(['POST'])

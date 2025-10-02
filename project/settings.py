@@ -84,6 +84,9 @@ REST_FRAMEWORK = {
 #     "PAGE_SIZE": 10,  # items per page
 # }
 
+
+LOGIN_URL = '/login/'
+
 from datetime import timedelta
 
 SIMPLE_JWT = {
