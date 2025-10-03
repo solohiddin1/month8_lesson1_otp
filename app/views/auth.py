@@ -155,7 +155,7 @@ def logout_view(request):
 
 @swagger_auto_schema(method='post', request_body=ChangePasswordSerializer)
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def change_password(request):
     print('111111')
 
@@ -198,7 +198,7 @@ def change_password(request):
 
         return Response({"success":False, "errors" : serializer.errors},status=400)
     else:
-        return Response({"error":"password is incorrect"})
+        return Response({"error":"password is incorrect"},status=status.HTTP_400_BAD_REQUEST)
 
 
 def change_password_page(request):
@@ -353,6 +353,8 @@ def loginexistinguser(request):
         print(user,'tthis user is good')
         userin = User.objects.get(email=email)
         print(userin)
+        if user is None:
+            return Response({"error":"Invalid credentials"},status=status.HTTP_400_BAD_REQUEST)
         if not userin.email_verified:
             return Response({"error": "email is not verified"}, status=status.HTTP_400_BAD_REQUEST)
     

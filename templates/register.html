@@ -7,10 +7,15 @@
     {% csrf_token %}
     <label>Name:</label>
     <input type="text" name="name" required><br>
+    <label>Surname:</label>
+    <input type="text" name="surname" required><br>
+    <label>Age:</label>
+    <input type="number" name="age" min="1" required><br>
+    <hr>
     <label>Email:</label>
     <input type="email" name="email" required><br>
-    <label>Password:</label>
-    <input type="password" name="password" required><br>
+    <label>Phone number:</label>
+    <input type="text" name="phone_number" required><br>
     <button type="submit">Register</button>
 </form>
 <p id="register-message" style="color:red;"></p>
@@ -21,43 +26,32 @@ document.getElementById("register-form").onsubmit = async function(e) {
     const form = e.target;
     const formData = new FormData(form);
 
+    const payload = {
+        name: form.elements["name"].value.trim(),
+        surname: form.elements["surname"].value.trim(),
+        age: parseInt(form.elements["age"].value, 10),
+        user: {
+            email: form.elements["email"].value.trim(),
+            phone_number: form.elements["phone_number"].value.trim()
+        }
+    };
+
     // Send registration request
     let response = await fetch("{% url 'register' %}", {
         method: "POST",
         headers: {
-            "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+            "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
+            "Content-Type": "application/json"
         },
-        body: formData
+        body: JSON.stringify(payload)
     });
 
     let data = await response.json();
 
     if (data.success) {
-        // Registration successful, now login automatically
-        let email = form.elements["email"].value;
-        let password = form.elements["password"].value;
-
-        let loginData = new FormData();
-        loginData.append("email", email);
-        loginData.append("password", password);
-        loginData.append("csrfmiddlewaretoken", formData.get("csrfmiddlewaretoken"));
-
-        let loginResponse = await fetch("{% url 'userlogin' %}", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": formData.get("csrfmiddlewaretoken")
-            },
-            body: loginData
-        });
-
-        let loginResult = await loginResponse.json();
-
-        if (loginResult.success) {
-            // Redirect to OTP verification page
-            window.location.href = "{% url 'verify_user_otp_view' %}";
-        } else {
-            document.getElementById("register-message").innerText = loginResult.message || "Login failed after registration.";
-        }
+        document.getElementById("register-message").style.color = "green";
+        document.getElementById("register-message").innerText = "Registration successful. Check your email for login details.";
+        setTimeout(() => { window.location.href = "{% url 'login_existing_user_view' %}"; }, 1200);
     } else {
         document.getElementById("register-message").innerText = data.message || "Registration failed.";
     }
