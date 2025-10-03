@@ -321,9 +321,8 @@ from django.contrib.auth.decorators import login_required
 # @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def home(request):
-
-
     return render(request,"home.html")
+
 
 @swagger_auto_schema(method='post', request_body=LoginUserSerializer)
 @api_view(['POST'])
@@ -339,6 +338,7 @@ def loginexistinguser(request):
         user = authenticate(request=request._request, email=email, password=password)
         
         userin = User.objects.get(email=email)
+
         if not userin.email_verified:
             return Response({"error": "email is not verified"}, status=status.HTTP_400_BAD_REQUEST)
     

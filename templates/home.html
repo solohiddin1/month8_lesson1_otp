@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const data = await response.json();
             if (response.ok) {
                 localStorage.removeItem("token");
-                window.location.href = "/userlogin/";
+                window.location.href = "//";
             } else {
                 alert(data.message || "Logout failed");
             }

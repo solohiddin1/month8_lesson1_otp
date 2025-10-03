@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block header %}Login{% endblock %}
+
+{% block content %}
+<h2>Login</h2>
+
+<form id="loginForm">
+    <label>Email:</label>
+    <input type="email" id="email" required><br>
+
+    <label>Password:</label>
+    <input type="password" id="password" required><br>
+
+    <button type="submit">Login</button>
+</form>
+
+<p id="message" style="color:red;"></p>
+<div id="verifyButtonContainer"></div> <!-- For email verification button -->
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();  // prevent normal form submission
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const messageEl = document.getElementById("message");
+    const verifyContainer = document.getElementById("verifyButtonContainer");
+
+    // Clear previous messages/buttons
+    messageEl.innerText = "";
+    verifyContainer.innerHTML = "";
+
+    try {
+        const response = await fetch("{% url 'login_existing_user' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: email, password: password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            // store token
+            localStorage.setItem("token", data.token);
+            messageEl.style.color = "green";
+            messageEl.innerText = data.message;
+
+            // redirect to home
+            setTimeout(() => { window.location.href = "/"; }, 1000);
+        } else {
+            messageEl.style.color = "red";
+            messageEl.innerText = data.error || data.message || "Login failed!";
+
+            // If email is not verified, show button to go to verify page
+            if (data.error === "email is not verified") {
+                const btn = document.createElement("button");
+                btn.innerText = "Verify Email";
+                btn.type = "button";
+                btn.addEventListener("click", function() {
+                    window.location.href = "{% url 'verify_user_otp' %}";
+                });
+                verifyContainer.appendChild(btn);
+            }
+        }
+    } catch (error) {
+        messageEl.style.color = "red";
+        messageEl.innerText = "Something went wrong!";
+        console.error(error);
+    }
+});
+</script>
+{% endblock %}

@@ -3,7 +3,9 @@ from app.models.attendence import Attendence
 from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
 from app.views.lesson import LessonDetailView, LessonView
 from app.views.user import UserCreateView
-from app.views.auth import logout_view ,change_password_page, forgot_password, home, reset_page, reset_password, userlogin, userlogin_view, verify, login, verify_user_email, change_password
+from app.views.auth import (logout_view ,change_password_page, forgot_password, 
+    home, reset_page, reset_password, userlogin, userlogin_view, loginexistinguser, 
+    verify, login, verify_user_email, change_password)
 from app.views.teacher import TeacherCreateView
 from app.views.user import (register, 
      delete_user)
@@ -36,9 +38,9 @@ urlpatterns = [
     
     path('api/logout/',logout_view,name='logout'),
     path('userlogin/view/',userlogin_view,name='userlogin'),
+    path('login_existing_user/',loginexistinguser,name='login_existing_user'),
 
     # path('delete_user/<int:pk>/',delete_user, name="delete"),
-    # path('login_existing_user/',loginexistinguser,name='login_existing_user'),
     # path('api/token/',ObtainTokenView.as_view()),
     # path('api/token/refresh/',RefreshTokenView.as_view()),
 
