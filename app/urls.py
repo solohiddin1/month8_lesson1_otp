@@ -12,6 +12,7 @@ from app.views.user import (register,
      delete_user)
 from app.views.groups import GroupCreate, GroupDetailView, GroupListView
 
+from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 
 urlpatterns = [
     # path('user/',UserCreateView.as_view()),
@@ -43,11 +44,13 @@ urlpatterns = [
     path('login_existing_user/',loginexistinguser,name='login_existing_user'),
     path('login_existing_user/view',loginexistinguser_view,name='login_existing_user_view'),
 
-    # path('delete_user/<int:pk>/',delete_user, name="delete"),
-    # path('api/token/',ObtainTokenView.as_view()),
-    # path('api/token/refresh/',RefreshTokenView.as_view()),
+    path('delete_user/<int:pk>/',delete_user, name="delete"),
+    path('api/token/',TokenObtainPairView.as_view()),
+    path('api/token/refresh/',TokenRefreshView.as_view()),
 
     path('reset-password/<uidb64>/<token>/',reset_password, name='reset_password'),
     path('api/reset-password/<uiid64>/<token>/',reset_page, name='reset_page'),
     path('',home, name='home'),
+
+    path('register/', register, name='register'),
 ]

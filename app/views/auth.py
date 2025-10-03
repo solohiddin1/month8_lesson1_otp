@@ -1,3 +1,4 @@
+from django.forms import PasswordInput
 from django.http import response
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import requires_csrf_token
@@ -13,6 +14,7 @@ from rest_framework.decorators import api_view, APIView, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, login as django_login
 from django.core.mail import send_mail
 from django.conf import settings
@@ -65,8 +67,8 @@ def verify(request):
 
             user = User.objects.filter(email=email).first()
             if user:
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({'success': True, 'token': token.key})
+                refresh = RefreshToken.for_user(user)
+                return Response({'success': True, 'access': str(refresh.access_token), 'refresh': str(refresh)})
 
             return Response({'success': False, 'message': 'Invalid user.'}, status=400)
 
@@ -84,10 +86,10 @@ def userlogin(request):
     print('user here')
     if serializer.is_valid():
         print('user here2 ---')
-        email = serializer.validated_data.get("email")
-        password = serializer.validated_data.get("password")
+        email = serializer.validated_data.get("email", "").strip().lower()
+        password = serializer.validated_data.get("password", "").strip()
         print(email,password,'email password ---')
-        
+        print(f"[{email}], [{password}]")
         user = authenticate(request, email=email, password=password)
         print(user)
         if user:
@@ -128,23 +130,28 @@ def verify_user_email(request):
 
         user = User.objects.filter(email=email).first()
         if user:
-            # django_login(request._request, email=email,password=)
-            # user.is_student = True
             user.email_verified = True
             user.save()
-            # token, created = Token.objects.get_or_create(user=user)
-            return Response({'success': True, 'message':'email verifikatsiyadan otdi'})
+            refresh = RefreshToken.for_user(user)
+            return Response({'success': True, 'message':'email verifikatsiyadan otdi', 'access': str(refresh.access_token), 'refresh': str(refresh)})
 
         return Response({'success': False, 'message': 'Invalid user.'}, status=400)
 
     return Response({'success': False, 'message': 'Invalid or expired OTP.'}, status=400)
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def logout_view(request):
-    # delete user's token
-    request.user.auth_token.delete()
-    return Response({"success": True, "message": "Logged out successfully"})
+    # Expect refresh token in body and blacklist it
+    try:
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            return Response({"success": False, "error": "Refresh token required"}, status=status.HTTP_400_BAD_REQUEST)
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        return Response({"success": True, "message": "Logged out successfully"})
+    except Exception as exc:
+        return Response({"success": False, "error": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(method='post', request_body=ChangePasswordSerializer)
 @api_view(['POST'])
@@ -186,8 +193,8 @@ def change_password(request):
             user.is_active = True
             user.save()
             django_login(request._request, user)  # Log the user in
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'success': True, 'message': 'Password changed successfully.',"token":token.key})
+            refresh = RefreshToken.for_user(user)
+            return Response({'success': True, 'message': 'Password changed successfully.', 'access': str(refresh.access_token), 'refresh': str(refresh)})
 
         return Response({"success":False, "errors" : serializer.errors},status=400)
     else:
@@ -202,29 +209,29 @@ def change_password_page(request):
 # @api_view(['POST'])
 # @permission_classes([AllowAny])
 # def forgot_password(request):
-#     serializer = LoginSerializer(data=request.data)
+    serializer = LoginSerializer(data=request.data)
     
-#     print(request.data)
-#     if serializer.is_valid():
-#         email = serializer.validated_data['email']
-#         try:
-#             user = User.objects.get(email=serializer.validated_data['email'])
-#         except Exception as e:
-#             return Response({"error":str(e)})
-#         if user:
-#             otp = random.randint(1000,9999)
-#             cache.set(email,otp,timeout=300)
-#             print("otp sent")
-#             send_mail(
-#                  "Your code sent",
-#                     f"Your code is {otp}. It is valid for 5 minutes.",
-#                     settings.EMAIL_HOST_USER,
-#                     [email],
-#                     fail_silently=False,
-#                     )
-#             return Response({"message":"please verify your email, we sent code to your email"}) 
-#         return Response({"error":"User not found"})
-#     return Response({"error":serializer.errors})
+    print(request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        try:
+            user = User.objects.get(email=serializer.validated_data['email'])
+        except Exception as e:
+            return Response({"error":str(e)})
+        if user:
+            otp = random.randint(1000,9999)
+            cache.set(email,otp,timeout=300)
+            print("otp sent")
+            send_mail(
+                 "Your code sent",
+                    f"Your code is {otp}. It is valid for 5 minutes.",
+                    settings.EMAIL_HOST_USER,
+                    [email],
+                    fail_silently=False,
+                    )
+            return Response({"message":"please verify your email, we sent code to your email"}) 
+        return Response({"error":"User not found"})
+    return Response({"error":serializer.errors})
 
 
 
@@ -338,20 +345,20 @@ def loginexistinguser(request):
     print('user here')
     if serializer.is_valid():
         print('user here2 ---')
-        email = serializer.validated_data.get("email")
-        password = serializer.validated_data.get("password")
+        email = serializer.validated_data.get("email", "").strip().lower()
+        password = serializer.validated_data.get("password", "").strip()
         print(email,password,'email password ---')
         
         user = authenticate(request=request._request, email=email, password=password)
-        
+        print(user,'tthis user is good')
         userin = User.objects.get(email=email)
-
+        print(userin)
         if not userin.email_verified:
             return Response({"error": "email is not verified"}, status=status.HTTP_400_BAD_REQUEST)
     
         if user:
             django_login(request._request, user)  # Log the user in
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'success': True, 'message': 'user logged in successfully.', 'token': token.key})
+            refresh = RefreshToken.for_user(user)
+            return Response({'success': True, 'message': 'user logged in successfully.', 'access': str(refresh.access_token), 'refresh': str(refresh)})
         return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
     return Response(serializer.errors, status=400)

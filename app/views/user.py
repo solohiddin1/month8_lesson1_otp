@@ -1,3 +1,4 @@
+from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -12,13 +13,14 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.core.mail import send_mail
 from django.conf import settings
-import random
 from django.core.cache import cache
 from drf_yasg.utils import swagger_auto_schema
 from app.serializers_f.user_serializer import LoginUserSerializer, ChangePasswordSerializer
 from app.serializers_f.student_serizlizer import StudentSerializer
 
 
+def register_view(request):
+    return render(request,'register.html')
 
 @swagger_auto_schema(method='post', request_body=StudentSerializer)
 @api_view(['POST'])

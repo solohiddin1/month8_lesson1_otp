@@ -3,7 +3,7 @@
 {% block header %}Register{% endblock %}
 
 {% block content %}
-<form method="post" action="{% url 'register' %}">
+<form id="register-form">
     {% csrf_token %}
     <label>Name:</label>
     <input type="text" name="name" required><br>
@@ -13,4 +13,54 @@
     <input type="password" name="password" required><br>
     <button type="submit">Register</button>
 </form>
+<p id="register-message" style="color:red;"></p>
+
+<script>
+document.getElementById("register-form").onsubmit = async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    // Send registration request
+    let response = await fetch("{% url 'register' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+        },
+        body: formData
+    });
+
+    let data = await response.json();
+
+    if (data.success) {
+        // Registration successful, now login automatically
+        let email = form.elements["email"].value;
+        let password = form.elements["password"].value;
+
+        let loginData = new FormData();
+        loginData.append("email", email);
+        loginData.append("password", password);
+        loginData.append("csrfmiddlewaretoken", formData.get("csrfmiddlewaretoken"));
+
+        let loginResponse = await fetch("{% url 'userlogin' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+            },
+            body: loginData
+        });
+
+        let loginResult = await loginResponse.json();
+
+        if (loginResult.success) {
+            // Redirect to OTP verification page
+            window.location.href = "{% url 'verify_user_otp_view' %}";
+        } else {
+            document.getElementById("register-message").innerText = loginResult.message || "Login failed after registration.";
+        }
+    } else {
+        document.getElementById("register-message").innerText = data.message || "Registration failed.";
+    }
+};
+</script>
 {% endblock %}

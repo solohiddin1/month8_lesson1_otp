@@ -43,8 +43,9 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         const data = await response.json();
 
         if (response.ok && data.success) {
-            // store token
-            localStorage.setItem("token", data.token);
+            // store JWT tokens
+            localStorage.setItem("accessToken", data.access);
+            localStorage.setItem("refreshToken", data.refresh);
             messageEl.style.color = "green";
             messageEl.innerText = data.message;
 

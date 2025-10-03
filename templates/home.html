@@ -5,37 +5,49 @@
 {% block content %}
 <p>You are logged in as {{ request.user.email }}</p>
 <button id="logoutBtn">Logout</button>
+<button id="registerBtn">Register</button>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    // if no token, redirect to login
+    if (!accessToken) {
         window.location.href = "/login_existing_user/view";
+        return;
     }
+    console.log(localStorage.getItem("accessToken"));
 
     document.getElementById("logoutBtn").addEventListener("click", async function() {
         try {
             const response = await fetch("/api/logout/", {
                 method: "POST",
                 headers: {
-                    "Authorization": `Token ${token}`,
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Authorization": `Bearer ${accessToken}`,
+                    "Content-Type": "application/json"
                 },
+                body: JSON.stringify({ refresh: refreshToken })
             });
 
-            const data = await response.json();
             if (response.ok) {
-                localStorage.removeItem("token");
-                window.location.href = "/login_existing_user/";
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                window.location.href = "/login_existing_user/view";
             } else {
+                const data = await response.json();
                 alert(data.message || "Logout failed");
             }
         } catch (error) {
+            console.error(error);
             alert("Something went wrong!");
         }
+    });
+
+    document.getElementById("registerBtn").addEventListener("click", function() {
+        window.location.href = "{% url 'register' %}";
     });
 });
 </script>
