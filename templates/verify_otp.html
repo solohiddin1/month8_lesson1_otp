@@ -26,10 +26,15 @@ document.getElementById("verifyOtpForm").addEventListener("submit", async functi
         const response = await fetch("{% url 'verify_user_otp' %}", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
             },
-            body: JSON.stringify({ email: email, otp: otp })
+            body: JSON.stringify({
+                email: email,
+                otp: otp
+            })
         });
+
 
         const data = await response.json();
 
@@ -37,7 +42,7 @@ document.getElementById("verifyOtpForm").addEventListener("submit", async functi
             document.getElementById("message").style.color = "green";
             document.getElementById("message").innerText = data.message;
             // optionally redirect after successful verification
-            setTimeout(() => { window.location.href = "/userlogin/"; }, 1500);
+            setTimeout(() => { window.location.href = "/change_password_page/"; }, 1500);
         } else {
             document.getElementById("message").style.color = "red";
             document.getElementById("message").innerText = data.message || "Verification failed!";

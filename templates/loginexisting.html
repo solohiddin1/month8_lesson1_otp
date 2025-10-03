@@ -60,7 +60,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
                 btn.innerText = "Verify Email";
                 btn.type = "button";
                 btn.addEventListener("click", function() {
-                    window.location.href = "{% url 'verify_user_otp' %}";
+                    window.location.href = "{% url 'userlogin_view' %}";
                 });
                 verifyContainer.appendChild(btn);
             }

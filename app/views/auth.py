@@ -102,10 +102,12 @@ def userlogin(request):
                     fail_silently=False,
             )
             # token, created = Token.objects.get_or_create(user=user)
-            return Response({'success': True, 'message': 'OTP sent to email.'})
+            return Response({'success': True, 'message': 'OTP sent to email.'},status=status.HTTP_200_OK)
         return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
     return Response(serializer.errors, status=400)
 
+def verify_user_email_view(request):
+    return render(request,'verify_otp.html')
 
 @swagger_auto_schema(method='post', request_body=SendEmail)
 @api_view(['POST'])
@@ -119,6 +121,7 @@ def verify_user_email(request):
 
     cached_otp = cache.get(email)
     print(cached_otp)
+    print('user is being verified')
     if cached_otp and str(cached_otp) == str(otp):
         print("email cache")
         cache.delete(email)
@@ -322,6 +325,10 @@ from django.contrib.auth.decorators import login_required
 @permission_classes([IsAuthenticated])
 def home(request):
     return render(request,"home.html")
+
+def loginexistinguser_view(request):
+    return render(request,'loginexisting.html')
+    
 
 
 @swagger_auto_schema(method='post', request_body=LoginUserSerializer)

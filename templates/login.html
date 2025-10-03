@@ -5,21 +5,29 @@
     <label>Password:</label>
     <input type="password" name="password" placeholder="password" required><br>
     <button type="submit">Send OTP</button>
-  </form>
-  
-  <script>
-  document.getElementById("login-form").onsubmit = async (e) => {
-      e.preventDefault();
-      let formData = new FormData(e.target);
-  
-      let response = await fetch("{% url 'userlogin' %}", {
-          method: "POST",
-          headers: {"X-CSRFToken": formData.get("csrfmiddlewaretoken")},
-          body: formData
-      });
-  
-      let data = await response.json();
-      alert(data.message);
-  };
-  </script>
-  
+</form>
+
+<script>
+document.getElementById("login-form").onsubmit = async (e) => {
+    e.preventDefault();
+    let formData = new FormData(e.target);
+
+    let response = await fetch("{% url 'userlogin' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+        },
+        body: formData
+    });
+
+    let data = await response.json();
+
+    if (data.success) {
+        // alert(data.message);
+        // redirect user to OTP verification page
+        window.location.href = "{% url 'verify_user_otp_view' %}";
+    } else {
+        alert(data.message || "Login failed. Try again.");
+    }
+};
+</script>
