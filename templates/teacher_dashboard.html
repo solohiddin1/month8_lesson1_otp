@@ -223,7 +223,7 @@
             <h3>Change Password</h3>
             <form id="passwordForm">
                 <label>Email:</label>
-                <input type="email" name="email" required readonly>
+                <input type="email" name="email" required >
                 
                 <label>Old Password:</label>
                 <input type="password" name="old_password" required>
@@ -339,7 +339,7 @@
         // ========== FETCH MY GROUPS ==========
         async function fetchMyGroups() {
             try {
-                const res = await fetch("/create_groups/", { headers: authHeader() });
+                const res = await fetch("{% url 'groups' %}", { headers: authHeader() });
                 const data = await res.json();
                 const tbody = document.querySelector("#groupsTable tbody");
                 tbody.innerHTML = "";
