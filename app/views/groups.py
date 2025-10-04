@@ -14,22 +14,23 @@ from rest_framework import generics
 
 class GroupListView(generics.ListAPIView):
     queryset = Group.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUser]
     serializer_class = GroupSerializer
 
 
 class GroupCreate(generics.CreateAPIView):
     serializer_class = GroupSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUser]
 
 class GroupDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUser]
+
 
 class CreateGroupView(APIView):
     serializer_class = GroupSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(request_body=GroupSerializer)
     def post(self,request):

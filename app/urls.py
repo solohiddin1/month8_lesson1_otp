@@ -1,6 +1,6 @@
 from django.urls import path
 from app.models.attendence import Attendence
-from app.views.admin import TeacherCrud, admin_panel
+from app.views.admin import TeacherCrud, admin_panel, teacher_panel
 from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
 from app.views.lesson import LessonDetailView, LessonView
 from app.views.user import register_view
@@ -66,6 +66,7 @@ urlpatterns = [
 
     path('',home, name='home'),
     path('admin_dashboard/',admin_panel, name='admin_dashboard'),
+    path('teacher_dashboard/',teacher_panel, name='teacher_dashboard'),
 
 
 

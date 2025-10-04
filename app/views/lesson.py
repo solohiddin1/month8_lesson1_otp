@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from app.serializers_f.lesson import LessonSerializer
 
@@ -6,8 +8,10 @@ from rest_framework.views import APIView
 from app.models.lessons import Lesson
 from drf_yasg.utils import status, swagger_auto_schema
 
+
+@permission_classes([IsAuthenticated])
 class LessonView(APIView):
-    @swagger_auto_schema(request_body=LessonSerializer)
+    # @swagger_auto_schema(request_body=LessonSerializer)
     def post(self, request):
         lessons = request.data
         serializer = LessonSerializer(data=lessons)
@@ -24,9 +28,10 @@ class LessonView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+@permission_classes([IsAuthenticated])
 class LessonDetailView(APIView):
-    @swagger_auto_schema(request_body=LessonSerializer)
+    # @swagger_auto_schema(request_body=LessonSerializer)
+
     def put(self, request,pk):
         lessons = get_object_or_404(Lesson,pk=pk)
         serializer = LessonSerializer(lessons, data=lessons)
