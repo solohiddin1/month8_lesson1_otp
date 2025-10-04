@@ -43,15 +43,24 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         const data = await response.json();
 
         if (response.ok && data.success) {
-            // store JWT tokens
             localStorage.setItem("accessToken", data.access);
             localStorage.setItem("refreshToken", data.refresh);
+
+            const payload = JSON.parse(atob(data.access.split(".")[1]));  
+            const role = payload.role;
+
             messageEl.style.color = "green";
             messageEl.innerText = data.message;
 
-            // redirect to home
-            setTimeout(() => { window.location.href = "/"; }, 1000);
-        } else {
+            setTimeout(() => {
+                if (role === "admin") window.location.href = "/admin_dashboard/";
+                else if (role === "teacher") window.location.href = "/teacher_dashboard/";
+                else if (role === "student") window.location.href = "/student_dashboard/";
+                else window.location.href = "/";
+            }, 1000);
+        }
+
+         else {
             messageEl.style.color = "red";
             messageEl.innerText = data.error || data.message || "Login failed!";
 

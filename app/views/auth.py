@@ -361,6 +361,13 @@ def loginexistinguser(request):
         if user:
             django_login(request._request, user)  # Log the user in
             refresh = RefreshToken.for_user(user)
-            return Response({'success': True, 'message': 'user logged in successfully.', 'access': str(refresh.access_token), 'refresh': str(refresh)})
+            role = 'admin' if userin.is_admin else 'teacher'if userin.is_teacher else 'student' if userin.is_student else 'User' 
+            refresh['role'] = role
+            return Response({
+                'success': True, 
+                'message': 'user logged in successfully.', 
+                # 'role': role,
+                'access': str(refresh.access_token), 
+                'refresh': str(refresh)})
         return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
     return Response(serializer.errors, status=400)
