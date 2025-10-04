@@ -6,6 +6,7 @@
 <p>You are logged in as {{ request.user.email }}</p>
 <button id="logoutBtn">Logout</button>
 <button id="registerBtn">Register</button>
+<button id="changePasswordBtn">Change Password</button>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -19,8 +20,8 @@ document.addEventListener("DOMContentLoaded", function() {
         window.location.href = "/login_existing_user/view";
         return;
     }
-    // console.log(localStorage.getItem("accessToken"));
 
+    // Logout
     document.getElementById("logoutBtn").addEventListener("click", async function() {
         try {
             const response = await fetch("/api/logout/", {
@@ -28,7 +29,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ refresh: refreshToken })
             });
-
 
             if (response.ok) {
                 localStorage.removeItem("accessToken");
@@ -44,8 +44,34 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
+    // Register redirect
     document.getElementById("registerBtn").addEventListener("click", function() {
         window.location.href = "{% url 'register_view' %}";
+    });
+
+    // Change password redirect
+    document.getElementById("changePasswordBtn").addEventListener("click", async function() {
+        try {
+            // optional check: call backend with token before redirect
+            const response = await fetch("/change_password_page/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                }
+            });
+
+            if (response.ok) {
+                window.location.href = "/change_password_page/";
+            } else {
+                alert("Unauthorized, please login again.");
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                window.location.href = "/login_existing_user/view";
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Something went wrong!");
+        }
     });
 });
 </script>

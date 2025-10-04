@@ -181,6 +181,9 @@ def change_password(request):
         return Response({"message":"new password should match to confirm password!"},status=status.HTTP_400_BAD_REQUEST)
 
     user = authenticate(request._request,email=email,password=old_password)
+    print(user)
+    if user is None:
+        return Response({"error":"Password is incorrect"},status=status.HTTP_400_BAD_REQUEST)
     if user:
         print('user here!')
         if not user1.email_verified:
@@ -200,8 +203,9 @@ def change_password(request):
     else:
         return Response({"error":"password is incorrect"},status=status.HTTP_400_BAD_REQUEST)
 
-
+@permission_classes(IsAuthenticated)
 def change_password_page(request):
+
     return render(request,'change_password.html')
 
 
