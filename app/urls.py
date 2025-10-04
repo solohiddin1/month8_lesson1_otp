@@ -3,7 +3,7 @@ from app.models.attendence import Attendence
 from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
 from app.views.lesson import LessonDetailView, LessonView
 from app.views.user import UserCreateView, register_view
-from app.views.auth import (logout_view ,change_password_page, forgot_password, 
+from app.views.auth import (forgot_password_view, logout_view ,change_password_page, forgot_password, 
     home, reset_page, reset_password, userlogin, userlogin_view, loginexistinguser,
     loginexistinguser_view, verify_user_email_view,
     verify, login, verify_user_email, change_password)
@@ -44,6 +44,7 @@ urlpatterns = [
     path('change_password_page/',change_password_page,name='change_password_page'),
     path('api/change_password/',change_password,name='change_password'),
     path('forgot_password/',forgot_password,name='forgot_password'),
+    path('forgot_password/view/',forgot_password_view,name='forgot_password_view'),
     
     path('reset-password/<uidb64>/<token>/',reset_password, name='reset_password'),
     path('api/reset-password/<uiid64>/<token>/',reset_page, name='reset_page'),

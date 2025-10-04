@@ -15,6 +15,13 @@
     <button type="submit">Login</button>
 </form>
 
+<!-- Forgot password button -->
+<p>
+    <button type="button" onclick="window.location.href='{% url 'forgot_password_view' %}'">
+        Forgot Password?
+    </button>
+</p>
+
 <p id="message" style="color:red;"></p>
 <div id="verifyButtonContainer"></div> <!-- For email verification button -->
 
@@ -60,7 +67,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
             }, 1000);
         }
 
-         else {
+        else {
             messageEl.style.color = "red";
             messageEl.innerText = data.error || data.message || "Login failed!";
 

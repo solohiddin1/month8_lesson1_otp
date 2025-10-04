@@ -247,6 +247,9 @@ from app.utils import generate_reset_password_link
 
 token_generator = PasswordResetTokenGenerator()
 
+def forgot_password_view(request):
+    return render(request,'forgot_password.html')
+
 @permission_classes([AllowAny])
 @swagger_auto_schema(method='post',request_body=LoginSerializer)
 @api_view(['POST'])
@@ -363,6 +366,7 @@ def loginexistinguser(request):
             refresh = RefreshToken.for_user(user)
             role = 'admin' if userin.is_admin else 'teacher'if userin.is_teacher else 'student' if userin.is_student else 'User' 
             refresh['role'] = role
+            print(refresh)
             return Response({
                 'success': True, 
                 'message': 'user logged in successfully.', 
