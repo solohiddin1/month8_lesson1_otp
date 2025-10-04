@@ -20,17 +20,19 @@ urlpatterns = [
     # path('login/',login,name='login'),
     # path('verify/',verify,name='verify'),
     
-    #models
+    #model apis
     path('api/teachers/',TeacherCreateView.as_view(),name='create_teacher_view'),
+    path('api/teachers/<int:pk>/',TeacherCreateView.as_view(),name='teacher_detail'),
     path('attendense/',AttendenceView.as_view()),
     path('attendense/<int:pk>/',AttendanceDetailView.as_view()),
     path('cr_gr/',GroupCreate.as_view(), name="cr_gr"),
     path('create_groups/',GroupListView.as_view(), name="groups"),
     path('create_groups/<int:pk>/',GroupDetailView.as_view(),name="group-detail"),
-    path('create_lesson',LessonView.as_view(),name="lesson"),
-    path('lesson_detail',LessonDetailView.as_view(),name="lesson"),
+    path('create_lesson/',LessonView.as_view(),name="lesson"),
+    path('lesson_detail/<int:pk>/',LessonDetailView.as_view(),name="lesson_detail"),
     path('attendense/',AttendenceGetView.as_view()),
 
+    path('teacher_crud/',TeacherCrud, name='teacher_crud'),
     # login
     path('userlogin/',userlogin,name='userlogin'),
     path('userlogin/view/',userlogin_view,name='userlogin_view'),
@@ -65,7 +67,6 @@ urlpatterns = [
     path('',home, name='home'),
     path('admin_dashboard/',admin_panel, name='admin_dashboard'),
 
-    path('teacher_crud/',TeacherCrud, name='teacher_crud'),
 
 
     # path('register/', register, name='register'),

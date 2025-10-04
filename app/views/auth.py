@@ -1,7 +1,4 @@
-from django.forms import PasswordInput
-from django.http import response
 from django.shortcuts import redirect, render
-from django.views.decorators.csrf import requires_csrf_token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -23,7 +20,7 @@ from django.core.cache import cache
 from drf_yasg.utils import swagger_auto_schema
 from app.serializers_f.email_serializers import SendEmail, LoginSerializer
 from app.serializers_f.user_serializer import LoginUserSerializer, ChangePasswordSerializer
-from app.serializers_f.student_serizlizer import StudentSerializer
+# from app.serializers_f.student_serizlizer import StudentSerializer
 
 
 @swagger_auto_schema(method='post', request_body=LoginSerializer)

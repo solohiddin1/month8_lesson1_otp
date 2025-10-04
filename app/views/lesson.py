@@ -19,11 +19,10 @@ class LessonView(APIView):
     def get(self, request):
         try:
             lessons = Lesson.objects.all()
+            serializer = LessonSerializer(lessons, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({"message":str(e)},status=status.HTTP_404_NOT_FOUND)
-        serializer = LessonSerializer(lessons ,data=lessons,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-        # return Response({"error":serializer.errors},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LessonDetailView(APIView):

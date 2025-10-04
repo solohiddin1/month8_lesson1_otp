@@ -1,140 +1,831 @@
-{% extends "base.html" %}
-{% block title %}Admin Dashboard{% endblock %}
-{% block header %}Welcome Admin{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 5px; }
+        h1 { margin-bottom: 10px; }
+        .user-info { margin-bottom: 20px; padding: 10px; background: #e9ecef; border-radius: 3px; }
+        .top-actions { margin-bottom: 20px; }
+        .top-actions button { margin-right: 10px; padding: 8px 15px; cursor: pointer; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .tab { padding: 10px 20px; cursor: pointer; background: #f8f9fa; border: 1px solid #ddd; border-bottom: none; border-radius: 5px 5px 0 0; }
+        .tab.active { background: white; border-bottom: 2px solid white; margin-bottom: -2px; font-weight: bold; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table th, table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        table th { background: #007bff; color: white; }
+        button { padding: 5px 10px; cursor: pointer; border: 1px solid #ddd; background: #007bff; color: white; border-radius: 3px; }
+        button:hover { background: #0056b3; }
+        button.delete { background: #dc3545; }
+        button.delete:hover { background: #c82333; }
+        button.edit { background: #28a745; margin-right: 5px; }
+        button.edit:hover { background: #218838; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { position: relative; margin: 50px auto; padding: 20px; background: white; width: 90%; max-width: 500px; border-radius: 5px; max-height: 80vh; overflow-y: auto; }
+        .modal-content h3 { margin-bottom: 15px; }
+        .modal-content label { display: block; margin-top: 10px; font-weight: bold; }
+        .modal-content input, .modal-content textarea, .modal-content select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 3px; }
+        .modal-content textarea { min-height: 80px; }
+        .modal-actions { margin-top: 20px; display: flex; gap: 10px; }
+        .msg { padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .msg.error { background: #f8d7da; color: #721c24; }
+        .msg.success { background: #d4edda; color: #155724; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        <div class="user-info">
+            <p>Logged in as: <strong id="adminEmail"></strong></p>
+        </div>
+        
+        <div class="top-actions">
+            <button id="logoutBtn">Logout</button>
+            <button id="changePasswordBtn">Change Password</button>
+        </div>
 
-{% block content %}
-<p>You are logged in as <span id="adminEmail">{{ request.user.email }}</span></p>
+        <div class="tabs">
+            <div class="tab active" data-tab="teachers">Teachers</div>
+            <div class="tab" data-tab="groups">Groups</div>
+            <div class="tab" data-tab="lessons">Lessons</div>
+            <div class="tab" data-tab="attendance">Attendance</div>
+        </div>
 
-<div style="margin-bottom:20px;">
-    <button id="logoutBtn">Logout</button>
-    <button id="registerBtn">Register Teacher</button>
-    <button id="changePasswordBtn">Change Password</button>
-</div>
+        <!-- Teachers Tab -->
+        <div class="tab-content active" id="teachers">
+            <div class="section-header">
+                <h2>All Teachers</h2>
+                <button id="addTeacherBtn">Add Teacher</button>
+            </div>
+            <table id="teachersTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Surname</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Age</th>
+                        <th>Group</th>
+                        <th>Lesson</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <p id="teachersMsg" class="msg" style="display:none;"></p>
+        </div>
 
-<h3>All Teachers</h3>
-<table id="teachersTable" border="1" cellpadding="5">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Surname</th>
-            <th>Email</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
-<p id="teachersMsg" style="color:red;"></p>
-{% endblock %}
+        <!-- Groups Tab -->
+        <div class="tab-content" id="groups">
+            <div class="section-header">
+                <h2>All Groups</h2>
+                <button id="addGroupBtn">Add Group</button>
+            </div>
+            <table id="groupsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Room</th>
+                        <th>Floor</th>
+                        <th>Teacher</th>
+                        <th>Started Day</th>
+                        <th>Student Count</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <p id="groupsMsg" class="msg" style="display:none;"></p>
+        </div>
 
-{% block extra_scripts %}
-<script>
-// Decode JWT payload
-function parseJwt(token) {
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join('')));
-    } catch (e) {
-        return null;
-    }
-}
+        <!-- Lessons Tab -->
+        <div class="tab-content" id="lessons">
+            <div class="section-header">
+                <h2>All Lessons</h2>
+                <button id="addLessonBtn">Add Lesson</button>
+            </div>
+            <table id="lessonsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Content</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Days</th>
+                        <th>Teacher</th>
+                        <th>Group</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <p id="lessonsMsg" class="msg" style="display:none;"></p>
+        </div>
 
-document.addEventListener("DOMContentLoaded", async function() {
-    const accessToken = localStorage.getItem("accessToken");
-    const refreshToken = localStorage.getItem("refreshToken");
+        <!-- Attendance Tab -->
+        <div class="tab-content" id="attendance">
+            <div class="section-header">
+                <h2>All Attendance Records</h2>
+                <button id="addAttendanceBtn">Add Attendance</button>
+            </div>
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Teacher</th>
+                        <th>Group</th>
+                        <th>Lesson</th>
+                        <th>Absent Students</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <p id="attendanceMsg" class="msg" style="display:none;"></p>
+        </div>
+    </div>
 
-    if (!accessToken) {
-        window.location.href = "/login_existing_user/view";
-        return;
-    }
+    <!-- Teacher Modal -->
+    <div id="teacherModal" class="modal">
+        <div class="modal-content">
+            <h3 id="teacherModalTitle">Add Teacher</h3>
+            <form id="teacherForm">
+                <input type="hidden" name="teacher_id">
+                <label>Name:</label>
+                <input type="text" name="name" required>
+                <label>Surname:</label>
+                <input type="text" name="surname" required>
+                <label>Email:</label>
+                <input type="email" name="email" required>
+                <label>Phone:</label>
+                <input type="text" name="phone_number" required pattern="^\+998\d{9}$" title="+998XXXXXXXXX">
+                <label>Age:</label>
+                <input type="number" name="age" required>
+                <label>Group:</label>
+                <input type="text" name="group">
+                <label>Lesson:</label>
+                <input type="text" name="lesson">
+                <p id="teacherFormMsg" class="msg" style="display:none;"></p>
+                <div class="modal-actions">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    const payload = parseJwt(accessToken);
-    if (!payload['is_admin'] === 'admin') {
-        alert("You are not authorized as admin!");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        window.location.href = "/login_existing_user/view";
-        return;
-    }
+    <!-- Group Modal -->
+    <div id="groupModal" class="modal">
+        <div class="modal-content">
+            <h3 id="groupModalTitle">Add Group</h3>
+            <form id="groupForm">
+                <input type="hidden" name="group_id">
+                <label>Name:</label>
+                <input type="text" name="name" required>
+                <label>Description:</label>
+                <textarea name="description"></textarea>
+                <label>Room:</label>
+                <input type="number" name="room" min="0" value="0">
+                <label>Floor:</label>
+                <input type="number" name="floor" min="1" value="1">
+                <label>Teacher ID:</label>
+                <input type="number" name="teacher" required>
+                <label>Started Day:</label>
+                <input type="date" name="started_day">
+                <p id="groupFormMsg" class="msg" style="display:none;"></p>
+                <div class="modal-actions">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    document.getElementById("adminEmail").innerText = payload.email || "{{ request.user.email }}";
+    <!-- Lesson Modal -->
+    <div id="lessonModal" class="modal">
+        <div class="modal-content">
+            <h3 id="lessonModalTitle">Add Lesson</h3>
+            <form id="lessonForm">
+                <input type="hidden" name="lesson_id">
+                <label>Title:</label>
+                <input type="text" name="title" required>
+                <label>Content:</label>
+                <textarea name="content" required></textarea>
+                <label>Homework:</label>
+                <textarea name="homework"></textarea>
+                <label>Video URL:</label>
+                <input type="file" name="video_url" accept="video/*">
+                <label>Image:</label>
+                <input type="file" name="image" accept="image/*">
+                <label>Start Time:</label>
+                <input type="time" name="start_time" required>
+                <label>End Time:</label>
+                <input type="time" name="end_time" required>
+                <label>Days of Week:</label>
+                <input type="number" name="days_week" min="0" max="7" value="0">
+                <label>Teacher ID:</label>
+                <input type="number" name="teacher" required>
+                <label>Group ID:</label>
+                <input type="number" name="group" required>
+                <p id="lessonFormMsg" class="msg" style="display:none;"></p>
+                <div class="modal-actions">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    // Logout
-    document.getElementById("logoutBtn").addEventListener("click", async function() {
-        try {
-            const response = await fetch("/api/logout/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ refresh: refreshToken })
-            });
-            if (response.ok) {
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
-                window.location.href = "/login_existing_user/view";
-            } else {
-                const data = await response.json();
-                alert(data.message || "Logout failed");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Something went wrong!");
+    <!-- Attendance Modal -->
+    <div id="attendanceModal" class="modal">
+        <div class="modal-content">
+            <h3 id="attendanceModalTitle">Add Attendance</h3>
+            <form id="attendanceForm">
+                <input type="hidden" name="attendance_id">
+                <label>Teacher ID:</label>
+                <input type="number" name="teacher_id" required>
+                <label>Group ID:</label>
+                <input type="number" name="group_id" required>
+                <label>Lesson ID:</label>
+                <input type="number" name="lesson" placeholder="Optional">
+                <label>Absent Students (comma-separated IDs):</label>
+                <input type="text" name="absent_students" placeholder="e.g., 1,2,3">
+                <p id="attendanceFormMsg" class="msg" style="display:none;"></p>
+                <div class="modal-actions">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h3>Change Password</h3>
+            <form id="passwordForm">
+                <label>Email:</label>
+                <input type="email" name="email" required>
+                <label>Old Password:</label>
+                <input type="password" name="old_password" required>
+                <label>New Password:</label>
+                <input type="password" name="new_password" required>
+                <label>Confirm Password:</label>
+                <input type="password" name="confirm_password" required>
+                <p id="passwordFormMsg" class="msg" style="display:none;"></p>
+                <div class="modal-actions">
+                    <button type="submit">Change Password</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // JWT Helper Functions
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join('')));
+            } catch (e) { return null; }
         }
-    });
 
-    // Register Teacher
-    document.getElementById("registerBtn").addEventListener("click", function() {
-        window.location.href = "{% url 'teacher_crud' %}";
-    });
-
-    // Change password
-    document.getElementById("changePasswordBtn").addEventListener("click", async function() {
-        try {
-            const response = await fetch("/change_password_page/", {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`
-                }
-            });
-            if (response.ok) {
-                window.location.href = "/change_password_page/";
-            } else {
-                alert("Unauthorized, please login again.");
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
-                window.location.href = "/login_existing_user/view";
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Something went wrong!");
+        function authHeader() {
+            const token = localStorage.getItem("accessToken");
+            return { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" };
         }
-    });
 
-    // Fetch all teachers
-    try {
-        const response = await fetch("/api/teachers/", {
-            headers: { "Authorization": `Bearer ${accessToken}` }
+        function showMsg(elementId, message, isError = true) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = isError ? "msg error" : "msg success";
+            el.style.display = "block";
+            setTimeout(() => el.style.display = "none", 5000);
+        }
+
+        // Check authentication
+        const accessToken = localStorage.getItem("accessToken");
+        const refreshToken = localStorage.getItem("refreshToken");
+
+        if (!accessToken) {
+            window.location.href = "/login_existing_user/view";
+        }
+
+        const payload = parseJwt(accessToken);
+        if (!payload) {
+            alert("Invalid token!");
+            localStorage.clear();
+            window.location.href = "/login_existing_user/view";
+        }
+
+        document.getElementById("adminEmail").textContent = payload.email || "Admin";
+
+        // Tab Navigation
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(this.dataset.tab).classList.add('active');
+            });
         });
-        const data = await response.json();
-        const tbody = document.querySelector("#teachersTable tbody");
-        if (response.ok && Array.isArray(data)) {
-            tbody.innerHTML = "";
-            data.forEach(t => {
-                const row = `<tr>
-                    <td>${t.name}</td>
-                    <td>${t.surname}</td>
-                    <td>${t.user ? t.user.email : "Email yoq"}</td>
-                </tr>`;
-                tbody.innerHTML += row;
-            });
 
-        } else {
-            document.getElementById("teachersMsg").innerText = data.error || "No teachers found.";
+        // Close modals
+        document.querySelectorAll('.cancel').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+
+        // ========== CHANGE PASSWORD ==========
+        document.getElementById("changePasswordBtn").addEventListener("click", () => {
+            document.getElementById("passwordForm").reset();
+            // Pre-populate email with current user's email
+            document.getElementById("passwordForm").email.value = payload.email || "";
+            document.getElementById("passwordModal").style.display = "block";
+        });
+
+        document.getElementById("passwordForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            if (this.new_password.value !== this.confirm_password.value) {
+                showMsg("passwordFormMsg", "Passwords do not match!");
+                return;
+            }
+            
+            const payload = {
+                email: this.email.value,
+                old_password: this.old_password.value,
+                new_password: this.new_password.value,
+                confirm_password: this.confirm_password.value
+            };
+            
+            try {
+                const res = await fetch("/api/change_password/", { 
+                    method: "POST", 
+                    headers: authHeader(), 
+                    body: JSON.stringify(payload) 
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById("passwordModal").style.display = "none";
+                    alert("Password changed successfully!");
+                } else {
+                    showMsg("passwordFormMsg", data.error || JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("passwordFormMsg", "Failed to change password");
+            }
+        });
+
+        // ========== LOGOUT ==========
+        document.getElementById("logoutBtn").addEventListener("click", async function() {
+            try {
+                await fetch("/api/logout/", { 
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json" }, 
+                    body: JSON.stringify({ refresh: refreshToken }) 
+                });
+            } catch(e) { 
+                console.error(e); 
+            }
+            localStorage.clear();
+            window.location.href = "/login_existing_user/view";
+        });
+
+        // ========== TEACHERS ==========
+        async function fetchTeachers() {
+            try {
+                const res = await fetch("/api/teachers/", { headers: authHeader() });
+                const data = await res.json();
+                const tbody = document.querySelector("#teachersTable tbody");
+                tbody.innerHTML = "";
+                
+                if (res.ok && Array.isArray(data)) {
+                    data.forEach(t => {
+                        const row = `<tr>
+                            <td>${t.name || ''}</td>
+                            <td>${t.surname || ''}</td>
+                            <td>${t.user?.email || 'N/A'}</td>
+                            <td>${t.user?.phone_number || 'N/A'}</td>
+                            <td>${t.age || 'N/A'}</td>
+                            <td>${t.group?.name || 'N/A'}</td>
+                            <td>${t.lesson?.title || 'N/A'}</td>
+                            <td>
+                                <button class="edit editTeacherBtn" data-id="${t.id}" data-json='${JSON.stringify(t)}'>Edit</button>
+                                <button class="delete deleteTeacherBtn" data-id="${t.id}">Delete</button>
+                            </td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                } else {
+                    showMsg("teachersMsg", data.error || "No teachers found");
+                }
+            } catch (err) {
+                showMsg("teachersMsg", "Failed to fetch teachers");
+            }
         }
-    } catch (err) {
-        console.error(err);
-        document.getElementById("teachersMsg").innerText = "Failed to fetch teachers.";
-    }
-});
-</script>
-{% endblock %}
+
+        document.getElementById("addTeacherBtn").addEventListener("click", () => {
+            document.getElementById("teacherForm").reset();
+            document.getElementById("teacherForm").teacher_id.value = "";
+            document.getElementById("teacherModalTitle").textContent = "Add Teacher";
+            document.getElementById("teacherModal").style.display = "block";
+        });
+
+        document.getElementById("teacherForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const id = this.teacher_id.value;
+            const payload = {
+                name: this.name.value,
+                surname: this.surname.value,
+                age: parseInt(this.age.value),
+                group: this.group.value ? { name: this.group.value } : null,
+                lesson: this.lesson.value ? { title: this.lesson.value } : null,
+                user: {
+                    email: this.email.value,
+                    phone_number: this.phone_number.value
+                }
+            };
+            const url = id ? `/api/teachers/${id}/` : "/api/teachers/";
+            const method = id ? "PUT" : "POST";
+            
+            try {
+                const res = await fetch(url, { method, headers: authHeader(), body: JSON.stringify(payload) });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById("teacherModal").style.display = "none";
+                    showMsg("teachersMsg", "Teacher saved successfully!", false);
+                    fetchTeachers();
+                } else {
+                    showMsg("teacherFormMsg", JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("teacherFormMsg", "Something went wrong");
+            }
+        });
+
+        document.querySelector("#teachersTable tbody").addEventListener("click", async function(e) {
+            if (e.target.classList.contains("editTeacherBtn")) {
+                const data = JSON.parse(e.target.dataset.json);
+                const form = document.getElementById("teacherForm");
+                form.teacher_id.value = data.id;
+                form.name.value = data.name || '';
+                form.surname.value = data.surname || '';
+                form.email.value = data.user?.email || '';
+                form.phone_number.value = data.user?.phone_number || '';
+                form.age.value = data.age || '';
+                form.group.value = data.group?.name || '';
+                form.lesson.value = data.lesson?.title || '';
+                document.getElementById("teacherModalTitle").textContent = "Edit Teacher";
+                document.getElementById("teacherModal").style.display = "block";
+            } else if (e.target.classList.contains("deleteTeacherBtn")) {
+                if (!confirm("Delete this teacher?")) return;
+                const id = e.target.dataset.id;
+                try {
+                    const res = await fetch(`/api/teachers/${id}/`, { method: "DELETE", headers: authHeader() });
+                    if (res.ok) {
+                        showMsg("teachersMsg", "Teacher deleted successfully!", false);
+                        fetchTeachers();
+                    } else {
+                        showMsg("teachersMsg", "Failed to delete teacher");
+                    }
+                } catch (err) {
+                    showMsg("teachersMsg", "Something went wrong");
+                }
+            }
+        });
+
+        // ========== GROUPS ==========
+        async function fetchGroups() {
+            try {
+                const res = await fetch("/create_groups/", { headers: authHeader() });
+                const data = await res.json();
+                const tbody = document.querySelector("#groupsTable tbody");
+                tbody.innerHTML = "";
+                
+                if (res.ok && Array.isArray(data)) {
+                    data.forEach(g => {
+                        const row = `<tr>
+                            <td>${g.id}</td>
+                            <td>${g.name || ''}</td>
+                            <td>${g.description || ''}</td>
+                            <td>${g.room || 0}</td>
+                            <td>${g.floor || 1}</td>
+                            <td>${g.teacher || 'N/A'}</td>
+                            <td>${g.started_day || 'N/A'}</td>
+                            <td>${g.student_count || 0}</td>
+                            <td>${g.is_active ? 'Yes' : 'No'}</td>
+                            <td>
+                                <button class="edit editGroupBtn" data-id="${g.id}" data-json='${JSON.stringify(g)}'>Edit</button>
+                                <button class="delete deleteGroupBtn" data-id="${g.id}">Delete</button>
+                            </td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                } else {
+                    showMsg("groupsMsg", data.error || "No groups found");
+                }
+            } catch (err) {
+                showMsg("groupsMsg", "Failed to fetch groups");
+            }
+        }
+
+        document.getElementById("addGroupBtn").addEventListener("click", () => {
+            document.getElementById("groupForm").reset();
+            document.getElementById("groupForm").group_id.value = "";
+            document.getElementById("groupModalTitle").textContent = "Add Group";
+            document.getElementById("groupModal").style.display = "block";
+        });
+
+        document.getElementById("groupForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const id = this.group_id.value;
+            const payload = {
+                name: this.name.value,
+                description: this.description.value,
+                room: parseInt(this.room.value) || 0,
+                floor: parseInt(this.floor.value) || 1,
+                teacher: parseInt(this.teacher.value),
+                started_day: this.started_day.value || null
+            };
+            const url = id ? `/create_groups/${id}/` : "/cr_gr/";
+            const method = id ? "PUT" : "POST";
+            
+            try {
+                const res = await fetch(url, { method, headers: authHeader(), body: JSON.stringify(payload) });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById("groupModal").style.display = "none";
+                    showMsg("groupsMsg", "Group saved successfully!", false);
+                    fetchGroups();
+                } else {
+                    showMsg("groupFormMsg", JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("groupFormMsg", "Something went wrong");
+            }
+        });
+
+        document.querySelector("#groupsTable tbody").addEventListener("click", async function(e) {
+            if (e.target.classList.contains("editGroupBtn")) {
+                const data = JSON.parse(e.target.dataset.json);
+                const form = document.getElementById("groupForm");
+                form.group_id.value = data.id;
+                form.name.value = data.name || '';
+                form.description.value = data.description || '';
+                form.room.value = data.room || 0;
+                form.floor.value = data.floor || 1;
+                form.teacher.value = data.teacher || '';
+                form.started_day.value = data.started_day || '';
+                document.getElementById("groupModalTitle").textContent = "Edit Group";
+                document.getElementById("groupModal").style.display = "block";
+            } else if (e.target.classList.contains("deleteGroupBtn")) {
+                if (!confirm("Delete this group?")) return;
+                const id = e.target.dataset.id;
+                try {
+                    const res = await fetch(`/create_groups/${id}/`, { method: "DELETE", headers: authHeader() });
+                    if (res.ok) {
+                        showMsg("groupsMsg", "Group deleted successfully!", false);
+                        fetchGroups();
+                    } else {
+                        showMsg("groupsMsg", "Failed to delete group");
+                    }
+                } catch (err) {
+                    showMsg("groupsMsg", "Something went wrong");
+                }
+            }
+        });
+
+        // ========== LESSONS ==========
+        async function fetchLessons() {
+            try {
+                const res = await fetch("/create_lesson/", { headers: authHeader() });
+                const data = await res.json();
+                const tbody = document.querySelector("#lessonsTable tbody");
+                tbody.innerHTML = "";
+                
+                if (res.ok && Array.isArray(data)) {
+                    data.forEach(l => {
+                        const row = `<tr>
+                            <td>${l.id}</td>
+                            <td>${l.title || ''}</td>
+                            <td>${l.content ? l.content.substring(0, 50) + '...' : ''}</td>
+                            <td>${l.start_time || ''}</td>
+                            <td>${l.end_time || ''}</td>
+                            <td>${l.days_week || 0}</td>
+                            <td>${l.teacher || 'N/A'}</td>
+                            <td>${l.group || 'N/A'}</td>
+                            <td>
+                                <button class="edit editLessonBtn" data-id="${l.id}" data-json='${JSON.stringify(l)}'>Edit</button>
+                                <button class="delete deleteLessonBtn" data-id="${l.id}">Delete</button>
+                            </td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                } else {
+                    showMsg("lessonsMsg", data.error || "No lessons found");
+                }
+            } catch (err) {
+                showMsg("lessonsMsg", "Failed to fetch lessons");
+            }
+        }
+
+        document.getElementById("addLessonBtn").addEventListener("click", () => {
+            document.getElementById("lessonForm").reset();
+            document.getElementById("lessonForm").lesson_id.value = "";
+            document.getElementById("lessonModalTitle").textContent = "Add Lesson";
+            document.getElementById("lessonModal").style.display = "block";
+        });
+
+        document.getElementById("lessonForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const id = this.lesson_id.value;
+            const payload = {
+                title: this.title.value,
+                content: this.content.value,
+                homework: this.homework.value || '',
+                start_time: this.start_time.value,
+                end_time: this.end_time.value,
+                days_week: parseInt(this.days_week.value) || 0,
+                teacher: parseInt(this.teacher.value),
+                group: parseInt(this.group.value)
+            };
+            const url = id ? `/lesson_detail/${id}/` : "/create_lesson/";
+            const method = id ? "PUT" : "POST";
+            
+            try {
+                const res = await fetch(url, { method, headers: authHeader(), body: JSON.stringify(payload) });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById("lessonModal").style.display = "none";
+                    showMsg("lessonsMsg", "Lesson saved successfully!", false);
+                    fetchLessons();
+                } else {
+                    showMsg("lessonFormMsg", JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("lessonFormMsg", "Something went wrong");
+            }
+        });
+
+        document.querySelector("#lessonsTable tbody").addEventListener("click", async function(e) {
+            if (e.target.classList.contains("editLessonBtn")) {
+                const data = JSON.parse(e.target.dataset.json);
+                const form = document.getElementById("lessonForm");
+                form.lesson_id.value = data.id;
+                form.title.value = data.title || '';
+                form.content.value = data.content || '';
+                form.homework.value = data.homework || '';
+                form.start_time.value = data.start_time || '';
+                form.end_time.value = data.end_time || '';
+                form.days_week.value = data.days_week || 0;
+                form.teacher.value = data.teacher || '';
+                form.group.value = data.group || '';
+                document.getElementById("lessonModalTitle").textContent = "Edit Lesson";
+                document.getElementById("lessonModal").style.display = "block";
+            } else if (e.target.classList.contains("deleteLessonBtn")) {
+                if (!confirm("Delete this lesson?")) return;
+                const id = e.target.dataset.id;
+                try {
+                    const res = await fetch(`/lesson_detail/${id}/`, { method: "DELETE", headers: authHeader() });
+                    if (res.ok) {
+                        showMsg("lessonsMsg", "Lesson deleted successfully!", false);
+                        fetchLessons();
+                    } else {
+                        showMsg("lessonsMsg", "Failed to delete lesson");
+                    }
+                } catch (err) {
+                    showMsg("lessonsMsg", "Something went wrong");
+                }
+            }
+        });
+
+        // ========== ATTENDANCE ==========
+        async function fetchAttendance() {
+            try {
+                const res = await fetch("/attendense/", { headers: authHeader() });
+                const data = await res.json();
+                const tbody = document.querySelector("#attendanceTable tbody");
+                tbody.innerHTML = "";
+                
+                if (res.ok && Array.isArray(data)) {
+                    data.forEach(a => {
+                        const row = `<tr>
+                            <td>${a.id}</td>
+                            <td>${a.teacher_id || 'N/A'}</td>
+                            <td>${a.group_id || 'N/A'}</td>
+                            <td>${a.lesson || 'N/A'}</td>
+                            <td>${a.absent_students ? a.absent_students.join(', ') : 'None'}</td>
+                            <td>${a.created_at ? new Date(a.created_at).toLocaleDateString() : 'N/A'}</td>
+                            <td>
+                                <button class="edit editAttendanceBtn" data-id="${a.id}" data-json='${JSON.stringify(a)}'>Edit</button>
+                                <button class="delete deleteAttendanceBtn" data-id="${a.id}">Delete</button>
+                            </td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                } else {
+                    showMsg("attendanceMsg", data.error || "No attendance records found");
+                }
+            } catch (err) {
+                showMsg("attendanceMsg", "Failed to fetch attendance");
+            }
+        }
+
+        document.getElementById("addAttendanceBtn").addEventListener("click", () => {
+            document.getElementById("attendanceForm").reset();
+            document.getElementById("attendanceForm").attendance_id.value = "";
+            document.getElementById("attendanceModalTitle").textContent = "Add Attendance";
+            document.getElementById("attendanceModal").style.display = "block";
+        });
+
+        document.getElementById("attendanceForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const id = this.attendance_id.value;
+            const payload = {
+                teacher_id: parseInt(this.teacher_id.value),
+                group_id: parseInt(this.group_id.value),
+                lesson: this.lesson.value ? parseInt(this.lesson.value) : null,
+                absent_students: this.absent_students.value ? this.absent_students.value.split(',').map(id => parseInt(id.trim())) : []
+            };
+            const url = id ? `/attendense/${id}/` : "/attendense/";
+            const method = id ? "PUT" : "POST";
+            
+            try {
+                const res = await fetch(url, { method, headers: authHeader(), body: JSON.stringify(payload) });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById("attendanceModal").style.display = "none";
+                    showMsg("attendanceMsg", "Attendance saved successfully!", false);
+                    fetchAttendance();
+                } else {
+                    showMsg("attendanceFormMsg", JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("attendanceFormMsg", "Something went wrong");
+            }
+        });
+
+        document.querySelector("#attendanceTable tbody").addEventListener("click", async function(e) {
+            if (e.target.classList.contains("editAttendanceBtn")) {
+                const data = JSON.parse(e.target.dataset.json);
+                const form = document.getElementById("attendanceForm");
+                form.attendance_id.value = data.id;
+                form.teacher_id.value = data.teacher_id || '';
+                form.group_id.value = data.group_id || '';
+                form.lesson.value = data.lesson || '';
+                form.absent_students.value = data.absent_students ? data.absent_students.join(', ') : '';
+                document.getElementById("attendanceModalTitle").textContent = "Edit Attendance";
+                document.getElementById("attendanceModal").style.display = "block";
+            } else if (e.target.classList.contains("deleteAttendanceBtn")) {
+                if (!confirm("Delete this attendance record?")) return;
+                const id = e.target.dataset.id;
+                try {
+                    const res = await fetch(`/attendense/${id}/`, { method: "DELETE", headers: authHeader() });
+                    if (res.ok) {
+                        showMsg("attendanceMsg", "Attendance deleted successfully!", false);
+                        fetchAttendance();
+                    } else {
+                        showMsg("attendanceMsg", "Failed to delete attendance");
+                    }
+                } catch (err) {
+                    showMsg("attendanceMsg", "Something went wrong");
+                }
+            }
+        });
+
+        // ========== INITIAL DATA LOAD ==========
+        fetchTeachers();
+        fetchGroups();
+        fetchLessons();
+        fetchAttendance();
+    </script>
+</body>
+</html>

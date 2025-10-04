@@ -37,11 +37,11 @@ class TeacherCreateView(APIView):
     def get(self,request):
         try:
             # teachers = Teacher.objects.all()
-            teachers = Teacher.objects.select_related('user').all()
+            teachers = Teacher.objects.select_related('user').prefetch_related('teaching_groups').all()
             print(teachers)
-            for i in teachers:
-                print(i)
-                print(i.name,)
+            # for i in teachers:
+            #     print(i)
+            #     print(i.name,)
             if teachers.exists():
                 serializer = TeacherSerializer(teachers,many=True)
                 return Response(serializer.data,status=200)
@@ -50,8 +50,25 @@ class TeacherCreateView(APIView):
             return Response({"error":str(e)})
 
 
-    def put(self):
-        pass
+    def put(self, request, pk=None):
+        try:
+            teacher = Teacher.objects.get(pk=pk)
+            serializer = TeacherCreateSerializer(teacher, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(TeacherSerializer(teacher).data, status=200)
+            return Response(serializer.errors, status=400)
+        except Teacher.DoesNotExist:
+            return Response({"error": "Teacher not found"}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
 
-    def delete(self):
-        pass
+    def delete(self, request, pk=None):
+        try:
+            teacher = Teacher.objects.get(pk=pk)
+            teacher.delete()
+            return Response({"message": "Teacher deleted successfully"}, status=200)
+        except Teacher.DoesNotExist:
+            return Response({"error": "Teacher not found"}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
