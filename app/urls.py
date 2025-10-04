@@ -1,8 +1,9 @@
 from django.urls import path
 from app.models.attendence import Attendence
+from app.views.admin import TeacherCrud, admin_panel
 from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
 from app.views.lesson import LessonDetailView, LessonView
-from app.views.user import UserCreateView, register_view
+from app.views.user import register_view
 from app.views.auth import (forgot_password_view, logout_view ,change_password_page, forgot_password, 
     home, reset_page, reset_password, userlogin, userlogin_view, loginexistinguser,
     loginexistinguser_view, verify_user_email_view,
@@ -20,14 +21,14 @@ urlpatterns = [
     # path('verify/',verify,name='verify'),
     
     #models
-    # path('teacher/',TeacherCreateView.as_view()),
-    # path('attendense/',AttendenceView.as_view()),
-    # path('attendense/<int:pk>/',AttendanceDetailView.as_view()),
-    # path('cr_gr/',GroupCreate.as_view(), name="cr_gr"),
-    # path('create_groups/',GroupListView.as_view(), name="groups"),
-    # path('create_groups/<int:pk>/',GroupDetailView.as_view(),name="group-detail"),
-    # path('create_lesson',LessonView.as_view(),name="lesson"),
-    # path('lesson_detail',LessonDetailView.as_view(),name="lesson"),
+    path('api/teachers/',TeacherCreateView.as_view(),name='create_teacher_view'),
+    path('attendense/',AttendenceView.as_view()),
+    path('attendense/<int:pk>/',AttendanceDetailView.as_view()),
+    path('cr_gr/',GroupCreate.as_view(), name="cr_gr"),
+    path('create_groups/',GroupListView.as_view(), name="groups"),
+    path('create_groups/<int:pk>/',GroupDetailView.as_view(),name="group-detail"),
+    path('create_lesson',LessonView.as_view(),name="lesson"),
+    path('lesson_detail',LessonDetailView.as_view(),name="lesson"),
     path('attendense/',AttendenceGetView.as_view()),
 
     # login
@@ -54,7 +55,7 @@ urlpatterns = [
     path('verify_user_otp/',verify_user_email,name='verify_user_otp'),
     path('verify_user_otp/view',verify_user_email_view,name='verify_user_otp_view'),
 
-    path('register_user/',register,name='register'),
+    path('register_user/',register,name='register_user'),
     path('delete_user/<int:pk>/',delete_user, name="delete"),
     
     # token
@@ -62,7 +63,11 @@ urlpatterns = [
     path('api/token/refresh/',TokenRefreshView.as_view()),
 
     path('',home, name='home'),
+    path('admin_dashboard/',admin_panel, name='admin_dashboard'),
 
-    path('register/', register, name='register'),
+    path('teacher_crud/',TeacherCrud, name='teacher_crud'),
+
+
+    # path('register/', register, name='register'),
     path('register_view/', register_view, name='register_view'),
 ]

@@ -1,14 +1,19 @@
 from django.core.mail import send_mail
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 # from ..serializers import UserSerializer
 from app.models import teacher
 from app.models.teacher import Teacher
+from app.models.user import User
 from app.serializers_f.teacher_serializer import TeacherCreateSerializer, TeacherAddUserSerializer, TeacherSerializer
 from drf_yasg.utils import swagger_auto_schema
 
+
+
+@permission_classes([IsAdminUser])
 class TeacherCreateView(APIView):
     @swagger_auto_schema(request_body=TeacherCreateSerializer)
     def post(self,request):
@@ -31,8 +36,12 @@ class TeacherCreateView(APIView):
     
     def get(self,request):
         try:
-            teachers = Teacher.objects.all()
+            # teachers = Teacher.objects.all()
+            teachers = Teacher.objects.select_related('user').all()
             print(teachers)
+            for i in teachers:
+                print(i)
+                print(i.name,)
             if teachers.exists():
                 serializer = TeacherSerializer(teachers,many=True)
                 return Response(serializer.data,status=200)

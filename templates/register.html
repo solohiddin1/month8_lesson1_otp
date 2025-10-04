@@ -2,8 +2,7 @@
 {% block title %}Register{% endblock %}
 {% block header %}Register{% endblock %}
 
-{% block content %}
-<form id="register-form">
+{% block content %}<form id="register-form">
     {% csrf_token %}
     <label>Name:</label>
     <input type="text" name="name" required><br>
@@ -15,46 +14,75 @@
     <label>Email:</label>
     <input type="email" name="email" required><br>
     <label>Phone number:</label>
-    <input type="text" name="phone_number" required><br>
-    <button type="submit">Register</button>
+    <input type="text" name="phone_number" required pattern="^\+998\d{9}$" title="Phone must be in +998XXXXXXXXX format"><br>
+    <button type="number">Register</button>
 </form>
 <p id="register-message" style="color:red;"></p>
 
 <script>
-document.getElementById("register-form").onsubmit = async function(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("register-form");
+    form.onsubmit = async function(e) {
+        e.preventDefault();
+        const csrftoken = form.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    const payload = {
-        name: form.elements["name"].value.trim(),
-        surname: form.elements["surname"].value.trim(),
-        age: parseInt(form.elements["age"].value, 10),
-        user: {
-            email: form.elements["email"].value.trim(),
-            phone_number: form.elements["phone_number"].value.trim()
+        const phoneRegex = /^\+998\d{9}$/;
+        const phone = form.elements["phone_number"].value.trim();
+        if (!phoneRegex.test(phone)) {
+            document.getElementById("register-message").innerText = "Phone must be in +998XXXXXXXXX format";
+            return;
         }
+
+        const payload = {
+            name: form.elements["name"].value.trim(),
+            surname: form.elements["surname"].value.trim(),
+            age: parseInt(form.elements["age"].value, 10),
+            user: {
+                email: form.elements["email"].value.trim(),
+                phone_number: phone
+            }
+        };
+
+        let response = await fetch("{% url 'register_user' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrftoken,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        let data = await response.json();
+
+        if (data.success) {
+            const msgEl = document.getElementById("register-message");
+            msgEl.style.color = "green";
+            msgEl.innerText = "Registration successful. Check your email for login details.";
+            setTimeout(() => { window.location.href = "{% url 'userlogin_view' %}"; }, 1200);
+        } else {
+            let errorMsg = "";
+
+            // First, check for `user` field errors
+            if (data.user) {
+                for (const field in data.user) {
+                    errorMsg += `${field}: ${data.user[field].join(", ")}\n`;
+                }
+            }
+
+            // Then check for any other errors at top level
+            for (const field in data) {
+                if (field !== "user" && Array.isArray(data[field])) {
+                    errorMsg += `${field}: ${data[field].join(", ")}\n`;
+                }
+            }
+
+            const msgEl = document.getElementById("register-message");
+            msgEl.style.color = "red";
+            msgEl.innerText = errorMsg || "Registration failed.";
+        }
+
     };
-
-    // Send registration request
-    let response = await fetch("{% url 'register' %}", {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-    });
-
-    let data = await response.json();
-
-    if (data.success) {
-        document.getElementById("register-message").style.color = "green";
-        document.getElementById("register-message").innerText = "Registration successful. Check your email for login details.";
-        setTimeout(() => { window.location.href = "{% url 'login_existing_user_view' %}"; }, 1200);
-    } else {
-        document.getElementById("register-message").innerText = data.message || "Registration failed.";
-    }
-};
+});
 </script>
+
 {% endblock %}

@@ -7,10 +7,11 @@ from app.models import User
 from app import serializers_f
 
 class TeacherSerializer(serializers.ModelSerializer):   
-    # user = UserSerializer()
+    user = UserSerializer()
+
     class Meta:
         model = Teacher
-        fields = ['name','surname','age']
+        fields = ['name','surname','age','user']
         read_only_fields = ['created_at','updated_at']
 
 

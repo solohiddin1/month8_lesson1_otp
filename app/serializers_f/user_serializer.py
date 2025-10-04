@@ -2,6 +2,7 @@ from rest_framework import serializers
 from ..models import User
 from rest_framework import serializers
 from app.models import User
+import re
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,8 +14,14 @@ class UserSerializer(serializers.ModelSerializer):
         validated_data['is_teacher'] = False
         validated_data['is_admin'] = False
         validated_data['is_student'] = False
-        return super().create(validated_data)
+        return super().create_user(**validated_data)
 
+    def email_verification(self, user):
+        email = getattr(user, "email", None)
+        if not email:
+            return False
+        pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+        return re.match(pattern, email) is not None
 
 
 class RegisterSerializer(serializers.ModelSerializer):

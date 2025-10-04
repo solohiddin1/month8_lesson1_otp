@@ -370,6 +370,7 @@ def loginexistinguser(request):
             refresh = RefreshToken.for_user(user)
             role = 'admin' if userin.is_admin else 'teacher'if userin.is_teacher else 'student' if userin.is_student else 'User' 
             refresh['role'] = role
+            print(role)
             print(refresh)
             return Response({
                 'success': True, 

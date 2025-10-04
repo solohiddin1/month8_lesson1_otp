@@ -8,26 +8,30 @@ from drf_yasg.utils import swagger_auto_schema
 from app.models import User
 from rest_framework import permissions
 from rest_framework.decorators import api_view, APIView, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from django.core.mail import send_mail
 from django.conf import settings
-from django.core.cache import cache
 from drf_yasg.utils import swagger_auto_schema
 from app.serializers_f.student_serizlizer import StudentSerializer
 
-
+@permission_classes([IsAdminUser])
 def register_view(request):
     return render(request,'register.html')
 
+
 @swagger_auto_schema(method='post', request_body=StudentSerializer)
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAdminUser])
 def register(request):
+    print('user register')
     serializer = StudentSerializer(data=request.data)
 
     if serializer.is_valid():
+        
         student = serializer.save()
+        student.is_student = True
+        student.save()
         user = student.user
 
         # Send OTP
@@ -42,11 +46,12 @@ def register(request):
             fail_silently=False,
         )
         return Response({"success": True, "message": "User registered successfully."}, status=201)
-    return Response({"Error":"Something is wrong"},status=status.HTTP_400_BAD_REQUEST)
+    print(serializer.errors)
+    return Response({"Error":serializer.errors},status=status.HTTP_400_BAD_REQUEST)
 
 
 
-class UserCreateView(APIView):
+# class UserCreateView(APIView):
     @swagger_auto_schema(request_body=UserSerializer)
     def post(self,request):
         serializer = UserSerializer(data=request.data)

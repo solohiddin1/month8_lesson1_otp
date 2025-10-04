@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block header %}Welcome Admin{% endblock %}
+
+{% block content %}
+<p>You are logged in as <span id="adminEmail">{{ request.user.email }}</span></p>
+
+<div style="margin-bottom:20px;">
+    <button id="logoutBtn">Logout</button>
+    <button id="registerBtn">Register Teacher</button>
+    <button id="changePasswordBtn">Change Password</button>
+</div>
+
+<h3>All Teachers</h3>
+<table id="teachersTable" border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<p id="teachersMsg" style="color:red;"></p>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Decode JWT payload
+function parseJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join('')));
+    } catch (e) {
+        return null;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async function() {
+    const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (!accessToken) {
+        window.location.href = "/login_existing_user/view";
+        return;
+    }
+
+    const payload = parseJwt(accessToken);
+    if (!payload['is_admin'] === 'admin') {
+        alert("You are not authorized as admin!");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/login_existing_user/view";
+        return;
+    }
+
+    document.getElementById("adminEmail").innerText = payload.email || "{{ request.user.email }}";
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", async function() {
+        try {
+            const response = await fetch("/api/logout/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refresh: refreshToken })
+            });
+            if (response.ok) {
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                window.location.href = "/login_existing_user/view";
+            } else {
+                const data = await response.json();
+                alert(data.message || "Logout failed");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Something went wrong!");
+        }
+    });
+
+    // Register Teacher
+    document.getElementById("registerBtn").addEventListener("click", function() {
+        window.location.href = "{% url 'teacher_crud' %}";
+    });
+
+    // Change password
+    document.getElementById("changePasswordBtn").addEventListener("click", async function() {
+        try {
+            const response = await fetch("/change_password_page/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                }
+            });
+            if (response.ok) {
+                window.location.href = "/change_password_page/";
+            } else {
+                alert("Unauthorized, please login again.");
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                window.location.href = "/login_existing_user/view";
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Something went wrong!");
+        }
+    });
+
+    // Fetch all teachers
+    try {
+        const response = await fetch("/api/teachers/", {
+            headers: { "Authorization": `Bearer ${accessToken}` }
+        });
+        const data = await response.json();
+        const tbody = document.querySelector("#teachersTable tbody");
+        if (response.ok && Array.isArray(data)) {
+            tbody.innerHTML = "";
+            data.forEach(t => {
+                const row = `<tr>
+                    <td>${t.name}</td>
+                    <td>${t.surname}</td>
+                    <td>${t.user ? t.user.email : "Email yoq"}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+
+        } else {
+            document.getElementById("teachersMsg").innerText = data.error || "No teachers found.";
+        }
+    } catch (err) {
+        console.error(err);
+        document.getElementById("teachersMsg").innerText = "Failed to fetch teachers.";
+    }
+});
+</script>
+{% endblock %}
