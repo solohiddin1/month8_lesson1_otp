@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from app.models.groups import Group
 from app.models.homework import Homework
 from app.models.student import Student
-from app.serializers_f import lesson
 from app.serializers_f.homework_serializer import HomeworkSerializer
 from app.serializers_f.lesson import LessonSerializer
 
@@ -33,6 +32,7 @@ class LessonView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
 @permission_classes([IsAuthenticated])
 class LessonDetailView(APIView):
     # @swagger_auto_schema(request_body=LessonSerializer)
@@ -53,19 +53,19 @@ class LessonDetailView(APIView):
 
     def put(self, request,pk):
         student = get_object_or_404(Student,user=request.user)
-        lessons = get_object_or_404(Lesson,pk=pk,group__students_set=student)
-        homework = get_object_or_404(Homework,pk=pk,student=student)
+        lesson = get_object_or_404(Lesson,pk=pk,group__students_set=student)
+        homework = get_object_or_404(Homework,lesson=lesson,student=student)
 
-        homework_serializer = HomeworkSerializer(homework, data=homework)
+        homework_serializer = HomeworkSerializer(homework, data=request.data, partial=True)
         if homework_serializer.is_valid():
             homework_serializer.save()
-            return Response({"message":"homework updated"},status=status.HTTP_201_CREATED)
+            return Response({"message":"homework updated"},status=status.HTTP_200_OK)
         return Response({"error":homework_serializer.errors},status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request,pk):
-        lesson = get_object_or_404(Lesson,pk=pk)
-        # serializer = LessonSerializer(lessons, data=lessons)
-        if lesson:
-            lesson.delete()
-            return Response({"message":"lesson deleted"},status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+    # def delete(self, request,pk):
+    #     lesson = get_object_or_404(Lesson,pk=pk)
+    #     # serializer = LessonSerializer(lessons, data=lessons)
+    #     if lesson:
+    #         lesson.delete()
+    #         return Response({"message":"lesson deleted"},status=status.HTTP_200_OK)
+    #     return Response(status=status.HTTP_400_BAD_REQUEST)

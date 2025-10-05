@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 5px; }
+        h1 { margin-bottom: 10px; color: #2c3e50; }
+        h2 { color: #34495e; margin-bottom: 15px; }
+        h3 { color: #7f8c8d; margin: 10px 0; }
+        .user-info { margin-bottom: 20px; padding: 15px; background: #9b59b6; color: white; border-radius: 3px; }
+        .user-info h3 { margin-bottom: 5px; color: white; }
+        .top-actions { margin-bottom: 20px; }
+        .top-actions button { margin-right: 10px; padding: 8px 15px; cursor: pointer; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .tab { padding: 10px 20px; cursor: pointer; background: #f8f9fa; border: 1px solid #ddd; border-bottom: none; border-radius: 5px 5px 0 0; }
+        .tab.active { background: white; border-bottom: 2px solid white; margin-bottom: -2px; font-weight: bold; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        button { padding: 5px 10px; cursor: pointer; border: 1px solid #ddd; background: #9b59b6; color: white; border-radius: 3px; }
+        button:hover { background: #8e44ad; }
+        .group-card { background: #ecf0f1; padding: 15px; margin: 10px 0; border-radius: 5px; cursor: pointer; transition: all 0.3s; }
+        .group-card:hover { background: #d5dbdb; }
+        .group-card h3 { color: #2c3e50; }
+        .lesson-card { background: white; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .lesson-card h4 { color: #2980b9; margin-bottom: 10px; }
+        .lesson-content { margin: 10px 0; }
+        .lesson-content p { margin: 5px 0; }
+        .lesson-media { margin: 15px 0; }
+        .lesson-media video { max-width: 100%; height: auto; border-radius: 5px; }
+        .lesson-media img { max-width: 100%; height: auto; border-radius: 5px; }
+        .homework-section { background: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #ffc107; }
+        .homework-status { display: inline-block; padding: 5px 10px; border-radius: 3px; font-weight: bold; margin: 10px 0; }
+        .homework-status.submitted { background: #d4edda; color: #155724; }
+        .homework-status.pending { background: #f8d7da; color: #721c24; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { position: relative; margin: 50px auto; padding: 20px; background: white; width: 90%; max-width: 600px; border-radius: 5px; max-height: 80vh; overflow-y: auto; }
+        .modal-content h3 { margin-bottom: 15px; color: #2c3e50; }
+        .modal-content label { display: block; margin-top: 10px; font-weight: bold; }
+        .modal-content input, .modal-content textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 3px; }
+        .modal-content textarea { min-height: 100px; }
+        .modal-actions { margin-top: 20px; display: flex; gap: 10px; }
+        .msg { padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .msg.error { background: #fadbd8; color: #c0392b; }
+        .msg.success { background: #d5f4e6; color: #229954; }
+        .back-btn { background: #95a5a6; margin-bottom: 15px; }
+        .back-btn:hover { background: #7f8c8d; }
+        .empty-state { text-align: center; padding: 40px; color: #95a5a6; }
+        .profile-card { background: #ecf0f1; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .profile-card p { margin: 5px 0; }
+        .profile-card strong { color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Student Dashboard</h1>
+        <div class="user-info">
+            <h3 id="studentName">Loading...</h3>
+            <p id="studentEmail"></p>
+        </div>
+        
+        <div class="top-actions">
+            <button id="logoutBtn">Logout</button>
+            <button id="changePasswordBtn">Change Password</button>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="profile">My Profile</div>
+            <div class="tab" data-tab="groups">My Groups</div>
+            <div class="tab" data-tab="lessons">My Lessons</div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div class="tab-content active" id="profile">
+            <h2>My Profile</h2>
+            <div class="profile-card" id="profileCard">
+                <p><strong>Name:</strong> <span id="profName">-</span></p>
+                <p><strong>Surname:</strong> <span id="profSurname">-</span></p>
+                <p><strong>Email:</strong> <span id="profEmail">-</span></p>
+                <p><strong>Phone:</strong> <span id="profPhone">-</span></p>
+                <p><strong>Age:</strong> <span id="profAge">-</span></p>
+            </div>
+        </div>
+
+        <!-- Groups Tab -->
+        <div class="tab-content" id="groups">
+            <h2>My Groups</h2>
+            <div id="groupsList"></div>
+            <p id="groupsMsg" class="msg" style="display:none;"></p>
+        </div>
+
+        <!-- Lessons Tab -->
+        <div class="tab-content" id="lessons">
+            <div id="lessonsView">
+                <button class="back-btn" id="backToGroupsBtn" style="display:none;">← Back to Groups</button>
+                <h2 id="lessonsTitle">Select a group to view lessons</h2>
+                <div id="lessonsList"></div>
+            </div>
+            <p id="lessonsMsg" class="msg" style="display:none;"></p>
+        </div>
+    </div>
+
+    <!-- Homework Upload Modal -->
+    <div id="homeworkModal" class="modal">
+        <div class="modal-content">
+            <h3>Submit Homework</h3>
+            <form id="homeworkForm">
+                <input type="hidden" name="lesson_id">
+                
+                <label>Homework Text:</label>
+                <textarea name="homework_text" placeholder="Enter your homework solution or answer here..."></textarea>
+                
+                <label>Upload File (Optional):</label>
+                <input type="file" name="homework_file" accept="image/*,.pdf,.doc,.docx">
+                
+                <p id="homeworkFormMsg" class="msg" style="display:none;"></p>
+                <div class="modal-actions">
+                    <button type="submit">Submit Homework</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h3>Change Password</h3>
+            <form id="passwordForm">
+                <label>Email:</label>
+                <input type="email" name="email" required>
+                
+                <label>Old Password:</label>
+                <input type="password" name="old_password" required>
+                
+                <label>New Password:</label>
+                <input type="password" name="new_password" required>
+                
+                <label>Confirm Password:</label>
+                <input type="password" name="confirm_password" required>
+                
+                <p id="passwordFormMsg" class="msg" style="display:none;"></p>
+                <div class="modal-actions">
+                    <button type="submit">Change Password</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // JWT Helper Functions
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join('')));
+            } catch (e) { return null; }
+        }
+
+        function authHeader() {
+            const token = localStorage.getItem("accessToken");
+            return { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" };
+        }
+
+        function showMsg(elementId, message, isError = true) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = isError ? "msg error" : "msg success";
+            el.style.display = "block";
+            setTimeout(() => el.style.display = "none", 5000);
+        }
+
+        // Check authentication and role-based redirect
+        const accessToken = localStorage.getItem("accessToken");
+        const refreshToken = localStorage.getItem("refreshToken");
+
+        if (!accessToken) {
+            window.location.href = "/login_existing_user/view";
+        }
+
+        const payload = parseJwt(accessToken);
+        if (!payload) {
+            alert("Invalid token!");
+            localStorage.clear();
+            window.location.href = "/login_existing_user/view";
+        }
+
+        // Role-based redirect
+        if (payload.role === "admin") {
+            window.location.href = "/admin_dashboard/";
+        } else if (payload.role === "teacher") {
+            window.location.href = "/teacher_dashboard/";
+        } else if (payload.role !== "student") {
+            alert("Unauthorized access!");
+            localStorage.clear();
+            window.location.href = "/login_existing_user/view";
+        }
+
+        const studentId = payload.user_id;
+        let studentData = null;
+        let myGroups = [];
+        let currentGroupLessons = [];
+        let currentGroupId = null;
+
+        // Tab Navigation
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(this.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Close modals
+        document.querySelectorAll('.cancel').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+
+        // ========== FETCH STUDENT PROFILE ==========
+        async function fetchMyProfile() {
+            try {
+                // GET /api/students/ - fetch all students and filter by ID
+                const res = await fetch("/api/students/", { headers: authHeader() });
+                const data = await res.json();
+                
+                if (res.ok && Array.isArray(data)) {
+                    studentData = data.find(s => s.id === studentId);
+                    if (studentData) {
+                        document.getElementById("studentName").textContent = `${studentData.name} ${studentData.surname || ''}`;
+                        document.getElementById("studentEmail").textContent = studentData.user?.email || payload.email;
+                        
+                        document.getElementById("profName").textContent = studentData.name || '-';
+                        document.getElementById("profSurname").textContent = studentData.surname || '-';
+                        document.getElementById("profEmail").textContent = studentData.user?.email || '-';
+                        document.getElementById("profPhone").textContent = studentData.user?.phone_number || '-';
+                        document.getElementById("profAge").textContent = studentData.age || '-';
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch profile", err);
+            }
+        }
+
+        // ========== FETCH MY GROUPS ==========
+        async function fetchMyGroups() {
+            try {
+                // GET /api/student/groups/ - fetch groups for current student
+                const res = await fetch("/api/student/groups/", { headers: authHeader() });
+                const data = await res.json();
+                const container = document.getElementById("groupsList");
+                container.innerHTML = "";
+                
+                if (res.ok && Array.isArray(data)) {
+                    myGroups = data;
+                    
+                    if (myGroups.length === 0) {
+                        container.innerHTML = '<div class="empty-state"><h3>No groups available</h3><p>You are not enrolled in any groups yet.</p></div>';
+                        return;
+                    }
+                    
+                    myGroups.forEach(g => {
+                        const card = document.createElement("div");
+                        card.className = "group-card";
+                        card.innerHTML = `
+                            <h3>${g.name || 'Unnamed Group'}</h3>
+                            <p><strong>Description:</strong> ${g.description || 'No description'}</p>
+                            <p><strong>Room:</strong> ${g.room || 0} | <strong>Floor:</strong> ${g.floor || 1}</p>
+                            <p><strong>Started:</strong> ${g.started_day || 'N/A'}</p>
+                            <p style="color: ${g.is_active ? 'green' : 'red'}; font-weight: bold;">
+                                ${g.is_active ? 'Active' : 'Inactive'}
+                            </p>
+                        `;
+                        card.onclick = () => viewGroupLessons(g.id, g.name);
+                        container.appendChild(card);
+                    });
+                } else {
+                    showMsg("groupsMsg", data.error || "Failed to load groups");
+                }
+            } catch (err) {
+                showMsg("groupsMsg", "Failed to fetch groups");
+            }
+        }
+
+        // ========== VIEW LESSONS FOR A GROUP ==========
+        async function viewGroupLessons(groupId, groupName) {
+            currentGroupId = groupId;
+            
+            // Switch to lessons tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector('.tab[data-tab="lessons"]').classList.add('active');
+            document.getElementById('lessons').classList.add('active');
+            
+            document.getElementById("lessonsTitle").textContent = `Lessons in ${groupName}`;
+            document.getElementById("backToGroupsBtn").style.display = "inline-block";
+            
+            try {
+                // GET /create_lesson/ - fetch all lessons and filter by group
+                const res = await fetch("/create_lesson/", { headers: authHeader() });
+                const data = await res.json();
+                const container = document.getElementById("lessonsList");
+                container.innerHTML = "";
+                
+                if (res.ok && Array.isArray(data)) {
+                    currentGroupLessons = data.filter(l => l.group === groupId);
+                    
+                    if (currentGroupLessons.length === 0) {
+                        container.innerHTML = '<div class="empty-state"><h3>No lessons yet</h3><p>No lessons have been created for this group.</p></div>';
+                        return;
+                    }
+                    
+                    currentGroupLessons.forEach(lesson => {
+                        const card = document.createElement("div");
+                        card.className = "lesson-card";
+                        
+                        let mediaHTML = '';
+                        if (lesson.video_url) {
+                            mediaHTML += `<div class="lesson-media">
+                                <video controls><source src="${lesson.video_url}" type="video/mp4">Your browser does not support video.</video>
+                            </div>`;
+                        }
+                        if (lesson.image) {
+                            mediaHTML += `<div class="lesson-media"><img src="${lesson.image}" alt="Lesson image"></div>`;
+                        }
+                        
+                        const homeworkStatus = lesson.homework_submitted ? 
+                            '<span class="homework-status submitted">✓ Submitted</span>' : 
+                            '<span class="homework-status pending">⚠ Pending</span>';
+                        
+                        card.innerHTML = `
+                            <h4>${lesson.title || 'Untitled Lesson'}</h4>
+                            <div class="lesson-content">
+                                <p><strong>Content:</strong></p>
+                                <p>${lesson.content || 'No content available'}</p>
+                                <p><strong>Time:</strong> ${lesson.start_time || 'N/A'} - ${lesson.end_time || 'N/A'}</p>
+                                <p><strong>Days per week:</strong> ${lesson.days_week || 0}</p>
+                            </div>
+                            ${mediaHTML}
+                            <div class="homework-section">
+                                <h4>Homework</h4>
+                                <p>${lesson.homework || 'No homework assigned'}</p>
+                                ${homeworkStatus}
+                                <br>
+                                <button class="uploadHomeworkBtn" data-lesson-id="${lesson.id}" style="margin-top: 10px;">
+                                    ${lesson.homework_submitted ? 'Update Homework' : 'Submit Homework'}
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                    
+                    // Attach homework button listeners
+                    document.querySelectorAll('.uploadHomeworkBtn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const lessonId = this.dataset.lessonId;
+                            openHomeworkModal(lessonId);
+                        });
+                    });
+                } else {
+                    showMsg("lessonsMsg", "Failed to load lessons");
+                }
+            } catch (err) {
+                showMsg("lessonsMsg", "Failed to fetch lessons");
+            }
+        }
+
+        // Back to groups button
+        document.getElementById("backToGroupsBtn").addEventListener("click", () => {
+            document.getElementById("backToGroupsBtn").style.display = "none";
+            document.getElementById("lessonsTitle").textContent = "Select a group to view lessons";
+            document.getElementById("lessonsList").innerHTML = "";
+            currentGroupId = null;
+            
+            // Switch to groups tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector('.tab[data-tab="groups"]').classList.add('active');
+            document.getElementById('groups').classList.add('active');
+        });
+
+        // ========== HOMEWORK SUBMISSION ==========
+        function openHomeworkModal(lessonId) {
+            document.getElementById("homeworkForm").reset();
+            document.getElementById("homeworkForm").lesson_id.value = lessonId;
+            document.getElementById("homeworkModal").style.display = "block";
+        }
+
+        document.getElementById("homeworkForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const lessonId = this.lesson_id.value;
+            const homeworkText = this.homework_text.value;
+            const homeworkFile = this.homework_file.files[0];
+            
+            // For simplicity, we'll send homework as text
+            // In a real implementation, you'd use FormData to upload files
+            const payload = {
+                homework_submission: homeworkText,
+                homework_submitted: true
+            };
+            
+            try {
+                // PUT /lesson_detail/<id>/ - update lesson with homework
+                const res = await fetch(`/lesson_detail/${lessonId}/`, {
+                    method: "PUT",
+                    headers: authHeader(),
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById("homeworkModal").style.display = "none";
+                    showMsg("lessonsMsg", "Homework submitted successfully!", false);
+                    // Refresh lessons
+                    if (currentGroupId) {
+                        const groupName = myGroups.find(g => g.id === currentGroupId)?.name || '';
+                        viewGroupLessons(currentGroupId, groupName);
+                    }
+                } else {
+                    showMsg("homeworkFormMsg", data.error || JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("homeworkFormMsg", "Failed to submit homework");
+            }
+        });
+
+        // ========== CHANGE PASSWORD ==========
+        document.getElementById("changePasswordBtn").addEventListener("click", () => {
+            document.getElementById("passwordForm").reset();
+            document.getElementById("passwordForm").email.value = payload.email || "";
+            document.getElementById("passwordModal").style.display = "block";
+        });
+
+        document.getElementById("passwordForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            if (this.new_password.value !== this.confirm_password.value) {
+                showMsg("passwordFormMsg", "Passwords do not match!");
+                return;
+            }
+            
+            const payloadData = {
+                email: this.email.value,
+                old_password: this.old_password.value,
+                new_password: this.new_password.value,
+                confirm_password: this.confirm_password.value
+            };
+            
+            try {
+                // POST /api/change_password/ - change password
+                const res = await fetch("/api/change_password/", {
+                    method: "POST",
+                    headers: authHeader(),
+                    body: JSON.stringify(payloadData)
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById("passwordModal").style.display = "none";
+                    alert("Password changed successfully!");
+                } else {
+                    showMsg("passwordFormMsg", data.error || JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("passwordFormMsg", "Failed to change password");
+            }
+        });
+
+        // ========== LOGOUT ==========
+        document.getElementById("logoutBtn").addEventListener("click", async function() {
+            try {
+                // POST /api/logout/ - logout user
+                await fetch("/api/logout/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ refresh: refreshToken })
+                });
+            } catch(e) {
+                console.error(e);
+            }
+            localStorage.clear();
+            window.location.href = "/login_existing_user/view";
+        });
+
+        // ========== INITIAL DATA LOAD ==========
+        async function initializeDashboard() {
+            await fetchMyProfile();
+            await fetchMyGroups();
+        }
+
+        initializeDashboard();
+    </script>
+</body>
+</html>
