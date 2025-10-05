@@ -1,9 +1,8 @@
-from email.policy import default
 from django.db import models
 from config.config import settings
 from app.models.teacher import Teacher
 from app.models.groups import Group
-
+from app.models.homework import Homework
 
 class Lesson(models.Model):
     title = models.CharField(max_length=200)
@@ -18,6 +17,8 @@ class Lesson(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     teacher = models.ForeignKey('Teacher', on_delete=models.CASCADE, related_name='lessons')
     group = models.ForeignKey('Group', on_delete=models.CASCADE, related_name='lessons')
+    # student_homework = models.ForeignKey('Homework',on_delete=models.CASCADE,blank=True,null=True)
+
 
     def __str__(self):
         return self.title

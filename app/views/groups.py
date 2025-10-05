@@ -1,7 +1,9 @@
 from pydantic.types import _serialize_secret
 from django.shortcuts import render
-from app.models import groups
+from rest_framework.utils import serializer_helpers
+# from app.models import groups
 from app.models.groups import Group
+from app.models.student import Student
 from app.serializers_f.group_serializer import GroupSerializer
 
 from rest_framework.decorators import api_view, APIView, permission_classes
@@ -16,6 +18,23 @@ class GroupListView(generics.ListAPIView):
     queryset = Group.objects.all()
     permission_classes = [IsAdminUser]
     serializer_class = GroupSerializer
+
+@permission_classes([IsAuthenticated])
+class StudentGroupsView(APIView):
+
+    def get(self,request):
+        try:
+            student = Student.objects.get(user=request.user)
+            groups = student.student_groups.all()
+        except Student.DoesNotExist:
+            return Response({"error": "Student not found for this user."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = GroupSerializer(groups, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+            
+
 
 
 class GroupCreate(generics.CreateAPIView):

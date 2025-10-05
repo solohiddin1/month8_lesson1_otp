@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from ..models import Student
-from app.serializers_f.user_serializer import UserSerializer
+# from app.serializers_f.user_serializer import UserSerializer
 from app.models import User
 
 class StudentSerializer(serializers.ModelSerializer):   
-    user = UserSerializer(required=True)
+    # user = UserSerializer(required=True)
 
     class Meta:
         model = Student

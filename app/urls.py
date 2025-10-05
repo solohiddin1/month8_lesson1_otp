@@ -11,7 +11,7 @@ from app.views.auth import (forgot_password_view, logout_view ,change_password_p
 from app.views.teacher import TeacherCreateView
 from app.views.user import (register, 
      delete_user)
-from app.views.groups import GroupCreate, GroupDetailView, GroupListView
+from app.views.groups import GroupCreate, GroupDetailView, GroupListView, StudentGroupsView
 
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 
@@ -27,6 +27,7 @@ urlpatterns = [
     path('attendense/<int:pk>/',AttendanceDetailView.as_view()),
     path('cr_gr/',GroupCreate.as_view(), name="cr_gr"),
     path('create_groups/',GroupListView.as_view(), name="groups"),
+    path('student_groups/',StudentGroupsView.as_view(), name="student_groups"),
     path('create_groups/<int:pk>/',GroupDetailView.as_view(),name="group-detail"),
     path('create_lesson/',LessonView.as_view(),name="lesson"),
     path('lesson_detail/<int:pk>/',LessonDetailView.as_view(),name="lesson_detail"),

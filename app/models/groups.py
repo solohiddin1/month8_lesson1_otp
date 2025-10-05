@@ -1,6 +1,6 @@
 from django.db import models
 from app.models.user import User 
-from app.models.student import Student
+# from app.models.student import Student
 from app.models.teacher import Teacher
 
 class Group(models.Model):

@@ -1,77 +1,106 @@
 {% extends "base.html" %}
-{% block title %}Home{% endblock %}
-{% block header %}Welcome Home{% endblock %}
+{% block title %}Student Dashboard{% endblock %}
+{% block header %}Welcome, Student{% endblock %}
 
 {% block content %}
-<p>You are logged in as {{ request.user.email }}</p>
+<p>You are logged in as <strong>{{ request.user.email }}</strong></p>
+
+<div id="groupContainer">
+    <h3>Your Groups:</h3>
+    <ul id="groupList"></ul>
+    <p id="noGroups" style="display:none;">No groups available.</p>
+</div>
+
 <button id="logoutBtn">Logout</button>
-<button id="registerBtn">Register</button>
 <button id="changePasswordBtn">Change Password</button>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", async function() {
     const accessToken = localStorage.getItem("accessToken");
     const refreshToken = localStorage.getItem("refreshToken");
 
-    // if no token, redirect to login
     if (!accessToken) {
         window.location.href = "/login_existing_user/view";
         return;
     }
 
-    // Logout
+    // 1️⃣ Check user role and redirect
+    try {
+        const userResponse = await fetch("/api/user/me/", {   // ← make sure you have this API endpoint that returns role
+            method: "GET",
+            headers: { "Authorization": `Bearer ${accessToken}` }
+        });
+
+        if (!userResponse.ok) throw new Error("Invalid or expired token");
+
+        const userData = await userResponse.json();
+        const role = userData.role;
+
+        if (role === "admin") {
+            window.location.href = "/admin_dashboard/";
+            return;
+        } else if (role === "teacher") {
+            window.location.href = "/teacher_dashboard/";
+            return;
+        } else if (role !== "student") {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            window.location.href = "/login_existing_user/view";
+            return;
+        }
+
+        // 2️⃣ If student, fetch groups
+        const groupsResponse = await fetch("/api/student/groups/", {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${accessToken}` }
+        });
+
+        const groupList = document.getElementById("groupList");
+        const noGroups = document.getElementById("noGroups");
+
+        if (groupsResponse.ok) {
+            const groups = await groupsResponse.json();
+            if (groups.length === 0) {
+                noGroups.style.display = "block";
+            } else {
+                groups.forEach(group => {
+                    const li = document.createElement("li");
+                    li.textContent = `${group.name} (Room ${group.room}, Floor ${group.floor})`;
+                    groupList.appendChild(li);
+                });
+            }
+        } else {
+            noGroups.textContent = "Failed to load groups.";
+            noGroups.style.display = "block";
+        }
+
+    } catch (error) {
+        console.error("Auth check failed:", error);
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/login_existing_user/view";
+    }
+
+    // 3️⃣ Logout
     document.getElementById("logoutBtn").addEventListener("click", async function() {
         try {
-            const response = await fetch("/api/logout/", {
+            await fetch("/api/logout/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ refresh: refreshToken })
             });
-
-            if (response.ok) {
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
-                window.location.href = "/login_existing_user/view";
-            } else {
-                const data = await response.json();
-                alert(data.message || "Logout failed");
-            }
         } catch (error) {
             console.error(error);
-            alert("Something went wrong!");
         }
+        localStorage.clear();
+        window.location.href = "/login_existing_user/view";
     });
 
-    // Register redirect
-    document.getElementById("registerBtn").addEventListener("click", function() {
-        window.location.href = "{% url 'register_view' %}";
-    });
-
-    // Change password redirect
-    document.getElementById("changePasswordBtn").addEventListener("click", async function() {
-        try {
-            // optional check: call backend with token before redirect
-            const response = await fetch("/change_password_page/", {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`
-                }
-            });
-
-            if (response.ok) {
-                window.location.href = "/change_password_page/";
-            } else {
-                alert("Unauthorized, please login again.");
-                localStorage.removeItem("accessToken");
-                localStorage.removeItem("refreshToken");
-                window.location.href = "/login_existing_user/view";
-            }
-        } catch (error) {
-            console.error(error);
-            alert("Something went wrong!");
-        }
+    // 4️⃣ Change password
+    document.getElementById("changePasswordBtn").addEventListener("click", function() {
+        window.location.href = "/change_password_page/";
     });
 });
 </script>
