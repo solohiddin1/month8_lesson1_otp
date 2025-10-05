@@ -2,6 +2,11 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from app.models.groups import Group
+from app.models.homework import Homework
+from app.models.student import Student
+from app.serializers_f import lesson
+from app.serializers_f.homework_serializer import HomeworkSerializer
 from app.serializers_f.lesson import LessonSerializer
 
 from rest_framework.views import APIView
@@ -32,13 +37,30 @@ class LessonView(APIView):
 class LessonDetailView(APIView):
     # @swagger_auto_schema(request_body=LessonSerializer)
 
+    def get(self,request,pk):
+        try:
+            student = get_object_or_404(Student, user=request.user)
+            lesson = get_object_or_404(Lesson, pk=pk, group__students_set=student)
+            homework = Homework.objects.filter(lesson=lesson, student=student)
+            
+            lesson_serializer = LessonSerializer(lesson)
+            homework_serializer = HomeworkSerializer(homework)
+
+            return Response({"lesson":lesson_serializer,"homework":homework_serializer})
+        except Exception as e:
+            print(e)
+            return Response({"error":str(e)})
+
     def put(self, request,pk):
-        lessons = get_object_or_404(Lesson,pk=pk)
-        serializer = LessonSerializer(lessons, data=lessons)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message":"lesson updated"},status=status.HTTP_201_CREATED)
-        return Response({"error":serializer.errors},status=status.HTTP_400_BAD_REQUEST)
+        student = get_object_or_404(Student,user=request.user)
+        lessons = get_object_or_404(Lesson,pk=pk,group__students_set=student)
+        homework = get_object_or_404(Homework,pk=pk,student=student)
+
+        homework_serializer = HomeworkSerializer(homework, data=homework)
+        if homework_serializer.is_valid():
+            homework_serializer.save()
+            return Response({"message":"homework updated"},status=status.HTTP_201_CREATED)
+        return Response({"error":homework_serializer.errors},status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request,pk):
         lesson = get_object_or_404(Lesson,pk=pk)
