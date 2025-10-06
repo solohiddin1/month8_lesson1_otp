@@ -249,8 +249,8 @@
                         
                         document.getElementById("profName").textContent = studentData.name || '-';
                         document.getElementById("profSurname").textContent = studentData.surname || '-';
-                        document.getElementById("profEmail").textContent = studentData.user?.email || '-';
-                        document.getElementById("profPhone").textContent = studentData.user?.phone_number || '-';
+                        document.getElementById("profEmail").textContent = studentData?.email || '-';
+                        document.getElementById("profPhone").textContent = studentData?.phone_number || '-';
                         document.getElementById("profAge").textContent = studentData.age || '-';
                     }
                 }

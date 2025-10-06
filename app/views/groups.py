@@ -1,7 +1,3 @@
-from pydantic.types import _serialize_secret
-from django.shortcuts import render
-from rest_framework.utils import serializer_helpers
-# from app.models import groups
 from app.models.groups import Group
 from app.models.student import Student
 from app.serializers_f.group_serializer import GroupSerializer
@@ -12,6 +8,25 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework import generics
+
+
+@permission_classes([IsAdminUser])
+class AddStudentGroupView(APIView):
+
+    def post(self,request):
+        student_id = request.data.get('student_id')
+        group_id = request.data.get('group_id')
+
+        try:
+            student = Student.objects.get(id=student_id)
+            group = Group.objects.get(id=group_id)
+            group.students_set.add(student)
+            group.student_count = group.students_set.count()
+            group.save()
+            return Response({"message":"Student added successfully"},status=status.HTTP_201_CREATED)
+                        
+        except Student.DoesNotExist:
+            return Response({"error":"Student Not found"},status=status.HTTP_404_NOT_FOUND)
 
 
 class GroupListView(generics.ListAPIView):

@@ -20,21 +20,30 @@ urlpatterns = [
     # path('login/',login,name='login'),
     # path('verify/',verify,name='verify'),
     
+    # student
     path('api/student/',StudentView.as_view(),name='student'),
-    #model apis
+    path('student_groups/',StudentGroupsView.as_view(), name="student_groups"),
+
+    
+    # teacher
     path('api/teachers/',TeacherCreateView.as_view(),name='create_teacher_view'),
     path('api/teachers/<int:pk>/',TeacherCreateView.as_view(),name='teacher_detail'),
-    path('attendense/',AttendenceView.as_view()),
-    path('attendense/<int:pk>/',AttendanceDetailView.as_view()),
+    path('create_lesson/',LessonView.as_view(),name="lesson"),
+    path('teacher_crud/',TeacherCrud, name='teacher_crud'),
+
+    # groups
     path('cr_gr/',GroupCreate.as_view(), name="cr_gr"),
     path('create_groups/',GroupListView.as_view(), name="groups"),
-    path('student_groups/',StudentGroupsView.as_view(), name="student_groups"),
     path('create_groups/<int:pk>/',GroupDetailView.as_view(),name="group-detail"),
-    path('create_lesson/',LessonView.as_view(),name="lesson"),
-    path('lesson_detail/<int:pk>/',LessonDetailView.as_view(),name="lesson_detail"),
-    path('attendense/',AttendenceGetView.as_view()),
 
-    path('teacher_crud/',TeacherCrud, name='teacher_crud'),
+    # lesson
+    path('lesson_detail/<int:pk>/',LessonDetailView.as_view(),name="lesson_detail"),
+
+    # attendence
+    path('attendense/',AttendenceView.as_view()),
+    path('attendense/',AttendenceGetView.as_view()),
+    path('attendense/<int:pk>/',AttendanceDetailView.as_view()),
+    
     # login
     path('userlogin/',userlogin,name='userlogin'),
     path('userlogin/view/',userlogin_view,name='userlogin_view'),
@@ -42,6 +51,8 @@ urlpatterns = [
     path('login_existing_user/',loginexistinguser,name='login_existing_user'),
     path('login_existing_user/view',loginexistinguser_view,name='login_existing_user_view'),
 
+
+    # log out
     path('api/logout/',logout_view,name='logout'),
 
 
