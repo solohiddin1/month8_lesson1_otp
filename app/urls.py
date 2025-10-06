@@ -3,15 +3,16 @@ from app.models.attendence import Attendence
 from app.views.admin import TeacherCrud, admin_panel, teacher_panel
 from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
 from app.views.lesson import LessonDetailView, LessonView
+from app.views.student import StudentView
 from app.views.user import register_view
 from app.views.auth import (forgot_password_view, logout_view ,change_password_page, forgot_password, 
     home, reset_page, reset_password, student_dashboard, userlogin, userlogin_view, loginexistinguser,
     loginexistinguser_view, verify_user_email_view,
     verify, login, verify_user_email, change_password)
-from app.views.teacher import StudentView, TeacherCreateView
+from app.views.teacher import TeacherCreateView, TeacherProfileView
 from app.views.user import (register, 
      delete_user)
-from app.views.groups import GroupCreate, GroupDetailView, GroupListView, StudentGroupsView
+from app.views.groups import AddStudentGroupView, GroupCreate, GroupDetailView, GroupListView, StudentGroupsView
 
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 
@@ -26,12 +27,14 @@ urlpatterns = [
 
     
     # teacher
+    path('api/teacher_profile/',TeacherProfileView.as_view(),name='teacher_profie_view'),
     path('api/teachers/',TeacherCreateView.as_view(),name='create_teacher_view'),
     path('api/teachers/<int:pk>/',TeacherCreateView.as_view(),name='teacher_detail'),
     path('create_lesson/',LessonView.as_view(),name="lesson"),
     path('teacher_crud/',TeacherCrud, name='teacher_crud'),
 
     # groups
+    path('add_student_to_group/',AddStudentGroupView.as_view(),name='add_student_to_group'),
     path('cr_gr/',GroupCreate.as_view(), name="cr_gr"),
     path('create_groups/',GroupListView.as_view(), name="groups"),
     path('create_groups/<int:pk>/',GroupDetailView.as_view(),name="group-detail"),

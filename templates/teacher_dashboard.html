@@ -315,19 +315,21 @@
         // ========== FETCH TEACHER PROFILE ==========
         async function fetchMyProfile() {
             try {
-                const res = await fetch("/api/teachers/", { headers: authHeader() });
+                const res = await fetch("/api/teacher_profile/", { headers: authHeader() });
                 const data = await res.json();
                 
-                if (res.ok && Array.isArray(data)) {
-                    teacherData = data.find(t => t.id === teacherId);
+                if (res.ok && data ) {
+                    teacherData = data;
+                    // teacherData = data.find(t => t.id === teacherId);
+                    console.log('teacher')
                     if (teacherData) {
                         document.getElementById("teacherName").textContent = `${teacherData.name} ${teacherData.surname}`;
                         document.getElementById("teacherEmail").textContent = teacherData.user?.email || payload.email;
                         
                         document.getElementById("profName").textContent = teacherData.name || '-';
                         document.getElementById("profSurname").textContent = teacherData.surname || '-';
-                        document.getElementById("profEmail").textContent = teacherData.user?.email || '-';
-                        document.getElementById("profPhone").textContent = teacherData.user?.phone_number || '-';
+                        document.getElementById("profEmail").textContent = teacherData.email || '-';
+                        document.getElementById("profPhone").textContent = teacherData.phone_number || '-';
                         document.getElementById("profAge").textContent = teacherData.age || '-';
                     }
                 }

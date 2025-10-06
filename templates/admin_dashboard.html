@@ -58,6 +58,11 @@
             <div class="tab" data-tab="attendance">Attendance</div>
         </div>
 
+
+        <!-- add student to group -->
+        <div class="tab" data-tab="addStudent">Add Student to Group</div>
+
+
         <!-- Teachers Tab -->
         <div class="tab-content active" id="teachers">
             <div class="section-header">
@@ -156,6 +161,16 @@
             <p id="attendanceMsg" class="msg" style="display:none;"></p>
         </div>
     </div>
+
+    <!-- add student to group -->
+    <div class="tab-content" id="addStudent">
+        <div class="section-header">
+            <h2>Add Student to Group</h2>
+            <button id="openAddStudentModalBtn">Add Student</button>
+        </div>
+        <p id="addStudentMsg" class="msg" style="display:none;"></p>
+    </div>
+    
 
     <!-- Teacher Modal -->
     <div id="teacherModal" class="modal">
@@ -292,6 +307,25 @@
             </form>
         </div>
     </div>
+
+    <!-- add student to group modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <h3>Add Student to Group</h3>
+            <form id="addStudentForm">
+                <label>Student ID:</label>
+                <input type="number" name="student_id" required>
+                <label>Group ID:</label>
+                <input type="number" name="group_id" required>
+                <p id="addStudentFormMsg" class="msg" style="display:none;"></p>
+                <div class="modal-actions">
+                    <button type="submit">Add</button>
+                    <button type="button" class="cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
 
     <script>
         // JWT Helper Functions
@@ -820,6 +854,39 @@
                 }
             }
         });
+
+        // ========== ADD STUDENT TO GROUP ==========
+        document.getElementById("openAddStudentModalBtn").addEventListener("click", () => {
+            document.getElementById("addStudentForm").reset();
+            document.getElementById("addStudentModal").style.display = "block";
+        });
+
+        document.getElementById("addStudentForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const payload = {
+                student_id: parseInt(this.student_id.value),
+                group_id: parseInt(this.group_id.value)
+            };
+
+            try {
+                const res = await fetch("/add_student_to_group/", {
+                    method: "POST",
+                    headers: authHeader(),
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById("addStudentModal").style.display = "none";
+                    showMsg("addStudentMsg", "Student added successfully!", false);
+                } else {
+                    showMsg("addStudentFormMsg", data.error || JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("addStudentFormMsg", "Failed to add student");
+            }
+        });
+
 
         // ========== INITIAL DATA LOAD ==========
         fetchTeachers();

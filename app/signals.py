@@ -9,7 +9,7 @@ from app.models.groups import Group
 
 @receiver(m2m_changed,sender=Group.students_set.through)
 def update_student_count(sender,instance,**kwargs):
-    instance.student_count = Group.students.count()
+    instance.student_count = instance.students_set.count()
     instance.save()
 
 

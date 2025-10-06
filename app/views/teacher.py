@@ -15,23 +15,22 @@ from drf_yasg.utils import swagger_auto_schema
 
 
 @permission_classes([IsAuthenticated])
-class StudentView(APIView):
-
+class TeacherProfileView(APIView):
     def get(self,request):
+        
         try:
-            student = Student.objects.get(user=request.user)
-            print(student,'---')
-        except Student.DoesNotExist:
-            return Response({"error": "Student not found"}, status=404)
+            teacher = Teacher.objects.get(user=request.user)
+        except Teacher.DoesNotExist:
+            return Response({"error":"Teacher model does not exists"},status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({"error":str(e)})
-        serializer = StudentSerializer(student)
+            return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        serializer = TeacherSerializer(teacher)
+
         data = serializer.data.copy()
-        data['email'] = student.user.email
-        data['phone_number'] = student.user.phone_number
+        data['email'] = teacher.user.email
+        data['phone_number'] = teacher.user.phone_number
         print(data)
         return Response(data,status=status.HTTP_200_OK)
-
 
 
 @permission_classes([IsAdminUser])
