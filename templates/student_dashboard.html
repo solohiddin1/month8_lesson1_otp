@@ -235,11 +235,14 @@
         async function fetchMyProfile() {
             try {
                 // GET /api/students/ - fetch all students and filter by ID
-                const res = await fetch("/api/students/", { headers: authHeader() });
+                const res = await fetch("/api/student/", { headers: authHeader() });
                 const data = await res.json();
-                
-                if (res.ok && Array.isArray(data)) {
-                    studentData = data.find(s => s.id === studentId);
+                // console.log(res)
+                if (res.ok && data) {
+                    studentData = data;
+                    // studentData = data.find(s => s.id === studentId);
+                    console.log(studentData)
+                    console.log('student came')
                     if (studentData) {
                         document.getElementById("studentName").textContent = `${studentData.name} ${studentData.surname || ''}`;
                         document.getElementById("studentEmail").textContent = studentData.user?.email || payload.email;
@@ -259,8 +262,7 @@
         // ========== FETCH MY GROUPS ==========
         async function fetchMyGroups() {
             try {
-                // GET /api/student/groups/ - fetch groups for current student
-                const res = await fetch("/api/student/groups/", { headers: authHeader() });
+                const res = await fetch("/student_groups/", { headers: authHeader() });
                 const data = await res.json();
                 const container = document.getElementById("groupsList");
                 container.innerHTML = "";

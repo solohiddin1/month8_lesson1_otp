@@ -5,10 +5,10 @@ from app.views.attendence import AttendanceDetailView, AttendenceGetView, Attend
 from app.views.lesson import LessonDetailView, LessonView
 from app.views.user import register_view
 from app.views.auth import (forgot_password_view, logout_view ,change_password_page, forgot_password, 
-    home, reset_page, reset_password, userlogin, userlogin_view, loginexistinguser,
+    home, reset_page, reset_password, student_dashboard, userlogin, userlogin_view, loginexistinguser,
     loginexistinguser_view, verify_user_email_view,
     verify, login, verify_user_email, change_password)
-from app.views.teacher import TeacherCreateView
+from app.views.teacher import StudentView, TeacherCreateView
 from app.views.user import (register, 
      delete_user)
 from app.views.groups import GroupCreate, GroupDetailView, GroupListView, StudentGroupsView
@@ -20,6 +20,7 @@ urlpatterns = [
     # path('login/',login,name='login'),
     # path('verify/',verify,name='verify'),
     
+    path('api/student/',StudentView.as_view(),name='student'),
     #model apis
     path('api/teachers/',TeacherCreateView.as_view(),name='create_teacher_view'),
     path('api/teachers/<int:pk>/',TeacherCreateView.as_view(),name='teacher_detail'),
@@ -68,7 +69,7 @@ urlpatterns = [
     path('',home, name='home'),
     path('admin_dashboard/',admin_panel, name='admin_dashboard'),
     path('teacher_dashboard/',teacher_panel, name='teacher_dashboard'),
-
+    path('student_dashboard/',student_dashboard,name='student_dashboard'),
 
 
     # path('register/', register, name='register'),

@@ -26,6 +26,7 @@ class StudentGroupsView(APIView):
         try:
             student = Student.objects.get(user=request.user)
             groups = student.student_groups.all()
+            print(groups)
         except Student.DoesNotExist:
             return Response({"error": "Student not found for this user."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:

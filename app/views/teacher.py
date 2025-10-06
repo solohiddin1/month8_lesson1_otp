@@ -1,15 +1,32 @@
 from django.core.mail import send_mail
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 # from ..serializers import UserSerializer
 from app.models import teacher
+from app.models.student import Student
 from app.models.teacher import Teacher
 from app.models.user import User
+from app.serializers_f.student_serizlizer import StudentSerializer
 from app.serializers_f.teacher_serializer import TeacherCreateSerializer, TeacherAddUserSerializer, TeacherSerializer
 from drf_yasg.utils import swagger_auto_schema
+
+
+@permission_classes([IsAuthenticated])
+class StudentView(APIView):
+
+    def get(self,request):
+        try:
+            student = Student.objects.get(user=request.user)
+            print(student.name)
+        except Student.DoesNotExist:
+            return Response({"error": "Student not found"}, status=404)
+        except Exception as e:
+            return Response({"error":str(e)})
+        serializer = StudentSerializer(student)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 
 

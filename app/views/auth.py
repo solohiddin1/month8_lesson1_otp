@@ -341,9 +341,14 @@ def loginexistinguser_view(request):
     return render(request,'loginexisting.html')
     
 
+@permission_classes([IsAuthenticated])
+def student_dashboard(request):
+    return render(request,'student_dashboard.html')
+
 
 @swagger_auto_schema(method='post', request_body=LoginUserSerializer)
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def loginexistinguser(request):
     serializer = LoginUserSerializer(data=request.data)
     print('user here')
