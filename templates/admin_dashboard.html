@@ -313,10 +313,15 @@
         <div class="modal-content">
             <h3>Add Student to Group</h3>
             <form id="addStudentForm">
-                <label>Student ID:</label>
+                <label>Student:</label>
+                <select name="student_id" id="student_id" required></select>
+
+                <label>Group:</label>
+                <select name="group_id" id="group_id" required></select>
+                <!-- <label>Student ID:</label>
                 <input type="number" name="student_id" required>
                 <label>Group ID:</label>
-                <input type="number" name="group_id" required>
+                <input type="number" name="group_id" required> -->
                 <p id="addStudentFormMsg" class="msg" style="display:none;"></p>
                 <div class="modal-actions">
                     <button type="submit">Add</button>
@@ -886,6 +891,25 @@
                 showMsg("addStudentFormMsg", "Failed to add student");
             }
         });
+        document.getElementById("openAddStudentModalBtn").addEventListener("click", async () => {
+            document.getElementById("addStudentForm").reset();
+            document.getElementById("addStudentModal").style.display = "block";
+
+            const [studentsRes, groupsRes] = await Promise.all([
+                fetch("/students/", { headers: authHeader() }),
+                fetch("/create_groups/", { headers: authHeader() }),
+            ]);
+
+            const students = await studentsRes.json();
+            const groups = await groupsRes.json();
+
+            const studentSelect = document.getElementById("student_id");
+            const groupSelect = document.getElementById("group_id");
+
+            studentSelect.innerHTML = students.map(s => `<option value="${s.id}">${s.name} ${s.surname}</option>`).join("");
+            groupSelect.innerHTML = groups.map(g => `<option value="${g.id}">${g.name}</option>`).join("");
+        });
+
 
 
         // ========== INITIAL DATA LOAD ==========

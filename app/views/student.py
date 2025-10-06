@@ -1,5 +1,6 @@
+from this import d
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -25,3 +26,12 @@ class StudentView(APIView):
         data['phone_number'] = student.user.phone_number
         print(data)
         return Response(data,status=status.HTTP_200_OK)
+
+
+@permission_classes([IsAdminUser])
+class StudentsView(APIView):
+    def get(self,request):
+        students = Student.objects.all()
+        serializer = StudentSerializer(students,many=True)
+        print(serializer.data)
+        return Response(serializer.data)

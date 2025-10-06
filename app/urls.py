@@ -3,7 +3,7 @@ from app.models.attendence import Attendence
 from app.views.admin import TeacherCrud, admin_panel, teacher_panel
 from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
 from app.views.lesson import LessonDetailView, LessonView
-from app.views.student import StudentView
+from app.views.student import StudentView, StudentsView
 from app.views.user import register_view
 from app.views.auth import (forgot_password_view, logout_view ,change_password_page, forgot_password, 
     home, reset_page, reset_password, student_dashboard, userlogin, userlogin_view, loginexistinguser,
@@ -22,9 +22,9 @@ urlpatterns = [
     # path('verify/',verify,name='verify'),
     
     # student
-    path('api/student/',StudentView.as_view(),name='student'),
+    path('api/student/',StudentView.as_view(), name='student'),
     path('student_groups/',StudentGroupsView.as_view(), name="student_groups"),
-
+    path('students/',StudentsView.as_view(), name='students'),
     
     # teacher
     path('api/teacher_profile/',TeacherProfileView.as_view(),name='teacher_profie_view'),

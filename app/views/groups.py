@@ -22,7 +22,7 @@ class AddStudentGroupView(APIView):
             group = Group.objects.get(id=group_id)
             group.students_set.add(student)
             group.student_count = group.students_set.count()
-            if not group.is_active and group.student.count>=1:
+            if not group.is_active and group.student_count>=1:
                 group.is_active = True 
             group.save()
             return Response({"message":"Student added successfully"},status=status.HTTP_201_CREATED)
