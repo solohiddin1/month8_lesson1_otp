@@ -270,7 +270,7 @@
 
         // Check authentication
         const accessToken = localStorage.getItem("accessToken");
-        const refreshToken = localStorage.getItem("refreshToken");
+        // const refreshToken = localStorage.getItem("refreshToken");
 
         if (!accessToken) {
             window.location.href = "/login_existing_user/view";
@@ -315,7 +315,7 @@
         // ========== FETCH TEACHER PROFILE ==========
         async function fetchMyProfile() {
             try {
-                const res = await fetch("/api/teacher_profile/", { headers: authHeader() });
+                const res = await authorizedFetch("/api/teacher_profile/", { headers: authHeader() });
                 const data = await res.json();
                 
                 if (res.ok && data ) {
@@ -659,6 +659,43 @@
                 showMsg("attendanceMsg", "Failed to fetch attendance");
             }
         }
+
+        // token refresh
+        async function refreshToken() {
+            const refresh = localStorage.getItem("refreshToken");
+            const res = await fetch("/api/token/refresh/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refresh }),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem("accessToken", data.access);
+                return data.access;
+            } else {
+                localStorage.clear();
+                window.location.href = "/login_existing_user/view";
+            }
+        }
+
+        async function authorizedFetch(url, options = {}) {
+            let res = await fetch(url, {
+                ...options,
+                headers: authHeader(),
+            });
+
+            if (res.status === 401) {
+                const newAccess = await refreshToken();
+                res = await fetch(url, {
+                    ...options,
+                    headers: { ...authHeader(), Authorization: `Bearer ${newAccess}` },
+                });
+            }
+
+            return res;
+        }
+
+
 
         document.getElementById("markAttendanceBtn").addEventListener("click", () => {
             document.getElementById("attendanceForm").reset();
