@@ -341,20 +341,18 @@
         // ========== FETCH MY GROUPS ==========
         async function fetchMyGroups() {
             try {
-                const res = await fetch("{% url 'groups' %}", { headers: authHeader() });
+                const res = await fetch("{% url 'teacher_groups' %}", { headers: authHeader() });
                 const data = await res.json();
                 const tbody = document.querySelector("#groupsTable tbody");
                 tbody.innerHTML = "";
-                
+
                 if (res.ok && Array.isArray(data)) {
-                    myGroups = data.filter(g => g.teacher === teacherId);
-                    
-                    if (myGroups.length === 0) {
+                    if (data.length === 0) {
                         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No groups assigned to you</td></tr>';
                         return;
                     }
-                    
-                    myGroups.forEach(g => {
+
+                    data.forEach(g => {
                         const row = `<tr>
                             <td>${g.name || ''}</td>
                             <td>${g.description || ''}</td>
@@ -366,12 +364,48 @@
                         </tr>`;
                         tbody.innerHTML += row;
                     });
-                    
+
                     populateGroupSelects();
                 } else {
                     showMsg("groupsMsg", "Failed to load groups");
                 }
-            } catch (err) {
+
+                
+            //     const res = await fetch("{% url 'teacher_groups' %}", { headers: authHeader() });
+            //     const data = await res.json();
+            //     const tbody = document.querySelector("#groupsTable tbody");
+            //     tbody.innerHTML = "";
+                
+            //     if (res.ok && Array.isArray(data)) {
+            //         console.log("groups exist")
+            //         const teacherId = parseInt(payload.user_id)
+            //         console.log(teacherId)
+            //         myGroups = data.filter(g => g.teacher === teacherId);
+            //         console.log(myGroups.length)
+            //         if (myGroups.length === 0) {
+            //             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No groups assigned to you</td></tr>';
+            //             return;
+            //         }
+                    
+            //         myGroups.forEach(g => {
+            //             const row = `<tr>
+            //                 <td>${g.name || ''}</td>
+            //                 <td>${g.description || ''}</td>
+            //                 <td>${g.room || 0}</td>
+            //                 <td>${g.floor || 1}</td>
+            //                 <td>${g.started_day || 'N/A'}</td>
+            //                 <td>${g.student_count || 0}</td>
+            //                 <td>${g.is_active ? '<span style="color:green;">Active</span>' : '<span style="color:red;">Inactive</span>'}</td>
+            //             </tr>`;
+            //             tbody.innerHTML += row;
+            //         });
+                    
+            //         populateGroupSelects();
+            //     } else {
+            //         showMsg("groupsMsg", "Failed to load groups");
+            //     }
+            } 
+            catch (err) {
                 showMsg("groupsMsg", "Failed to fetch groups");
             }
         }

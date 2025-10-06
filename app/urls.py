@@ -12,7 +12,7 @@ from app.views.auth import (forgot_password_view, logout_view ,change_password_p
 from app.views.teacher import TeacherCreateView, TeacherProfileView
 from app.views.user import (register, 
      delete_user)
-from app.views.groups import AddStudentGroupView, GroupCreate, GroupDetailView, GroupListView, StudentGroupsView
+from app.views.groups import AddStudentGroupView, GroupCreate, GroupDetailView, GroupListView, StudentGroupsView, TeacherGroups
 
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 
@@ -32,6 +32,7 @@ urlpatterns = [
     path('api/teachers/<int:pk>/',TeacherCreateView.as_view(),name='teacher_detail'),
     path('create_lesson/',LessonView.as_view(),name="lesson"),
     path('teacher_crud/',TeacherCrud, name='teacher_crud'),
+    path('teacher_groups/',TeacherGroups.as_view(), name='teacher_groups'),
 
     # groups
     path('add_student_to_group/',AddStudentGroupView.as_view(),name='add_student_to_group'),

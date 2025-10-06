@@ -17,7 +17,7 @@ from drf_yasg.utils import swagger_auto_schema
 @permission_classes([IsAuthenticated])
 class TeacherProfileView(APIView):
     def get(self,request):
-        
+        print(request.user.id)
         try:
             teacher = Teacher.objects.get(user=request.user)
         except Teacher.DoesNotExist:

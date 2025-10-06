@@ -20,5 +20,6 @@ class EmailBackend(ModelBackend):
             return None
 
         if user.check_password(raw_password) and self.user_can_authenticate(user):
+            print(f"checked password of {user}")
             return user
         return None

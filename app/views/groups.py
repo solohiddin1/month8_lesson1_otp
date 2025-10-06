@@ -1,5 +1,6 @@
 from app.models.groups import Group
 from app.models.student import Student
+from app.models.teacher import Teacher
 from app.serializers_f.group_serializer import GroupSerializer
 
 from rest_framework.decorators import api_view, APIView, permission_classes
@@ -8,6 +9,24 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework import generics
+
+
+@permission_classes([IsAuthenticated])
+class TeacherGroups(APIView):
+    def get(self,request):
+        try:
+            print(request.user)
+            teacher = Teacher.objects.get(user=request.user)
+            # for 
+            print(teacher.id,teacher.name,)
+        except Teacher.DoesNotExist:
+            return Response({"error":"Teacher with this id did not found!"},status=status.HTTP_404_NOT_FOUND)
+        groups = Group.objects.filter(teacher_id=teacher)
+
+        serializer = GroupSerializer(groups,many=True)
+        print(serializer.data)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
 
 
 @permission_classes([IsAdminUser])

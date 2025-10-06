@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -251,9 +251,9 @@ token_generator = PasswordResetTokenGenerator()
 def forgot_password_view(request):
     return render(request,'forgot_password.html')
 
-@permission_classes([AllowAny])
 @swagger_auto_schema(method='post',request_body=LoginSerializer)
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def forgot_password(request):
     email = request.data.get("email")
     try:
@@ -355,13 +355,18 @@ def loginexistinguser(request):
     if serializer.is_valid():
         print('user here2 ---')
         email = serializer.validated_data.get("email", "").strip().lower()
+        try:
+            userin = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error":"User not found"})
+        # if userin is None:
+        #     return Response({"error":"User not found!"},status=status.HTTP_404_NOT_FOUND)
         password = serializer.validated_data.get("password", "").strip()
         print(email,password,'email password ---')
         
         user = authenticate(request=request._request, email=email, password=password)
         print(user,'tthis user is good')
-        userin = User.objects.get(email=email)
-        print(userin)
+        print(userin,'userin -------- here ')
         if user is None:
             return Response({"error":"Invalid credentials"},status=status.HTTP_400_BAD_REQUEST)
         if not userin.email_verified:
