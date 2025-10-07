@@ -21,7 +21,7 @@ class LessonView(APIView):
         serializer = LessonSerializer(data=lessons)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message":"created lesson"},status=status.HTTP_201_CREATED)
+            return Response({"message":"lesson is created"},status=status.HTTP_201_CREATED)
         return Response({"error":serializer.errors},status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):

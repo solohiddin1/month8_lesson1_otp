@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import  swagger_auto_schema
+from rest_framework.decorators import permission_classes
 from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from app.models.attendence import Attendence
 from app.models.groups import Group
@@ -10,12 +12,15 @@ from rest_framework.response import Response
 from rest_framework import status
 
 
+@permission_classes([IsAuthenticated])
 class AttendenceGetView(ListAPIView):
     queryset = Attendence.objects.all()
     serializer_class = AttendenceSerializer
     pagination_class = CustomPagination
 
+
 class AttendenceView(APIView):
+    permission_classes = ([IsAuthenticated])
     @swagger_auto_schema(request_body=AttendenceSerializer)
     def post(self, request):
         # students = request.data
