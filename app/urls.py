@@ -62,7 +62,7 @@ urlpatterns = [
     path('login_existing_user/view',loginexistinguser_view,name='login_existing_user_view'),
 
 
-    # log out
+    # log out0
     path('api/logout/',logout_view,name='logout'),
 
 
