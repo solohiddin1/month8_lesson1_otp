@@ -9,6 +9,7 @@ from app.serializers_f.student_serizlizer import StudentSerializer
 
 
 
+
 @permission_classes([IsAuthenticated])
 class StudentView(APIView):
 

@@ -9,8 +9,10 @@
         body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
         .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 5px; }
         h1 { margin-bottom: 10px; color: #2c3e50; }
+        h2 { color: #34495e; margin-bottom: 15px; }
+        h3 { color: #7f8c8d; margin: 10px 0; }
         .user-info { margin-bottom: 20px; padding: 15px; background: #3498db; color: white; border-radius: 3px; }
-        .user-info h3 { margin-bottom: 5px; }
+        .user-info h3 { margin-bottom: 5px; color: white; }
         .top-actions { margin-bottom: 20px; }
         .top-actions button { margin-right: 10px; padding: 8px 15px; cursor: pointer; }
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
@@ -18,35 +20,44 @@
         .tab.active { background: white; border-bottom: 2px solid white; margin-bottom: -2px; font-weight: bold; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        table th, table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        table th { background: #3498db; color: white; }
         button { padding: 5px 10px; cursor: pointer; border: 1px solid #ddd; background: #3498db; color: white; border-radius: 3px; }
         button:hover { background: #2980b9; }
         button.delete { background: #e74c3c; }
         button.delete:hover { background: #c0392b; }
         button.edit { background: #27ae60; margin-right: 5px; }
         button.edit:hover { background: #229954; }
-        button.mark { background: #f39c12; }
-        button.mark:hover { background: #d68910; }
+        button.back { background: #95a5a6; margin-bottom: 15px; }
+        button.back:hover { background: #7f8c8d; }
+        .group-card { background: #ecf0f1; padding: 15px; margin: 10px 0; border-radius: 5px; cursor: pointer; transition: all 0.3s; }
+        .group-card:hover { background: #d5dbdb; transform: translateY(-2px); }
+        .group-card h3 { color: #2c3e50; }
+        .group-detail { background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+        .group-header { background: #3498db; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .section { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+        .section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; color: #2c3e50; }
+        .lesson-item { background: white; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .lesson-item h4 { color: #2980b9; margin-bottom: 10px; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
         .modal-content { position: relative; margin: 50px auto; padding: 20px; background: white; width: 90%; max-width: 600px; border-radius: 5px; max-height: 80vh; overflow-y: auto; }
         .modal-content h3 { margin-bottom: 15px; color: #2c3e50; }
         .modal-content label { display: block; margin-top: 10px; font-weight: bold; }
-        .modal-content input, .modal-content textarea, .modal-content select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 3px; }
-        .modal-content textarea { min-height: 80px; }
+        .modal-content input, .modal-content textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 3px; }
+        .modal-content textarea { min-height: 100px; }
         .modal-actions { margin-top: 20px; display: flex; gap: 10px; }
         .msg { padding: 10px; margin: 10px 0; border-radius: 3px; }
         .msg.error { background: #fadbd8; color: #c0392b; }
         .msg.success { background: #d5f4e6; color: #229954; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .profile-card { background: #ecf0f1; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
         .profile-card p { margin: 5px 0; }
         .profile-card strong { color: #2c3e50; }
-        .info-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0; }
-        .student-list { max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 3px; }
+        .student-list { max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 3px; background: white; }
         .student-item { padding: 8px; margin: 5px 0; background: #f8f9fa; border-radius: 3px; display: flex; align-items: center; }
         .student-item input[type="checkbox"] { margin-right: 10px; }
+        .homework-card { background: white; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .homework-card .badge { display: inline-block; padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
+        .homework-card .badge.checked { background: #d4edda; color: #155724; }
+        .homework-card .badge.unchecked { background: #fff3cd; color: #856404; }
+        .empty-state { text-align: center; padding: 40px; color: #95a5a6; }
     </style>
 </head>
 <body>
@@ -65,14 +76,13 @@
         <div class="tabs">
             <div class="tab active" data-tab="profile">My Profile</div>
             <div class="tab" data-tab="groups">My Groups</div>
-            <div class="tab" data-tab="lessons">My Lessons</div>
-            <div class="tab" data-tab="attendance">Attendance</div>
+            <div class="tab" data-tab="homework">Student Homework</div>
         </div>
 
         <!-- Profile Tab -->
         <div class="tab-content active" id="profile">
             <h2>My Profile</h2>
-            <div class="profile-card" id="profileCard">
+            <div class="profile-card">
                 <p><strong>Name:</strong> <span id="profName">-</span></p>
                 <p><strong>Surname:</strong> <span id="profSurname">-</span></p>
                 <p><strong>Email:</strong> <span id="profEmail">-</span></p>
@@ -83,68 +93,66 @@
 
         <!-- Groups Tab -->
         <div class="tab-content" id="groups">
-            <h2>My Assigned Groups</h2>
-            <div class="info-box">
-                <strong>Note:</strong> You can view groups assigned to you but cannot modify them. Contact admin for changes.
+            <div id="groupsListView">
+                <h2>My Groups</h2>
+                <div id="groupsList"></div>
+                <p id="groupsMsg" class="msg" style="display:none;"></p>
             </div>
-            <table id="groupsTable">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Room</th>
-                        <th>Floor</th>
-                        <th>Started Day</th>
-                        <th>Students</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <p id="groupsMsg" class="msg" style="display:none;"></p>
+
+            <!-- Group Detail View -->
+            <div id="groupDetailView" style="display:none;">
+                <button class="back" id="backToGroupsBtn">← Back to Groups</button>
+                <div class="group-detail">
+                    <div class="group-header">
+                        <h2 id="groupDetailName">Group Name</h2>
+                        <p id="groupDetailInfo"></p>
+                    </div>
+
+                    <!-- Lessons Section -->
+                    <div class="section">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="section-title">📚 Lessons</div>
+                            <button id="addLessonBtn">+ Create Lesson</button>
+                        </div>
+                        <div id="lessonsList"></div>
+                        <p id="lessonsMsg" class="msg" style="display:none;"></p>
+                    </div>
+
+                    <!-- Attendance Section -->
+                    <div class="section">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="section-title">📋 Mark Attendance</div>
+                            <button id="saveAttendanceBtn" style="background: #27ae60;">Save Attendance</button>
+                        </div>
+                        <p><strong>Select lesson (optional):</strong></p>
+                        <select id="attendanceLessonSelect" style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ddd; border-radius: 3px;">
+                            <option value="">-- No specific lesson --</option>
+                        </select>
+                        <p><strong>Mark absent students:</strong></p>
+                        <div class="student-list" id="attendanceStudentsList"></div>
+                        <p id="attendanceMsg" class="msg" style="display:none;"></p>
+                    </div>
+
+                    <!-- Attendance History -->
+                    <div class="section">
+                        <div class="section-title">📊 Attendance History</div>
+                        <div id="attendanceHistory"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Lessons Tab -->
-        <div class="tab-content" id="lessons">
-            <div class="section-header">
-                <h2>My Lessons</h2>
-                <button id="addLessonBtn">Create New Lesson</button>
+        <!-- Homework Tab -->
+        <div class="tab-content" id="homework">
+            <h2>Student Homework Submissions</h2>
+            <div>
+                <label><strong>Filter by Group:</strong></label>
+                <select id="homeworkGroupFilter" style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ddd; border-radius: 3px;">
+                    <option value="">-- All Groups --</option>
+                </select>
             </div>
-            <table id="lessonsTable">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Group</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Days/Week</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <p id="lessonsMsg" class="msg" style="display:none;"></p>
-        </div>
-
-        <!-- Attendance Tab -->
-        <div class="tab-content" id="attendance">
-            <div class="section-header">
-                <h2>Attendance Records</h2>
-                <button id="markAttendanceBtn">Mark New Attendance</button>
-            </div>
-            <table id="attendanceTable">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Group</th>
-                        <th>Lesson</th>
-                        <th>Absent Students</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <p id="attendanceMsg" class="msg" style="display:none;"></p>
+            <div id="homeworkList"></div>
+            <p id="homeworkMsg" class="msg" style="display:none;"></p>
         </div>
     </div>
 
@@ -154,6 +162,8 @@
             <h3 id="lessonModalTitle">Create New Lesson</h3>
             <form id="lessonForm">
                 <input type="hidden" name="lesson_id">
+                <input type="hidden" name="group_id">
+                
                 <label>Title:</label>
                 <input type="text" name="title" required>
                 
@@ -172,11 +182,6 @@
                 <label>Days of Week (0-7):</label>
                 <input type="number" name="days_week" min="0" max="7" value="1">
                 
-                <label>Select Group:</label>
-                <select name="group" id="lessonGroupSelect" required>
-                    <option value="">-- Select Group --</option>
-                </select>
-                
                 <p id="lessonFormMsg" class="msg" style="display:none;"></p>
                 <div class="modal-actions">
                     <button type="submit">Save Lesson</button>
@@ -186,31 +191,24 @@
         </div>
     </div>
 
-    <!-- Attendance Modal -->
-    <div id="attendanceModal" class="modal">
+    <!-- Homework Grade Modal -->
+    <div id="homeworkGradeModal" class="modal">
         <div class="modal-content">
-            <h3 id="attendanceModalTitle">Mark Attendance</h3>
-            <form id="attendanceForm">
-                <input type="hidden" name="attendance_id">
+            <h3>Grade Homework</h3>
+            <form id="homeworkGradeForm">
+                <input type="hidden" name="homework_id">
                 
-                <label>Select Group:</label>
-                <select name="group_id" id="attGroupSelect" required>
-                    <option value="">-- Select Group --</option>
-                </select>
+                <div id="homeworkContent"></div>
                 
-                <label>Select Lesson (Optional):</label>
-                <select name="lesson" id="attLessonSelect">
-                    <option value="">-- No Lesson --</option>
-                </select>
+                <label>Mark (Grade):</label>
+                <input type="number" name="mark" min="0" max="100" required>
                 
-                <label>Mark Absent Students:</label>
-                <div class="student-list" id="studentsList">
-                    <p style="color: #999;">Select a group to see students</p>
-                </div>
+                <label>Mark as Checked:</label>
+                <input type="checkbox" name="is_checked">
                 
-                <p id="attendanceFormMsg" class="msg" style="display:none;"></p>
+                <p id="homeworkGradeFormMsg" class="msg" style="display:none;"></p>
                 <div class="modal-actions">
-                    <button type="submit">Save Attendance</button>
+                    <button type="submit">Save Grade</button>
                     <button type="button" class="cancel">Cancel</button>
                 </div>
             </form>
@@ -223,7 +221,7 @@
             <h3>Change Password</h3>
             <form id="passwordForm">
                 <label>Email:</label>
-                <input type="email" name="email" required >
+                <input type="email" name="email" required>
                 
                 <label>Old Password:</label>
                 <input type="password" name="old_password" required>
@@ -262,6 +260,7 @@
 
         function showMsg(elementId, message, isError = true) {
             const el = document.getElementById(elementId);
+            if (!el) return;
             el.textContent = message;
             el.className = isError ? "msg error" : "msg success";
             el.style.display = "block";
@@ -286,8 +285,9 @@
         const teacherId = payload.user_id;
         let teacherData = null;
         let myGroups = [];
-        let myLessons = [];
-        let allStudents = [];
+        let currentGroup = null;
+        let currentGroupLessons = [];
+        let currentGroupStudents = [];
 
         // Tab Navigation
         document.querySelectorAll('.tab').forEach(tab => {
@@ -312,391 +312,10 @@
             }
         });
 
-        // ========== FETCH TEACHER PROFILE ==========
-        async function fetchMyProfile() {
-            try {
-                const res = await authorizedFetch("/api/teacher_profile/", { headers: authHeader() });
-                const data = await res.json();
-                
-                if (res.ok && data ) {
-                    teacherData = data;
-                    // teacherData = data.find(t => t.id === teacherId);
-                    console.log('teacher')
-                    if (teacherData) {
-                        document.getElementById("teacherName").textContent = `${teacherData.name} ${teacherData.surname}`;
-                        document.getElementById("teacherEmail").textContent = teacherData.user?.email || payload.email;
-                        
-                        document.getElementById("profName").textContent = teacherData.name || '-';
-                        document.getElementById("profSurname").textContent = teacherData.surname || '-';
-                        document.getElementById("profEmail").textContent = teacherData.email || '-';
-                        document.getElementById("profPhone").textContent = teacherData.phone_number || '-';
-                        document.getElementById("profAge").textContent = teacherData.age || '-';
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to fetch profile", err);
-            }
-        }
-
-        // ========== FETCH MY GROUPS ==========
-        async function fetchMyGroups() {
-            try {
-                const res = await fetch("{% url 'teacher_groups' %}", { headers: authHeader() });
-                const data = await res.json();
-                const tbody = document.querySelector("#groupsTable tbody");
-                tbody.innerHTML = "";
-
-                if (res.ok && Array.isArray(data)) {
-                    if (data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No groups assigned to you</td></tr>';
-                        return;
-                    }
-
-                    data.forEach(g => {
-                        const row = `<tr>
-                            <td>${g.name || ''}</td>
-                            <td>${g.description || ''}</td>
-                            <td>${g.room || 0}</td>
-                            <td>${g.floor || 1}</td>
-                            <td>${g.started_day || 'N/A'}</td>
-                            <td>${g.student_count || 0}</td>
-                            <td>${g.is_active ? '<span style="color:green;">Active</span>' : '<span style="color:red;">Inactive</span>'}</td>
-                        </tr>`;
-                        tbody.innerHTML += row;
-                    });
-
-                    populateGroupSelects();
-                } else {
-                    showMsg("groupsMsg", "Failed to load groups");
-                }
-
-                
-            //     const res = await fetch("{% url 'teacher_groups' %}", { headers: authHeader() });
-            //     const data = await res.json();
-            //     const tbody = document.querySelector("#groupsTable tbody");
-            //     tbody.innerHTML = "";
-                
-            //     if (res.ok && Array.isArray(data)) {
-            //         console.log("groups exist")
-            //         const teacherId = parseInt(payload.user_id)
-            //         console.log(teacherId)
-            //         myGroups = data.filter(g => g.teacher === teacherId);
-            //         console.log(myGroups.length)
-            //         if (myGroups.length === 0) {
-            //             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No groups assigned to you</td></tr>';
-            //             return;
-            //         }
-                    
-            //         myGroups.forEach(g => {
-            //             const row = `<tr>
-            //                 <td>${g.name || ''}</td>
-            //                 <td>${g.description || ''}</td>
-            //                 <td>${g.room || 0}</td>
-            //                 <td>${g.floor || 1}</td>
-            //                 <td>${g.started_day || 'N/A'}</td>
-            //                 <td>${g.student_count || 0}</td>
-            //                 <td>${g.is_active ? '<span style="color:green;">Active</span>' : '<span style="color:red;">Inactive</span>'}</td>
-            //             </tr>`;
-            //             tbody.innerHTML += row;
-            //         });
-                    
-            //         populateGroupSelects();
-            //     } else {
-            //         showMsg("groupsMsg", "Failed to load groups");
-            //     }
-            } 
-            catch (err) {
-                showMsg("groupsMsg", "Failed to fetch groups");
-            }
-        }
-
-        function populateGroupSelects() {
-            const lessonSelect = document.getElementById("lessonGroupSelect");
-            const attSelect = document.getElementById("attGroupSelect");
-            
-            lessonSelect.innerHTML = '<option value="">-- Select Group --</option>';
-            attSelect.innerHTML = '<option value="">-- Select Group --</option>';
-            
-            myGroups.forEach(g => {
-                lessonSelect.innerHTML += `<option value="${g.id}">${g.name}</option>`;
-                attSelect.innerHTML += `<option value="${g.id}">${g.name}</option>`;
-            });
-        }
-
-        // ========== FETCH MY LESSONS ==========
-        async function fetchMyLessons() {
-            try {
-                const res = await fetch("/create_lesson/", { headers: authHeader() });
-                const data = await res.json();
-                const tbody = document.querySelector("#lessonsTable tbody");
-                tbody.innerHTML = "";
-                
-                if (res.ok && Array.isArray(data)) {
-                    myLessons = data.filter(l => l.teacher === teacherId);
-                    
-                    if (myLessons.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No lessons created yet</td></tr>';
-                        return;
-                    }
-                    
-                    myLessons.forEach(l => {
-                        const groupName = myGroups.find(g => g.id === l.group)?.name || 'N/A';
-                        const row = `<tr>
-                            <td>${l.title || ''}</td>
-                            <td>${groupName}</td>
-                            <td>${l.start_time || ''}</td>
-                            <td>${l.end_time || ''}</td>
-                            <td>${l.days_week || 0}</td>
-                            <td>
-                                <button class="edit editLessonBtn" data-id="${l.id}" data-json='${JSON.stringify(l)}'>Edit</button>
-                                <button class="delete deleteLessonBtn" data-id="${l.id}">Delete</button>
-                            </td>
-                        </tr>`;
-                        tbody.innerHTML += row;
-                    });
-                    
-                    populateLessonSelect();
-                } else {
-                    showMsg("lessonsMsg", "Failed to load lessons");
-                }
-            } catch (err) {
-                showMsg("lessonsMsg", "Failed to fetch lessons");
-            }
-        }
-
-        function populateLessonSelect() {
-            const select = document.getElementById("attLessonSelect");
-            select.innerHTML = '<option value="">-- No Lesson --</option>';
-            myLessons.forEach(l => {
-                select.innerHTML += `<option value="${l.id}">${l.title}</option>`;
-            });
-        }
-
-        document.getElementById("addLessonBtn").addEventListener("click", () => {
-            document.getElementById("lessonForm").reset();
-            document.getElementById("lessonForm").lesson_id.value = "";
-            document.getElementById("lessonModalTitle").textContent = "Create New Lesson";
-            document.getElementById("lessonModal").style.display = "block";
-        });
-
-        document.getElementById("lessonForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
-            const id = this.lesson_id.value;
-            const payload = {
-                title: this.title.value,
-                content: this.content.value,
-                homework: this.homework.value || '',
-                start_time: this.start_time.value,
-                end_time: this.end_time.value,
-                days_week: parseInt(this.days_week.value) || 0,
-                teacher: teacherId,
-                group: parseInt(this.group.value)
-            };
-            const url = id ? `/lesson_detail/${id}/` : "/create_lesson/";
-            const method = id ? "PUT" : "POST";
-            
-            try {
-                const res = await fetch(url, { method, headers: authHeader(), body: JSON.stringify(payload) });
-                const data = await res.json();
-                
-                if (res.ok) {
-                    document.getElementById("lessonModal").style.display = "none";
-                    showMsg("lessonsMsg", "Lesson saved successfully!", false);
-                    fetchMyLessons();
-                } else {
-                    showMsg("lessonFormMsg", JSON.stringify(data));
-                }
-            } catch (err) {
-                showMsg("lessonFormMsg", "Something went wrong");
-            }
-        });
-
-        document.querySelector("#lessonsTable tbody").addEventListener("click", async function(e) {
-            if (e.target.classList.contains("editLessonBtn")) {
-                const data = JSON.parse(e.target.dataset.json);
-                const form = document.getElementById("lessonForm");
-                form.lesson_id.value = data.id;
-                form.title.value = data.title || '';
-                form.content.value = data.content || '';
-                form.homework.value = data.homework || '';
-                form.start_time.value = data.start_time || '';
-                form.end_time.value = data.end_time || '';
-                form.days_week.value = data.days_week || 0;
-                form.group.value = data.group || '';
-                document.getElementById("lessonModalTitle").textContent = "Edit Lesson";
-                document.getElementById("lessonModal").style.display = "block";
-            } else if (e.target.classList.contains("deleteLessonBtn")) {
-                if (!confirm("Delete this lesson?")) return;
-                const id = e.target.dataset.id;
-                try {
-                    const res = await fetch(`/lesson_detail/${id}/`, { method: "DELETE", headers: authHeader() });
-                    if (res.ok) {
-                        showMsg("lessonsMsg", "Lesson deleted successfully!", false);
-                        fetchMyLessons();
-                    } else {
-                        showMsg("lessonsMsg", "Failed to delete lesson");
-                    }
-                } catch (err) {
-                    showMsg("attendanceMsg", "Something went wrong");
-                }
-            }
-        });
-
-        // ========== CHANGE PASSWORD ==========
-        document.getElementById("changePasswordBtn").addEventListener("click", () => {
-            document.getElementById("passwordForm").reset();
-            document.getElementById("passwordForm").email.value = payload.email || "";
-            document.getElementById("passwordModal").style.display = "block";
-        });
-
-        document.getElementById("passwordForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
-            
-            if (this.new_password.value !== this.confirm_password.value) {
-                showMsg("passwordFormMsg", "Passwords do not match!");
-                return;
-            }
-            
-            const payloadData = {
-                email: this.email.value,
-                old_password: this.old_password.value,
-                new_password: this.new_password.value,
-                confirm_password: this.confirm_password.value
-            };
-            
-            try {
-                const res = await fetch("/api/change_password/", { 
-                    method: "POST", 
-                    headers: authHeader(), 
-                    body: JSON.stringify(payloadData) 
-                });
-                const data = await res.json();
-                
-                if (res.ok) {
-                    document.getElementById("passwordModal").style.display = "none";
-                    alert("Password changed successfully!");
-                } else {
-                    showMsg("passwordFormMsg", data.error || JSON.stringify(data));
-                }
-            } catch (err) {
-                showMsg("passwordFormMsg", "Failed to change password");
-            }
-        });
-
-        // ========== LOGOUT ==========
-        document.getElementById("logoutBtn").addEventListener("click", async function() {
-            try {
-                await fetch("/api/logout/", { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify({ refresh: refreshToken }) 
-                });
-            } catch(e) { 
-                console.error(e); 
-            }
-            localStorage.clear();
-            window.location.href = "/login_existing_user/view";
-        });
-
-        // ========== INITIAL DATA LOAD ==========
-        async function initializeDashboard() {
-            await fetchMyProfile();
-            await fetchMyGroups();
-            await fetchMyLessons();
-            await fetchMyAttendance();
-        }
-
-        initializeDashboard();
-
-        // ========== FETCH STUDENTS FOR GROUP ==========
-        async function fetchStudentsForGroup(groupId) {
-            try {
-                // For now, we'll create a mock student list since the API might not exist
-                // In a real implementation, you'd fetch from /api/students/?group=<id>
-                const container = document.getElementById("studentsList");
-                container.innerHTML = "";
-                
-                // Mock students - replace with actual API call when available
-                const mockStudents = [
-                    { id: 1, name: "John", surname: "Doe" },
-                    { id: 2, name: "Jane", surname: "Smith" },
-                    { id: 3, name: "Bob", surname: "Johnson" },
-                    { id: 4, name: "Alice", surname: "Brown" },
-                    { id: 5, name: "Charlie", surname: "Wilson" }
-                ];
-                
-                if (mockStudents.length > 0) {
-                    mockStudents.forEach(student => {
-                        const item = document.createElement("div");
-                        item.className = "student-item";
-                        item.innerHTML = `
-                            <input type="checkbox" name="absent_students" value="${student.id}" id="student_${student.id}">
-                            <label for="student_${student.id}">${student.name} ${student.surname || ''}</label>
-                        `;
-                        container.appendChild(item);
-                    });
-                    allStudents = mockStudents;
-                } else {
-                    container.innerHTML = '<p style="color: #999;">No students in this group</p>';
-                }
-            } catch (err) {
-                console.error("Failed to fetch students", err);
-                document.getElementById("studentsList").innerHTML = '<p style="color: #e74c3c;">Failed to load students</p>';
-            }
-        }
-
-        document.getElementById("attGroupSelect").addEventListener("change", function() {
-            if (this.value) {
-                fetchStudentsForGroup(this.value);
-            } else {
-                document.getElementById("studentsList").innerHTML = '<p style="color: #999;">Select a group to see students</p>';
-            }
-        });
-
-        // ========== ATTENDANCE ==========
-        async function fetchMyAttendance() {
-            try {
-                const res = await fetch("/attendense/", { headers: authHeader() });
-                const data = await res.json();
-                const tbody = document.querySelector("#attendanceTable tbody");
-                tbody.innerHTML = "";
-                
-                if (res.ok && Array.isArray(data)) {
-                    const myAttendance = data.filter(a => a.teacher_id === teacherId);
-                    
-                    if (myAttendance.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No attendance records yet</td></tr>';
-                        return;
-                    }
-                    
-                    myAttendance.forEach(a => {
-                        const groupName = myGroups.find(g => g.id === a.group_id)?.name || 'N/A';
-                        const lessonTitle = myLessons.find(l => l.id === a.lesson)?.title || 'N/A';
-                        const absentCount = Array.isArray(a.absent_students) ? a.absent_students.length : 0;
-                        
-                        const row = `<tr>
-                            <td>${a.created_at ? new Date(a.created_at).toLocaleDateString() : 'N/A'}</td>
-                            <td>${groupName}</td>
-                            <td>${lessonTitle}</td>
-                            <td>${absentCount} students</td>
-                            <td>
-                                <button class="edit editAttendanceBtn" data-id="${a.id}" data-json='${JSON.stringify(a)}'>Edit</button>
-                                <button class="delete deleteAttendanceBtn" data-id="${a.id}">Delete</button>
-                            </td>
-                        </tr>`;
-                        tbody.innerHTML += row;
-                    });
-                } else {
-                    showMsg("attendanceMsg", "Failed to load attendance");
-                }
-            } catch (err) {
-                showMsg("attendanceMsg", "Failed to fetch attendance");
-            }
-        }
-
-        // token refresh
+        // Token refresh
         async function refreshToken() {
             const refresh = localStorage.getItem("refreshToken");
+            // POST /api/token/refresh/ - refresh JWT token
             const res = await fetch("/api/token/refresh/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -715,102 +334,557 @@
         async function authorizedFetch(url, options = {}) {
             let res = await fetch(url, {
                 ...options,
-                headers: authHeader(),
+                headers: { ...authHeader(), ...options.headers },
             });
 
             if (res.status === 401) {
                 const newAccess = await refreshToken();
                 res = await fetch(url, {
                     ...options,
-                    headers: { ...authHeader(), Authorization: `Bearer ${newAccess}` },
+                    headers: { ...authHeader(), Authorization: `Bearer ${newAccess}`, ...options.headers },
                 });
             }
 
             return res;
         }
 
+        // ========== FETCH TEACHER PROFILE ==========
+        async function fetchMyProfile() {
+            try {
+                // GET /api/teacher_profile/ - fetch current teacher's profile
+                const res = await authorizedFetch("/api/teacher_profile/");
+                const data = await res.json();
+                
+                if (res.ok && data) {
+                    teacherData = data;
+                    document.getElementById("teacherName").textContent = `${teacherData.name} ${teacherData.surname}`;
+                    document.getElementById("teacherEmail").textContent = teacherData.email || payload.email;
+                    
+                    document.getElementById("profName").textContent = teacherData.name || '-';
+                    document.getElementById("profSurname").textContent = teacherData.surname || '-';
+                    document.getElementById("profEmail").textContent = teacherData.email || '-';
+                    document.getElementById("profPhone").textContent = teacherData.phone_number || '-';
+                    document.getElementById("profAge").textContent = teacherData.age || '-';
+                }
+            } catch (err) {
+                console.error("Failed to fetch profile", err);
+            }
+        }
 
+        // ========== FETCH MY GROUPS ==========
+        async function fetchMyGroups() {
+            try {
+                // GET /api/teacher/groups/ - fetch groups for current teacher
+                const res = await authorizedFetch("/api/teacher/groups/");
+                const data = await res.json();
+                const container = document.getElementById("groupsList");
+                container.innerHTML = "";
+                
+                if (res.ok && Array.isArray(data)) {
+                    myGroups = data;
+                    
+                    if (myGroups.length === 0) {
+                        container.innerHTML = '<div class="empty-state"><h3>No groups assigned</h3><p>You have no groups assigned yet.</p></div>';
+                        return;
+                    }
+                    
+                    myGroups.forEach(g => {
+                        const card = document.createElement("div");
+                        card.className = "group-card";
+                        card.innerHTML = `
+                            <h3>${g.name || 'Unnamed Group'}</h3>
+                            <p><strong>Description:</strong> ${g.description || 'No description'}</p>
+                            <p><strong>Room:</strong> ${g.room || 0} | <strong>Floor:</strong> ${g.floor || 1}</p>
+                            <p><strong>Students:</strong> ${g.student_count || 0}</p>
+                            <p style="color: ${g.is_active ? 'green' : 'red'}; font-weight: bold;">
+                                ${g.is_active ? '✓ Active' : '✗ Inactive'}
+                            </p>
+                        `;
+                        card.onclick = () => viewGroupDetail(g.id);
+                        container.appendChild(card);
+                    });
 
-        document.getElementById("markAttendanceBtn").addEventListener("click", () => {
-            document.getElementById("attendanceForm").reset();
-            document.getElementById("attendanceForm").attendance_id.value = "";
-            document.getElementById("studentsList").innerHTML = '<p style="color: #999;">Select a group to see students</p>';
-            document.getElementById("attendanceModalTitle").textContent = "Mark Attendance";
-            document.getElementById("attendanceModal").style.display = "block";
+                    // Populate homework filter
+                    const homeworkFilter = document.getElementById("homeworkGroupFilter");
+                    homeworkFilter.innerHTML = '<option value="">-- All Groups --</option>';
+                    myGroups.forEach(g => {
+                        homeworkFilter.innerHTML += `<option value="${g.id}">${g.name}</option>`;
+                    });
+                } else {
+                    showMsg("groupsMsg", "Failed to load groups");
+                }
+            } catch (err) {
+                showMsg("groupsMsg", "Failed to fetch groups");
+            }
+        }
+
+        // ========== VIEW GROUP DETAIL ==========
+        async function viewGroupDetail(groupId) {
+            currentGroup = myGroups.find(g => g.id === groupId);
+            if (!currentGroup) return;
+
+            document.getElementById("groupsListView").style.display = "none";
+            document.getElementById("groupDetailView").style.display = "block";
+
+            document.getElementById("groupDetailName").textContent = currentGroup.name;
+            document.getElementById("groupDetailInfo").textContent = 
+                `${currentGroup.description || ''} | Room: ${currentGroup.room} | Floor: ${currentGroup.floor} | Students: ${currentGroup.student_count}`;
+
+            await fetchGroupLessons(groupId);
+            await fetchGroupStudents(groupId);
+            await fetchGroupAttendanceHistory(groupId);
+        }
+
+        // Back to groups button
+        document.getElementById("backToGroupsBtn").addEventListener("click", () => {
+            document.getElementById("groupDetailView").style.display = "none";
+            document.getElementById("groupsListView").style.display = "block";
+            currentGroup = null;
         });
 
-        document.getElementById("attendanceForm").addEventListener("submit", async function(e) {
+        // ========== FETCH GROUP LESSONS ==========
+        async function fetchGroupLessons(groupId) {
+            try {
+                // GET /create_lesson/ - fetch all lessons and filter by group
+                const res = await authorizedFetch("/create_lesson/");
+                const data = await res.json();
+                const container = document.getElementById("lessonsList");
+                const select = document.getElementById("attendanceLessonSelect");
+                container.innerHTML = "";
+                select.innerHTML = '<option value="">-- No specific lesson --</option>';
+                
+                if (res.ok && Array.isArray(data)) {
+                    currentGroupLessons = data.filter(l => l.group === groupId);
+                    
+                    if (currentGroupLessons.length === 0) {
+                        container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No lessons yet. Create one!</p>';
+                        return;
+                    }
+                    
+                    currentGroupLessons.forEach(l => {
+                        const item = document.createElement("div");
+                        item.className = "lesson-item";
+                        item.innerHTML = `
+                            <h4>${l.title || 'Untitled'}</h4>
+                            <p><strong>Content:</strong> ${l.content || 'No content'}</p>
+                            <p><strong>Homework:</strong> ${l.homework || 'No homework'}</p>
+                            <p><strong>Time:</strong> ${l.start_time} - ${l.end_time} | Days/week: ${l.days_week || 0}</p>
+                            <div style="margin-top: 10px;">
+                                <button class="edit editLessonBtn" data-id="${l.id}" data-json='${JSON.stringify(l)}'>Edit</button>
+                                <button class="delete deleteLessonBtn" data-id="${l.id}">Delete</button>
+                            </div>
+                        `;
+                        container.appendChild(item);
+
+                        select.innerHTML += `<option value="${l.id}">${l.title}</option>`;
+                    });
+                } else {
+                    showMsg("lessonsMsg", "Failed to load lessons");
+                }
+            } catch (err) {
+                showMsg("lessonsMsg", "Failed to fetch lessons");
+            }
+        }
+
+        // ========== FETCH GROUP STUDENTS ==========
+        async function fetchGroupStudents(groupId) {
+            try {
+                // GET /api/group/<id>/students/ - fetch students in the group
+                const res = await authorizedFetch(`/api/group/${groupId}/students/`);
+                const data = await res.json();
+                const container = document.getElementById("attendanceStudentsList");
+                container.innerHTML = "";
+                
+                if (res.ok && Array.isArray(data)) {
+                    currentGroupStudents = data;
+                    
+                    if (data.length === 0) {
+                        container.innerHTML = '<p style="color: #999;">No students in this group</p>';
+                        return;
+                    }
+                    
+                    data.forEach(student => {
+                        const item = document.createElement("div");
+                        item.className = "student-item";
+                        item.innerHTML = `
+                            <input type="checkbox" name="absent_students" value="${student.id}" id="student_${student.id}">
+                            <label for="student_${student.id}">${student.name} ${student.surname || ''}</label>
+                        `;
+                        container.appendChild(item);
+                    });
+                } else {
+                    container.innerHTML = '<p style="color: #e74c3c;">Failed to load students</p>';
+                }
+            } catch (err) {
+                console.error("Failed to fetch students", err);
+                document.getElementById("attendanceStudentsList").innerHTML = '<p style="color: #e74c3c;">Failed to load students</p>';
+            }
+        }
+
+        // ========== FETCH ATTENDANCE HISTORY ==========
+        async function fetchGroupAttendanceHistory(groupId) {
+            try {
+                // GET /attendense/ - fetch all attendance and filter by group
+                const res = await authorizedFetch("/attendense/");
+                const data = await res.json();
+                const container = document.getElementById("attendanceHistory");
+                container.innerHTML = "";
+                
+                if (res.ok && Array.isArray(data)) {
+                    const groupAttendance = data.filter(a => a.group_id === groupId);
+                    
+                    if (groupAttendance.length === 0) {
+                        container.innerHTML = '<p style="color: #999; text-align: center;">No attendance records yet</p>';
+                        return;
+                    }
+                    
+                    groupAttendance.forEach(a => {
+                        console.log(a)
+                        const lessonTitle = currentGroupLessons.find(l => l.id === a.lesson)?.title || 'General';
+                        const absentCount = Array.isArray(a.absent_students) ? a.absent_students.length : 0;
+                        const date = a.created_at ? new Date(a.created_at).toLocaleString() : 'N/A';
+                        
+                        const item = document.createElement("div");
+                        item.style.cssText = "background: white; border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 3px;";
+                        item.innerHTML = `
+                            <strong>${date}</strong> | Lesson: ${lessonTitle} | Absent: ${absentCount} students
+                            <button class="delete" onclick="deleteAttendance(${a.id})" style="float: right; font-size: 12px;">Delete</button>
+                        `;
+                        container.appendChild(item);
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to fetch attendance history", err);
+            }
+        }
+
+        // ========== CREATE/EDIT LESSON ==========
+        document.getElementById("addLessonBtn").addEventListener("click", () => {
+            if (!currentGroup) return;
+            const form = document.getElementById("lessonForm");
+            form.reset();
+            form.lesson_id.value = "";
+            form.group_id.value = currentGroup.id;
+            document.getElementById("lessonModalTitle").textContent = "Create New Lesson";
+            document.getElementById("lessonModal").style.display = "block";
+        });
+
+        document.getElementById("lessonForm").addEventListener("submit", async function(e) {
             e.preventDefault();
-            const id = this.attendance_id.value;
+            const id = this.lesson_id.value;
+            const payload = {
+                title: this.title.value,
+                content: this.content.value,
+                homework: this.homework.value || '',
+                start_time: this.start_time.value,
+                end_time: this.end_time.value,
+                days_week: parseInt(this.days_week.value) || 0,
+                teacher: teacherId,
+                group: parseInt(this.group_id.value)
+            };
             
+            // POST /create_lesson/ or PUT /lesson_detail/<id>/
+            const url = id ? `/lesson_detail/${id}/` : "/create_lesson/";
+            const method = id ? "PUT" : "POST";
+            
+            try {
+                const res = await authorizedFetch(url, { 
+                    method, 
+                    body: JSON.stringify(payload) 
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById("lessonModal").style.display = "none";
+                    showMsg("lessonsMsg", "Lesson saved successfully!", false);
+                    await fetchGroupLessons(currentGroup.id);
+                } else {
+                    showMsg("lessonFormMsg", JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("lessonFormMsg", "Something went wrong");
+            }
+        });
+
+        // Edit/Delete lesson listeners
+        document.getElementById("lessonsList").addEventListener("click", async function(e) {
+            if (e.target.classList.contains("editLessonBtn")) {
+                const data = JSON.parse(e.target.dataset.json);
+                const form = document.getElementById("lessonForm");
+                form.lesson_id.value = data.id;
+                form.group_id.value = data.group;
+                form.title.value = data.title || '';
+                form.content.value = data.content || '';
+                form.homework.value = data.homework || '';
+                form.start_time.value = data.start_time || '';
+                form.end_time.value = data.end_time || '';
+                form.days_week.value = data.days_week || 0;
+                document.getElementById("lessonModalTitle").textContent = "Edit Lesson";
+                document.getElementById("lessonModal").style.display = "block";
+            } else if (e.target.classList.contains("deleteLessonBtn")) {
+                if (!confirm("Delete this lesson?")) return;
+                const id = e.target.dataset.id;
+                try {
+                    // DELETE /lesson_detail/<id>/ - delete lesson
+                    const res = await authorizedFetch(`/lesson_detail/${id}/`, { method: "DELETE" });
+                    if (res.ok) {
+                        showMsg("lessonsMsg", "Lesson deleted successfully!", false);
+                        await fetchGroupLessons(currentGroup.id);
+                    } else {
+                        showMsg("lessonsMsg", "Failed to delete lesson");
+                    }
+                } catch (err) {
+                    showMsg("lessonsMsg", "Something went wrong");
+                }
+            }
+        });
+
+        // ========== SAVE ATTENDANCE ==========
+        document.getElementById("saveAttendanceBtn").addEventListener("click", async function() {
+            if (!currentGroup) return;
+
             const absentStudents = [];
             document.querySelectorAll('input[name="absent_students"]:checked').forEach(cb => {
                 absentStudents.push(parseInt(cb.value));
             });
+
+            const lessonId = document.getElementById("attendanceLessonSelect").value;
             
+            if (!lessonId) {
+                showMsg("attendanceMsg", "Please select a lesson first!");
+                return;
+            }
+
             const payload = {
                 teacher_id: teacherId,
-                group_id: parseInt(this.group_id.value),
-                lesson: this.lesson.value ? parseInt(this.lesson.value) : null,
+                group_id: currentGroup.id,
+                // lesson: lessonId ? parseInt(lessonId) : null,
+                lesson: parseInt(lessonId),
                 absent_students: absentStudents
             };
-            
-            const url = id ? `/attendense/${id}/` : "/attendense/";
-            const method = id ? "PUT" : "POST";
-            
+
+
             try {
-                const res = await fetch(url, { method, headers: authHeader(), body: JSON.stringify(payload) });
+                // POST /attendense/ - create attendance record
+                const res = await authorizedFetch("/attendense/", {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                });
                 const data = await res.json();
-                
+
                 if (res.ok) {
-                    document.getElementById("attendanceModal").style.display = "none";
                     showMsg("attendanceMsg", "Attendance saved successfully!", false);
-                    fetchMyAttendance();
+                    // Uncheck all checkboxes
+                    document.querySelectorAll('input[name="absent_students"]').forEach(cb => cb.checked = false);
+                    document.getElementById("attendanceLessonSelect").value = "";
+                    await fetchGroupAttendanceHistory(currentGroup.id);
                 } else {
-                    showMsg("attendanceFormMsg", JSON.stringify(data));
+                    showMsg("attendanceMsg", JSON.stringify(data));
                 }
             } catch (err) {
-                showMsg("attendanceFormMsg", "Something went wrong");
+                showMsg("attendanceMsg", "Failed to save attendance");
             }
         });
 
-        document.querySelector("#attendanceTable tbody").addEventListener("click", async function(e) {
-            if (e.target.classList.contains("editAttendanceBtn")) {
-                const data = JSON.parse(e.target.dataset.json);
-                const form = document.getElementById("attendanceForm");
-                form.attendance_id.value = data.id;
-                form.group_id.value = data.group_id || '';
-                form.lesson.value = data.lesson || '';
-                
-                // Load students and check absent ones
-                if (data.group_id) {
-                    await fetchStudentsForGroup(data.group_id);
-                    if (Array.isArray(data.absent_students)) {
-                        data.absent_students.forEach(studentId => {
-                            const checkbox = document.getElementById(`student_${studentId}`);
-                            if (checkbox) checkbox.checked = true;
+        // ========== DELETE ATTENDANCE ==========
+        async function deleteAttendance(attendanceId) {
+            if (!confirm("Delete this attendance record?")) return;
+            try {
+                // DELETE /attendense/<id>/ - delete attendance record
+                const res = await authorizedFetch(`/attendense/${attendanceId}/`, { method: "DELETE" });
+                console.log(attendanceId)
+                console.log('delete')
+                if (res.ok) {
+                    showMsg("attendanceMsg", "Attendance deleted successfully!", false);
+                    await fetchGroupAttendanceHistory(currentGroup.id);
+                } else {
+                    showMsg("attendanceMsg", "Failed to delete attendance");
+                }
+            } catch (err) {
+                showMsg("attendanceMsg", "Something went wrong");
+            }
+        }
+
+        // ========== FETCH STUDENT HOMEWORK ==========
+        async function fetchStudentHomework(groupId = null) {
+            try {
+                // GET /api/homework/ - fetch all homework submissions
+                const res = await authorizedFetch("/api/homework/");
+                const data = await res.json();
+                const container = document.getElementById("homeworkList");
+                container.innerHTML = "";
+
+                if (res.ok && Array.isArray(data)) {
+                    let filteredHomework = data;
+
+                    // Filter by group if selected
+                    if (groupId) {
+                        filteredHomework = data.filter(hw => {
+                            const lesson = currentGroupLessons.find(l => l.id === hw.lesson);
+                            return lesson && lesson.group === parseInt(groupId);
                         });
                     }
-                }
-                
-                document.getElementById("attendanceModalTitle").textContent = "Edit Attendance";
-                document.getElementById("attendanceModal").style.display = "block";
-            } else if (e.target.classList.contains("deleteAttendanceBtn")) {
-                if (!confirm("Delete this attendance record?")) return;
-                const id = e.target.dataset.id;
-                try {
-                    const res = await fetch(`/attendense/${id}/`, { method: "DELETE", headers: authHeader() });
-                    if (res.ok) {
-                        showMsg("attendanceMsg", "Attendance deleted successfully!", false);
-                        fetchMyAttendance();
-                    } else {
-                        showMsg("attendanceMsg", "Failed to delete attendance");
+
+                    if (filteredHomework.length === 0) {
+                        container.innerHTML = '<div class="empty-state"><h3>No homework submissions</h3><p>No students have submitted homework yet.</p></div>';
+                        return;
                     }
-                } catch (err) {
-                    showMsg("attendanceMsg", "Something went wrong");
+
+                    filteredHomework.forEach(hw => {
+                        const card = document.createElement("div");
+                        card.className = "homework-card";
+                        
+                        const studentName = hw.student?.name || 'Unknown Student';
+                        const lessonTitle = hw.lesson?.title || 'Unknown Lesson';
+                        const submittedDate = hw.uploaded_at ? new Date(hw.uploaded_at).toLocaleString() : 'N/A';
+                        const badge = hw.is_checked ? 
+                            '<span class="badge checked">✓ Checked</span>' : 
+                            '<span class="badge unchecked">⚠ Pending</span>';
+
+                        let contentHTML = '';
+                        if (hw.text) contentHTML += `<p><strong>Text:</strong> ${hw.text}</p>`;
+                        if (hw.file) contentHTML += `<p><strong>File:</strong> <a href="${hw.file}" target="_blank">Download</a></p>`;
+                        if (hw.photo) contentHTML += `<p><strong>Photo:</strong> <a href="${hw.photo}" target="_blank">View</a></p>`;
+
+                        card.innerHTML = `
+                            <h4>${studentName} - ${lessonTitle}</h4>
+                            ${badge}
+                            <p><strong>Submitted:</strong> ${submittedDate}</p>
+                            ${contentHTML}
+                            <p><strong>Mark:</strong> ${hw.mark !== null && hw.mark !== undefined ? hw.mark : 'Not graded'}</p>
+                            <button class="edit gradeHomeworkBtn" data-id="${hw.id}" data-json='${JSON.stringify(hw)}'>Grade / Check</button>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    showMsg("homeworkMsg", "Failed to load homework");
                 }
+            } catch (err) {
+                showMsg("homeworkMsg", "Failed to fetch homework");
+            }
+        }
+
+        // Homework filter change
+        document.getElementById("homeworkGroupFilter").addEventListener("change", function() {
+            fetchStudentHomework(this.value);
+        });
+
+        // ========== GRADE HOMEWORK ==========
+        document.getElementById("homeworkList").addEventListener("click", function(e) {
+            if (e.target.classList.contains("gradeHomeworkBtn")) {
+                const hw = JSON.parse(e.target.dataset.json);
+                const form = document.getElementById("homeworkGradeForm");
+                form.homework_id.value = hw.id;
+                form.mark.value = hw.mark || '';
+                form.is_checked.checked = hw.is_checked || false;
+
+                let contentHTML = '<div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 15px;">';
+                contentHTML += `<p><strong>Student:</strong> ${hw.student?.name || 'Unknown'}</p>`;
+                contentHTML += `<p><strong>Lesson:</strong> ${hw.lesson?.title || 'Unknown'}</p>`;
+                if (hw.text) contentHTML += `<p><strong>Text:</strong> ${hw.text}</p>`;
+                if (hw.file) contentHTML += `<p><a href="${hw.file}" target="_blank">View File</a></p>`;
+                if (hw.photo) contentHTML += `<p><a href="${hw.photo}" target="_blank">View Photo</a></p>`;
+                contentHTML += '</div>';
+
+                document.getElementById("homeworkContent").innerHTML = contentHTML;
+                document.getElementById("homeworkGradeModal").style.display = "block";
             }
         });
+
+        document.getElementById("homeworkGradeForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const id = this.homework_id.value;
+            const payload = {
+                mark: parseInt(this.mark.value),
+                is_checked: this.is_checked.checked
+            };
+
+            try {
+                // PUT /api/homework/<id>/ - update homework with grade
+                const res = await authorizedFetch(`/api/homework/${id}/`, {
+                    method: "PUT",
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById("homeworkGradeModal").style.display = "none";
+                    showMsg("homeworkMsg", "Homework graded successfully!", false);
+                    const groupFilter = document.getElementById("homeworkGroupFilter").value;
+                    await fetchStudentHomework(groupFilter);
+                } else {
+                    showMsg("homeworkGradeFormMsg", JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("homeworkGradeFormMsg", "Failed to grade homework");
+            }
+        });
+
+        // ========== CHANGE PASSWORD ==========
+        document.getElementById("changePasswordBtn").addEventListener("click", () => {
+            document.getElementById("passwordForm").reset();
+            document.getElementById("passwordForm").email.value = payload.email || "";
+            document.getElementById("passwordModal").style.display = "block";
+        });
+
+        document.getElementById("passwordForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            if (this.new_password.value !== this.confirm_password.value) {
+                showMsg("passwordFormMsg", "Passwords do not match!");
+                return;
+            }
+
+            const payloadData = {
+                email: this.email.value,
+                old_password: this.old_password.value,
+                new_password: this.new_password.value,
+                confirm_password: this.confirm_password.value
+            };
+
+            try {
+                // POST /api/change_password/ - change password
+                const res = await authorizedFetch("/api/change_password/", {
+                    method: "POST",
+                    body: JSON.stringify(payloadData)
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById("passwordModal").style.display = "none";
+                    alert("Password changed successfully!");
+                } else {
+                    showMsg("passwordFormMsg", data.error || JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("passwordFormMsg", "Failed to change password");
+            }
+        });
+
+        // ========== LOGOUT ==========
+        document.getElementById("logoutBtn").addEventListener("click", async function() {
+            try {
+                // POST /api/logout/ - logout user
+                await fetch("/api/logout/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ refresh: refreshToken })
+                });
+            } catch(e) {
+                console.error(e);
+            }
+            localStorage.clear();
+            window.location.href = "/login_existing_user/view";
+        });
+
+        // ========== INITIAL DATA LOAD ==========
+        async function initializeDashboard() {
+            await fetchMyProfile();
+            await fetchMyGroups();
+            await fetchStudentHomework();
+        }
+
+        initializeDashboard();
     </script>
 </body>
 </html>

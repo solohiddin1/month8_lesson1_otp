@@ -1,3 +1,4 @@
+from pickletools import pystring
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import  swagger_auto_schema
 from rest_framework.decorators import permission_classes
@@ -6,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from app.models.attendence import Attendence
 from app.models.groups import Group
+from app.models.teacher import Teacher
 from app.pagination import CustomPagination
 from app.serializers_f.attendence import AttendenceSerializer
 from rest_framework.response import Response
@@ -25,14 +27,21 @@ class AttendenceView(APIView):
     def post(self, request):
         # students = request.data
         students = request.data
+        teacher_id = Teacher.objects.get(user_id=request.data['teacher_id'])
         # students = request.data.get("attendance",[])
+        
         print(students)
+        print("requested here---")
         # group_id = students["group_id"]
-
+        
+        
         # group = Group.objects.get(pk=group_id)
         # all_students = group.students_set.all()
 
-        serializer = AttendenceSerializer(data=students)
+
+        data = request.data.copy()
+        data['teacher_id'] = teacher_id.id
+        serializer = AttendenceSerializer(data=data)
         if serializer.is_valid():
             # for i in all_students:
             #     # Attendence.objects.create(

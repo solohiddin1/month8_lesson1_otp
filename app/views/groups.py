@@ -10,6 +10,27 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework import generics
 
+from app.serializers_f.student_serizlizer import StudentSerializer
+from app.views import student
+
+
+
+@permission_classes([IsAuthenticated])
+class StudentsIngroupView(APIView):
+
+    def get(self,request,pk):
+        try:
+            group = Group.objects.get(id=pk)
+        except Group.DoesNotExist:
+            return Response({"error":"Group not found"},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        students = group.students_set.all()
+        if students is not None:
+            serizlizer = StudentSerializer(students,many=True)
+            return Response(serizlizer.data,status=status.HTTP_200_OK)
+        return Response({"error":"Nothing"},status=status.HTTP_400_BAD_REQUEST)
+
 
 @permission_classes([IsAuthenticated])
 class TeacherGroups(APIView):

@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from app.models.groups import Group
 from app.models.homework import Homework
 from app.models.student import Student
+from app.models.teacher import Teacher
+from app.serializers_f import lesson
 from app.serializers_f.homework_serializer import HomeworkSerializer
 from app.serializers_f.lesson import LessonSerializer
 
@@ -12,13 +14,21 @@ from rest_framework.views import APIView
 from app.models.lessons import Lesson
 from drf_yasg.utils import status, swagger_auto_schema
 
+# from app.views import teacher
+
 
 @permission_classes([IsAuthenticated])
 class LessonView(APIView):
     # @swagger_auto_schema(request_body=LessonSerializer)
     def post(self, request):
         lessons = request.data
-        serializer = LessonSerializer(data=lessons)
+        print(request.data['teacher'],'----')
+        teacher_id = Teacher.objects.get(user_id=request.data['teacher'])
+        print(lessons)
+        data = lessons.copy()
+        data['teacher'] = teacher_id.id
+        serializer = LessonSerializer(data=data)
+        print(serializer)
         if serializer.is_valid():
             serializer.save()
             return Response({"message":"lesson is created"},status=status.HTTP_201_CREATED)

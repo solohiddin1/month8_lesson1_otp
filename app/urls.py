@@ -2,6 +2,7 @@ from django.urls import path
 from app.models.attendence import Attendence
 from app.views.admin import TeacherCrud, admin_panel, teacher_panel
 from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
+from app.views.homework import HomeworkDetailView, HomeworkView
 from app.views.lesson import LessonDetailView, LessonView
 from app.views.student import StudentView, StudentsView
 from app.views.user import register_view
@@ -12,7 +13,7 @@ from app.views.auth import (forgot_password_view, logout_view ,change_password_p
 from app.views.teacher import TeacherCreateView, TeacherProfileView
 from app.views.user import (register, 
      delete_user)
-from app.views.groups import AddStudentGroupView, GroupCreate, GroupDetailView, GroupListView, StudentGroupsView, TeacherGroups
+from app.views.groups import AddStudentGroupView, GroupCreate, GroupDetailView, GroupListView, StudentGroupsView, StudentsIngroupView, TeacherGroups
 
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 
@@ -21,6 +22,10 @@ urlpatterns = [
     # path('login/',login,name='login'),
     # path('verify/',verify,name='verify'),
     
+    # homework
+    path('api/homework/',HomeworkView.as_view(), name='api_homework'),
+    path('api/homework/',HomeworkDetailView.as_view(), name='api_homework_detail'),
+
     # student
     path('api/student/',StudentView.as_view(), name='student'),
     path('student_groups/',StudentGroupsView.as_view(), name="student_groups"),
@@ -32,13 +37,14 @@ urlpatterns = [
     path('api/teachers/<int:pk>/',TeacherCreateView.as_view(),name='teacher_detail'),
     path('create_lesson/',LessonView.as_view(),name="lesson"),
     path('teacher_crud/',TeacherCrud, name='teacher_crud'),
-    path('teacher_groups/',TeacherGroups.as_view(), name='teacher_groups'),
+    path('api/teacher/groups/',TeacherGroups.as_view(), name='teacher_groups'),
 
     # groups
     path('add_student_to_group/',AddStudentGroupView.as_view(),name='add_student_to_group'),
     path('cr_gr/',GroupCreate.as_view(), name="cr_gr"),
     path('create_groups/',GroupListView.as_view(), name="groups"),
     path('create_groups/<int:pk>/',GroupDetailView.as_view(),name="group-detail"),
+    path('api/group/<int:pk>/students/',StudentsIngroupView.as_view(),name="students_in_group"),
 
     # lesson
     path('lesson_detail/<int:pk>/',LessonDetailView.as_view(),name="lesson_detail"),

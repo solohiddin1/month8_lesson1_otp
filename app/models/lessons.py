@@ -12,7 +12,6 @@ class Lesson(models.Model):
     image = models.ImageField(upload_to=settings.PHOTO_PATH, blank=True, null=True,default=settings.DEFAULT_PHOTO_PATH)
     start_time = models.TimeField(default=None)
     end_time = models.TimeField(default=None)
-    days_week = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     teacher = models.ForeignKey('Teacher', on_delete=models.CASCADE, related_name='lessons')
