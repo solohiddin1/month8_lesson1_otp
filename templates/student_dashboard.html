@@ -103,19 +103,24 @@
         </div>
     </div>
 
+
     <!-- Homework Upload Modal -->
     <div id="homeworkModal" class="modal">
         <div class="modal-content">
             <h3>Submit Homework</h3>
             <form id="homeworkForm">
-                <input type="hidden" name="lesson_id">
-                
+                <input type="hidden" name="student">
+                <input type="hidden" name="homework">
+
                 <label>Homework Text:</label>
-                <textarea name="homework_text" placeholder="Enter your homework solution or answer here..."></textarea>
-                
+                <textarea name="text" placeholder="Enter your homework solution or answer here..."></textarea>
+
                 <label>Upload File (Optional):</label>
-                <input type="file" name="homework_file" accept="image/*,.pdf,.doc,.docx">
-                
+                <input type="file" name="file" accept="image/*,.pdf,.doc,.docx">
+
+                <label>Upload Photo (Optional):</label>
+                <input type="file" name="photo" accept="image/*">
+
                 <p id="homeworkFormMsg" class="msg" style="display:none;"></p>
                 <div class="modal-actions">
                     <button type="submit">Submit Homework</button>
@@ -124,6 +129,7 @@
             </form>
         </div>
     </div>
+
 
     <!-- Change Password Modal -->
     <div id="passwordModal" class="modal">
@@ -163,10 +169,17 @@
             } catch (e) { return null; }
         }
 
-        function authHeader() {
+
+        function authHeader(isFormData = false) {
             const token = localStorage.getItem("accessToken");
+            if (isFormData) return { "Authorization": `Bearer ${token}` };
             return { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" };
         }
+
+        // function authHeader() {
+        //     const token = localStorage.getItem("accessToken");
+        //     return { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" };
+        // }
 
         function showMsg(elementId, message, isError = true) {
             const el = document.getElementById(elementId);
@@ -218,6 +231,7 @@
                 document.getElementById(this.dataset.tab).classList.add('active');
             });
         });
+
 
         // Close modals
         document.querySelectorAll('.cancel').forEach(btn => {
@@ -359,21 +373,26 @@
                                 <p>${lesson.homework || 'No homework assigned'}</p>
                                 ${homeworkStatus}
                                 <br>
-                                <button class="uploadHomeworkBtn" data-lesson-id="${lesson.id}" style="margin-top: 10px;">
-                                    ${lesson.homework_submitted ? 'Update Homework' : 'Submit Homework'}
+                                <button class="uploadHomeworkBtn" 
+                                    data-lesson-id="${lesson.id}" 
+                                    data-homework-id="${lesson.homework?.id || lesson.homework || ''}">
+
+                                    Upload Homework
                                 </button>
+
+
                             </div>
                         `;
                         container.appendChild(card);
                     });
-                    
-                    // Attach homework button listeners
                     document.querySelectorAll('.uploadHomeworkBtn').forEach(btn => {
                         btn.addEventListener('click', function() {
                             const lessonId = this.dataset.lessonId;
-                            openHomeworkModal(lessonId);
+                            const homeworkId = this.dataset.homeworkId;
+                            openHomeworkModal(lessonId, homeworkId);
                         });
                     });
+
                 } else {
                     showMsg("lessonsMsg", "Failed to load lessons");
                 }
@@ -397,46 +416,49 @@
         });
 
         // ========== HOMEWORK SUBMISSION ==========
-        function openHomeworkModal(lessonId) {
-            document.getElementById("homeworkForm").reset();
-            document.getElementById("homeworkForm").lesson_id.value = lessonId;
+        // function openHomeworkModal(lessonId) {
+        //     document.getElementById("homeworkForm").reset();
+        //     document.getElementById("homeworkForm").lesson_id.value = lessonId;
+        //     document.getElementById("homeworkModal").style.display = "block";
+        // }
+
+
+        // Open modal function
+        function openHomeworkModal(lessonId, homeworkId) {
+            const form = document.getElementById("homeworkForm");
+            form.reset();
+            form.querySelector('[name="student"]').value = studentId; // ✅ this one is correct
+            form.querySelector('[name="homework"]').value = homeworkId;
             document.getElementById("homeworkModal").style.display = "block";
         }
 
+
+
+
+        // Submit homework
         document.getElementById("homeworkForm").addEventListener("submit", async function(e) {
             e.preventDefault();
-            const lessonId = this.lesson_id.value;
-            const homeworkText = this.homework_text.value;
-            const homeworkFile = this.homework_file.files[0];
-            
-            // For simplicity, we'll send homework as text
-            // In a real implementation, you'd use FormData to upload files
-            const payload = {
-                homework_submission: homeworkText,
-                homework_submitted: true
-            };
-            
+
+            const form = e.target;
+            const formData = new FormData();
+            formData.append("student", form.student.value);
+            formData.append("homework", form.homework.value);
+            formData.append("text", form.text.value);
+
+            if (form.file.files[0]) formData.append("file", form.file.files[0]);
+            if (form.photo.files[0]) formData.append("photo", form.photo.files[0]);
+
             try {
-                // PUT /lesson_detail/<id>/ - update lesson with homework
-                    const res = await fetch(`/api/homework_upload/`, {
+                const res = await fetch(`/api/homework_upload/`, {
                     method: "POST",
-                    headers: {
-                        ...authHeader(),
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
+                    headers: authHeader(true), // include authorization, do NOT set content-type manually
+                    body: formData
                 });
 
                 const data = await res.json();
-                
                 if (res.ok) {
                     document.getElementById("homeworkModal").style.display = "none";
-                    showMsg("lessonsMsg", "Homework submitted successfully!", false);
-                    // Refresh lessons
-                    if (currentGroupId) {
-                        const groupName = myGroups.find(g => g.id === currentGroupId)?.name || '';
-                        viewGroupLessons(currentGroupId, groupName);
-                    }
+                    showMsg("homeworkFormMsg", "Homework submitted successfully!", false);
                 } else {
                     showMsg("homeworkFormMsg", data.error || JSON.stringify(data));
                 }
@@ -445,7 +467,16 @@
             }
         });
 
-        
+        // Helper function to show messages
+        function showMsg(elementId, message, isError = true) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = isError ? "msg error" : "msg success";
+            el.style.display = "block";
+            setTimeout(() => el.style.display = "none", 5000);
+        }
+
+
         // ========== CHANGE PASSWORD ==========
         document.getElementById("changePasswordBtn").addEventListener("click", () => {
             document.getElementById("passwordForm").reset();

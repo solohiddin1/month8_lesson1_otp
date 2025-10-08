@@ -18,4 +18,4 @@ class HomeworkUpload(models.Model):
     mark = models.SmallIntegerField(blank=True, null=True)
     is_checked = models.BooleanField(default=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)    

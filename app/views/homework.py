@@ -4,6 +4,7 @@ from rest_framework.decorators import APIView, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from app.models.homework import Homework, HomeworkUpload
 from rest_framework.response import Response
+from app.models.student import Student
 from app.serializers_f.homework_serializer import HomeworkSerializer, HomeworkUploadSerializer
 
 
@@ -13,11 +14,18 @@ class HomeworkUploadView(APIView):
     def post(self, request):
         # pk = request.data.get('id')
         print(request.data)
-    
-        serializer = HomeworkUploadSerializer(data=request.data)
+        try:
+            student = Student.objects.get(user=request.data['student'])
+        except Student.DoesNotExist:
+            return Response({"error":"student not found"},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        data = request.data.copy()
+        data['student'] = student.id
+        serializer = HomeworkUploadSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "Homework saved"}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Homework saved"}, status=201)
         return Response({"error": serializer.errors}, status=400)
 
 
