@@ -1,3 +1,4 @@
+from django.core.signals import request_started
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -104,16 +105,24 @@ class LessonDetailView(APIView):
         # print(teacher.user_id)
         print(request.data,'----data-------')
         print(pk,'pk=-----')
-        data = request.data
-        data._mutable = True
-        files = request.FILES
+        data = request.data.copy()
+        data.update(request.FILES)
+        # data._mutable = True
+        # files = request.FILES
         lesson = get_object_or_404(Lesson,pk=pk)
         data['teacher'] = lesson.teacher_id
         # lesson = get_object_or_404(Lesson,pk=pk,teacher_id=teacher.user_id)
         print(data,'data======')
+        homeworkserializer  = HomeworkSerializer(data=request.data)
 
-        homework_serializer = LessonSerializer(lesson, data=data, partial=True)
-        homeworkserializer  = homeworkserializer()
+        if homeworkserializer.is_valid():
+            homework = homeworkserializer.save()
+            data['homework'] = homework.id
+        print('\n  new data , === ',data)
+
+        clean_data = {k : v[0] if isinstance(v,list) else v for k,v in data.items()}
+
+        homework_serializer = LessonSerializer(lesson, data=clean_data, partial=True)
         if homework_serializer.is_valid():
             homework_serializer.save()
             return Response({"message":"lesson updated"},status=status.HTTP_200_OK)

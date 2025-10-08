@@ -30,6 +30,7 @@ urlpatterns = [
     # homework
     path('api/homework_get/',HomeworkView.as_view(), name='api_homework'),
     path('api/homework/<int:pk>',HomeworkDetailView.as_view(), name='api_homework_detail'),
+    path('api/homework/<int:pk>',HomeworkDetailView.as_view(), name='api_homework_detail'),
 
     # student
     path('api/student/',StudentView.as_view(), name='student'),
