@@ -634,8 +634,7 @@
                 container.innerHTML = "";
 
                 if (res.ok && Array.isArray(data)) {
-                    const lessonHomework = data.filter(hw => hw.lesson === lessonId);
-
+                    const lessonHomework = data.filter(hw => hw.homework.id === lessonId);
                     if (lessonHomework.length === 0) {
                         container.innerHTML = '<p style="color: #999; text-align: center;">No homework submissions yet</p>';
                         return;
@@ -934,7 +933,7 @@
             try {
                 // First, update the mark
                 const markRes = await authorizedFetch(`/api/homework_put_mark/${id}/`, {
-                    method: "PUT",
+                    method: "POST",
                     body: JSON.stringify({ mark: mark })
                 });
 

@@ -33,7 +33,7 @@ class HomeworkUploadView(APIView):
 @permission_classes([IsAuthenticated])
 class HomeworkPutMarkView(APIView):
 
-    def put(self, request,pk):
+    def post(self, request,pk):
         # pk = request.data.get('id')
         print(request.data)
         if not pk:
@@ -42,8 +42,12 @@ class HomeworkPutMarkView(APIView):
             homework = HomeworkUpload.objects.get(pk=pk)
         except HomeworkUpload.DoesNotExist:
             return Response({"error": "Homework not found"}, status=404)
+        print(homework.is_checked)
+        homework.is_checked = True
+        
         serializer = HomeworkUploadSerializer(homework, data=request.data, partial=True)
         if serializer.is_valid():
+            
             serializer.save()
             return Response({"message": "Homework updated"}, status=200)
         return Response({"error": serializer.errors}, status=400)
@@ -62,8 +66,8 @@ class HomeworkView(APIView):
 
 
     def get(self, request):
-        homeworks = Homework.objects.all()
-        serializer = HomeworkSerializer(homeworks, many=True)
+        homeworks = HomeworkUpload.objects.all()
+        serializer = HomeworkUploadSerializer(homeworks, many=True)
         return Response(serializer.data, status=200)
 
 
