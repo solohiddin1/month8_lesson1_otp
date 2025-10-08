@@ -35,7 +35,8 @@
         .group-header { background: #3498db; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
         .section { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; }
         .section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; color: #2c3e50; }
-        .lesson-item { background: white; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .lesson-item { background: white; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; cursor: pointer; transition: all 0.3s; }
+        .lesson-item:hover { background: #f8f9fa; }
         .lesson-item h4 { color: #2980b9; margin-bottom: 10px; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
         .modal-content { position: relative; margin: 50px auto; padding: 20px; background: white; width: 90%; max-width: 600px; border-radius: 5px; max-height: 80vh; overflow-y: auto; }
@@ -58,6 +59,11 @@
         .homework-card .badge.checked { background: #d4edda; color: #155724; }
         .homework-card .badge.unchecked { background: #fff3cd; color: #856404; }
         .empty-state { text-align: center; padding: 40px; color: #95a5a6; }
+        .lesson-detail-view { background: #fff; padding: 20px; border-radius: 5px; }
+        .media-preview { margin: 10px 0; }
+        .media-preview img { max-width: 200px; border-radius: 5px; }
+        .media-preview video { max-width: 100%; border-radius: 5px; }
+        .attendance-record { background: white; border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -117,6 +123,44 @@
                         <div id="lessonsList"></div>
                         <p id="lessonsMsg" class="msg" style="display:none;"></p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Lesson Detail View -->
+            <div id="lessonDetailView" style="display:none;">
+                <button class="back" id="backToLessonsBtn">← Back to Lessons</button>
+                <div class="lesson-detail-view">
+                    <div class="group-header">
+                        <h2 id="lessonDetailTitle">Lesson Title</h2>
+                        <p id="lessonDetailInfo"></p>
+                    </div>
+
+                    <!-- Lesson Content Section -->
+                    <div class="section">
+                        <div class="section-title">📝 Lesson Details</div>
+                        <form id="lessonContentForm">
+                            <input type="hidden" name="lesson_id">
+                            
+                            <label>Content:</label>
+                            <textarea name="content" placeholder="Enter lesson content..."></textarea>
+                            
+                            <label>Homework Description:</label>
+                            <textarea name="homework_description" placeholder="Enter homework description..."></textarea>
+                            
+                            <label>Video:</label>
+                            <input type="file" name="video" accept="video/*">
+                            <div id="videoPreview" class="media-preview"></div>
+                            
+                            <label>Image:</label>
+                            <input type="file" name="image" accept="image/*">
+                            <div id="imagePreview" class="media-preview"></div>
+                            
+                            <p id="lessonContentMsg" class="msg" style="display:none;"></p>
+                            <div class="modal-actions">
+                                <button type="submit">Save Lesson Details</button>
+                            </div>
+                        </form>
+                    </div>
 
                     <!-- Attendance Section -->
                     <div class="section">
@@ -124,10 +168,6 @@
                             <div class="section-title">📋 Mark Attendance</div>
                             <button id="saveAttendanceBtn" style="background: #27ae60;">Save Attendance</button>
                         </div>
-                        <p><strong>Select lesson (optional):</strong></p>
-                        <select id="attendanceLessonSelect" style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ddd; border-radius: 3px;">
-                            <option value="">-- No specific lesson --</option>
-                        </select>
                         <p><strong>Mark absent students:</strong></p>
                         <div class="student-list" id="attendanceStudentsList"></div>
                         <p id="attendanceMsg" class="msg" style="display:none;"></p>
@@ -137,6 +177,12 @@
                     <div class="section">
                         <div class="section-title">📊 Attendance History</div>
                         <div id="attendanceHistory"></div>
+                    </div>
+
+                    <!-- Student Homework Submissions -->
+                    <div class="section">
+                        <div class="section-title">📄 Student Homework Submissions</div>
+                        <div id="lessonHomeworkList"></div>
                     </div>
                 </div>
             </div>
@@ -156,7 +202,7 @@
         </div>
     </div>
 
-    <!-- Lesson Modal -->
+    <!-- Lesson Modal (Create) -->
     <div id="lessonModal" class="modal">
         <div class="modal-content">
             <h3 id="lessonModalTitle">Create New Lesson</h3>
@@ -167,24 +213,15 @@
                 <label>Title:</label>
                 <input type="text" name="title" required>
                 
-                <label>Content:</label>
-                <textarea name="content" required></textarea>
-                
-                <label>Homework:</label>
-                <textarea name="homework"></textarea>
-                
                 <label>Start Time:</label>
                 <input type="time" name="start_time" required>
                 
                 <label>End Time:</label>
                 <input type="time" name="end_time" required>
                 
-                <label>Days of Week (0-7):</label>
-                <input type="number" name="days_week" min="0" max="7" value="1">
-                
                 <p id="lessonFormMsg" class="msg" style="display:none;"></p>
                 <div class="modal-actions">
-                    <button type="submit">Save Lesson</button>
+                    <button type="submit">Create Lesson</button>
                     <button type="button" class="cancel">Cancel</button>
                 </div>
             </form>
@@ -196,15 +233,12 @@
         <div class="modal-content">
             <h3>Grade Homework</h3>
             <form id="homeworkGradeForm">
-                <input type="hidden" name="homework_id">
+                <input type="hidden" name="homework_upload_id">
                 
                 <div id="homeworkContent"></div>
                 
                 <label>Mark (Grade):</label>
                 <input type="number" name="mark" min="0" max="100" required>
-                
-                <label>Mark as Checked:</label>
-                <input type="checkbox" name="is_checked">
                 
                 <p id="homeworkGradeFormMsg" class="msg" style="display:none;"></p>
                 <div class="modal-actions">
@@ -269,7 +303,7 @@
 
         // Check authentication
         const accessToken = localStorage.getItem("accessToken");
-        // const refreshToken = localStorage.getItem("refreshToken");
+        const refreshToken = localStorage.getItem("refreshToken");
 
         if (!accessToken) {
             window.location.href = "/login_existing_user/view";
@@ -288,6 +322,7 @@
         let currentGroup = null;
         let currentGroupLessons = [];
         let currentGroupStudents = [];
+        let currentLesson = null;
 
         // Tab Navigation
         document.querySelectorAll('.tab').forEach(tab => {
@@ -313,9 +348,8 @@
         });
 
         // Token refresh
-        async function refreshToken() {
+        async function refreshAccessToken() {
             const refresh = localStorage.getItem("refreshToken");
-            // POST /api/token/refresh/ - refresh JWT token
             const res = await fetch("/api/token/refresh/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -338,7 +372,7 @@
             });
 
             if (res.status === 401) {
-                const newAccess = await refreshToken();
+                const newAccess = await refreshAccessToken();
                 res = await fetch(url, {
                     ...options,
                     headers: { ...authHeader(), Authorization: `Bearer ${newAccess}`, ...options.headers },
@@ -351,7 +385,6 @@
         // ========== FETCH TEACHER PROFILE ==========
         async function fetchMyProfile() {
             try {
-                // GET /api/teacher_profile/ - fetch current teacher's profile
                 const res = await authorizedFetch("/api/teacher_profile/");
                 const data = await res.json();
                 
@@ -374,7 +407,6 @@
         // ========== FETCH MY GROUPS ==========
         async function fetchMyGroups() {
             try {
-                // GET /api/teacher/groups/ - fetch groups for current teacher
                 const res = await authorizedFetch("/api/teacher/groups/");
                 const data = await res.json();
                 const container = document.getElementById("groupsList");
@@ -425,6 +457,7 @@
 
             document.getElementById("groupsListView").style.display = "none";
             document.getElementById("groupDetailView").style.display = "block";
+            document.getElementById("lessonDetailView").style.display = "none";
 
             document.getElementById("groupDetailName").textContent = currentGroup.name;
             document.getElementById("groupDetailInfo").textContent = 
@@ -432,7 +465,6 @@
 
             await fetchGroupLessons(groupId);
             await fetchGroupStudents(groupId);
-            await fetchGroupAttendanceHistory(groupId);
         }
 
         // Back to groups button
@@ -442,16 +474,20 @@
             currentGroup = null;
         });
 
+        // Back to lessons button
+        document.getElementById("backToLessonsBtn").addEventListener("click", () => {
+            document.getElementById("lessonDetailView").style.display = "none";
+            document.getElementById("groupDetailView").style.display = "block";
+            currentLesson = null;
+        });
+
         // ========== FETCH GROUP LESSONS ==========
         async function fetchGroupLessons(groupId) {
             try {
-                // GET /create_lesson/ - fetch all lessons and filter by group
                 const res = await authorizedFetch("/create_lesson/");
                 const data = await res.json();
                 const container = document.getElementById("lessonsList");
-                const select = document.getElementById("attendanceLessonSelect");
                 container.innerHTML = "";
-                select.innerHTML = '<option value="">-- No specific lesson --</option>';
                 
                 if (res.ok && Array.isArray(data)) {
                     currentGroupLessons = data.filter(l => l.group === groupId);
@@ -466,17 +502,11 @@
                         item.className = "lesson-item";
                         item.innerHTML = `
                             <h4>${l.title || 'Untitled'}</h4>
-                            <p><strong>Content:</strong> ${l.content || 'No content'}</p>
-                            <p><strong>Homework:</strong> ${l.homework || 'No homework'}</p>
-                            <p><strong>Time:</strong> ${l.start_time} - ${l.end_time} | Days/week: ${l.days_week || 0}</p>
-                            <div style="margin-top: 10px;">
-                                <button class="edit editLessonBtn" data-id="${l.id}" data-json='${JSON.stringify(l)}'>Edit</button>
-                                <button class="delete deleteLessonBtn" data-id="${l.id}">Delete</button>
-                            </div>
+                            <p><strong>Time:</strong> ${l.start_time} - ${l.end_time}</p>
+                            <p style="color: #7f8c8d; font-size: 12px;">Click to view details</p>
                         `;
+                        item.onclick = () => viewLessonDetail(l.id);
                         container.appendChild(item);
-
-                        select.innerHTML += `<option value="${l.id}">${l.title}</option>`;
                     });
                 } else {
                     showMsg("lessonsMsg", "Failed to load lessons");
@@ -486,79 +516,163 @@
             }
         }
 
+        // ========== VIEW LESSON DETAIL ==========
+        async function viewLessonDetail(lessonId) {
+            currentLesson = currentGroupLessons.find(l => l.id === lessonId);
+            if (!currentLesson) return;
+
+            document.getElementById("groupDetailView").style.display = "none";
+            document.getElementById("lessonDetailView").style.display = "block";
+
+            document.getElementById("lessonDetailTitle").textContent = currentLesson.title;
+            document.getElementById("lessonDetailInfo").textContent = 
+                `Time: ${currentLesson.start_time} - ${currentLesson.end_time}`;
+
+            // Populate lesson content form
+            const form = document.getElementById("lessonContentForm");
+            form.lesson_id.value = currentLesson.id;
+            form.content.value = currentLesson.content || '';
+            form.homework_description.value = currentLesson.homework?.description || '';
+
+            // Show current media
+            const videoPreview = document.getElementById("videoPreview");
+            const imagePreview = document.getElementById("imagePreview");
+            videoPreview.innerHTML = '';
+            imagePreview.innerHTML = '';
+
+            if (currentLesson.video_url) {
+                videoPreview.innerHTML = `<video src="${currentLesson.video_url}" controls style="max-width: 100%;"></video>`;
+            }
+            if (currentLesson.image) {
+                imagePreview.innerHTML = `<img src="${currentLesson.image}" alt="Lesson Image">`;
+            }
+
+            await fetchLessonAttendance(lessonId);
+            await fetchLessonHomework(lessonId);
+        }
+
         // ========== FETCH GROUP STUDENTS ==========
         async function fetchGroupStudents(groupId) {
             try {
-                // GET /api/group/<id>/students/ - fetch students in the group
                 const res = await authorizedFetch(`/api/group/${groupId}/students/`);
                 const data = await res.json();
-                const container = document.getElementById("attendanceStudentsList");
-                container.innerHTML = "";
                 
                 if (res.ok && Array.isArray(data)) {
                     currentGroupStudents = data;
-                    
-                    if (data.length === 0) {
-                        container.innerHTML = '<p style="color: #999;">No students in this group</p>';
-                        return;
-                    }
-                    
-                    data.forEach(student => {
-                        const item = document.createElement("div");
-                        item.className = "student-item";
-                        item.innerHTML = `
-                            <input type="checkbox" name="absent_students" value="${student.id}" id="student_${student.id}">
-                            <label for="student_${student.id}">${student.name} ${student.surname || ''}</label>
-                        `;
-                        container.appendChild(item);
-                    });
                 } else {
-                    container.innerHTML = '<p style="color: #e74c3c;">Failed to load students</p>';
+                    currentGroupStudents = [];
                 }
             } catch (err) {
                 console.error("Failed to fetch students", err);
-                document.getElementById("attendanceStudentsList").innerHTML = '<p style="color: #e74c3c;">Failed to load students</p>';
+                currentGroupStudents = [];
             }
         }
 
-        // ========== FETCH ATTENDANCE HISTORY ==========
-        async function fetchGroupAttendanceHistory(groupId) {
+        // ========== POPULATE ATTENDANCE LIST ==========
+        function populateAttendanceList() {
+            const container = document.getElementById("attendanceStudentsList");
+            container.innerHTML = "";
+            
+            if (currentGroupStudents.length === 0) {
+                container.innerHTML = '<p style="color: #999;">No students in this group</p>';
+                return;
+            }
+            
+            currentGroupStudents.forEach(student => {
+                const item = document.createElement("div");
+                item.className = "student-item";
+                item.innerHTML = `
+                    <input type="checkbox" name="absent_students" value="${student.id}" id="student_${student.id}">
+                    <label for="student_${student.id}">${student.name} ${student.surname || ''}</label>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // ========== FETCH LESSON ATTENDANCE ==========
+        async function fetchLessonAttendance(lessonId) {
             try {
-                // GET /attendense/ - fetch all attendance and filter by group
                 const res = await authorizedFetch("/attendense/");
                 const data = await res.json();
                 const container = document.getElementById("attendanceHistory");
                 container.innerHTML = "";
                 
+                // Populate students list for marking attendance
+                populateAttendanceList();
+                
                 if (res.ok && Array.isArray(data)) {
-                    const groupAttendance = data.filter(a => a.group_id === groupId);
+                    const lessonAttendance = data.filter(a => a.lesson === lessonId);
                     
-                    if (groupAttendance.length === 0) {
+                    if (lessonAttendance.length === 0) {
                         container.innerHTML = '<p style="color: #999; text-align: center;">No attendance records yet</p>';
                         return;
                     }
                     
-                    groupAttendance.forEach(a => {
-                        console.log(a)
-                        const lessonTitle = currentGroupLessons.find(l => l.id === a.lesson)?.title || 'General';
+                    lessonAttendance.forEach(a => {
                         const absentCount = Array.isArray(a.absent_students) ? a.absent_students.length : 0;
                         const date = a.created_at ? new Date(a.created_at).toLocaleString() : 'N/A';
                         
                         const item = document.createElement("div");
-                        item.style.cssText = "background: white; border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 3px;";
+                        item.className = "attendance-record";
                         item.innerHTML = `
-                            <strong>${date}</strong> | Lesson: ${lessonTitle} | Absent: ${absentCount} students
-                            <button class="delete" onclick="deleteAttendance(${a.id})" style="float: right; font-size: 12px;">Delete</button>
+                            <strong>${date}</strong> | Absent: ${absentCount} students
                         `;
                         container.appendChild(item);
                     });
                 }
             } catch (err) {
-                console.error("Failed to fetch attendance history", err);
+                console.error("Failed to fetch attendance", err);
             }
         }
 
-        // ========== CREATE/EDIT LESSON ==========
+        // ========== FETCH LESSON HOMEWORK SUBMISSIONS ==========
+        async function fetchLessonHomework(lessonId) {
+            try {
+                const res = await authorizedFetch("/api/homework_get/");
+                const data = await res.json();
+                const container = document.getElementById("lessonHomeworkList");
+                container.innerHTML = "";
+
+                if (res.ok && Array.isArray(data)) {
+                    const lessonHomework = data.filter(hw => hw.lesson === lessonId);
+
+                    if (lessonHomework.length === 0) {
+                        container.innerHTML = '<p style="color: #999; text-align: center;">No homework submissions yet</p>';
+                        return;
+                    }
+
+                    lessonHomework.forEach(hw => {
+                        const card = document.createElement("div");
+                        card.className = "homework-card";
+                        
+                        const studentName = hw.student?.name || 'Unknown Student';
+                        const submittedDate = hw.uploaded_at ? new Date(hw.uploaded_at).toLocaleString() : 'N/A';
+                        const badge = hw.is_checked ? 
+                            '<span class="badge checked">✓ Checked</span>' : 
+                            '<span class="badge unchecked">⚠ Not Checked</span>';
+
+                        let contentHTML = '';
+                        if (hw.text) contentHTML += `<p><strong>Text:</strong> ${hw.text}</p>`;
+                        if (hw.file) contentHTML += `<p><strong>File:</strong> <a href="${hw.file}" target="_blank">Download</a></p>`;
+                        if (hw.photo) contentHTML += `<p><strong>Photo:</strong> <a href="${hw.photo}" target="_blank">View</a></p>`;
+
+                        card.innerHTML = `
+                            <h4>${studentName}</h4>
+                            ${badge}
+                            <p><strong>Submitted:</strong> ${submittedDate}</p>
+                            ${contentHTML}
+                            <p><strong>Mark:</strong> ${hw.mark !== null && hw.mark !== undefined ? hw.mark : 'Not graded'}</p>
+                            <button class="edit gradeHomeworkBtn" data-id="${hw.id}" data-json='${JSON.stringify(hw)}'>Grade / Check</button>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to fetch homework", err);
+            }
+        }
+
+        // ========== CREATE LESSON ==========
         document.getElementById("addLessonBtn").addEventListener("click", () => {
             if (!currentGroup) return;
             const form = document.getElementById("lessonForm");
@@ -571,32 +685,25 @@
 
         document.getElementById("lessonForm").addEventListener("submit", async function(e) {
             e.preventDefault();
-            const id = this.lesson_id.value;
+            
             const payload = {
                 title: this.title.value,
-                content: this.content.value,
-                homework: this.homework.value || '',
                 start_time: this.start_time.value,
                 end_time: this.end_time.value,
-                days_week: parseInt(this.days_week.value) || 0,
                 teacher: teacherId,
                 group: parseInt(this.group_id.value)
             };
             
-            // POST /create_lesson/ or PUT /lesson_detail/<id>/
-            const url = id ? `/lesson_detail/${id}/` : "/create_lesson/";
-            const method = id ? "PUT" : "POST";
-            
             try {
-                const res = await authorizedFetch(url, { 
-                    method, 
+                const res = await authorizedFetch("/create_lesson/", { 
+                    method: "POST", 
                     body: JSON.stringify(payload) 
                 });
                 const data = await res.json();
                 
                 if (res.ok) {
                     document.getElementById("lessonModal").style.display = "none";
-                    showMsg("lessonsMsg", "Lesson saved successfully!", false);
+                    showMsg("lessonsMsg", "Lesson created successfully!", false);
                     await fetchGroupLessons(currentGroup.id);
                 } else {
                     showMsg("lessonFormMsg", JSON.stringify(data));
@@ -606,66 +713,116 @@
             }
         });
 
-        // Edit/Delete lesson listeners
-        document.getElementById("lessonsList").addEventListener("click", async function(e) {
-            if (e.target.classList.contains("editLessonBtn")) {
-                const data = JSON.parse(e.target.dataset.json);
-                const form = document.getElementById("lessonForm");
-                form.lesson_id.value = data.id;
-                form.group_id.value = data.group;
-                form.title.value = data.title || '';
-                form.content.value = data.content || '';
-                form.homework.value = data.homework || '';
-                form.start_time.value = data.start_time || '';
-                form.end_time.value = data.end_time || '';
-                form.days_week.value = data.days_week || 0;
-                document.getElementById("lessonModalTitle").textContent = "Edit Lesson";
-                document.getElementById("lessonModal").style.display = "block";
-            } else if (e.target.classList.contains("deleteLessonBtn")) {
-                if (!confirm("Delete this lesson?")) return;
-                const id = e.target.dataset.id;
-                try {
-                    // DELETE /lesson_detail/<id>/ - delete lesson
-                    const res = await authorizedFetch(`/lesson_detail/${id}/`, { method: "DELETE" });
-                    if (res.ok) {
-                        showMsg("lessonsMsg", "Lesson deleted successfully!", false);
-                        await fetchGroupLessons(currentGroup.id);
-                    } else {
-                        showMsg("lessonsMsg", "Failed to delete lesson");
+        // ========== UPDATE LESSON CONTENT ==========
+        document.getElementById("lessonContentForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            const lessonId = this.lesson_id.value;
+            const formData = new FormData();
+            
+            formData.append('content', this.content.value);
+            formData.append('teacher', teacherId);
+            formData.append('group', currentLesson.group);
+            formData.append('title', currentLesson.title);
+            formData.append('start_time', currentLesson.start_time);
+            formData.append('end_time', currentLesson.end_time);
+            
+            // Handle homework description - create or update homework
+            if (this.homework_description.value) {
+                // If lesson already has homework, we'll update it via separate call
+                // Otherwise, create new homework first
+                if (currentLesson.homework) {
+                    try {
+                        const homeworkRes = await authorizedFetch(`/api/homework/${currentLesson.homework.id}/`, {
+                            method: "PUT",
+                            body: JSON.stringify({ description: this.homework_description.value })
+                        });
+                    } catch (err) {
+                        console.error("Failed to update homework", err);
                     }
-                } catch (err) {
-                    showMsg("lessonsMsg", "Something went wrong");
+                } else {
+                    // Create new homework
+                    try {
+                        const homeworkRes = await authorizedFetch("/api/homework_get/", {
+                            method: "POST",
+                            body: JSON.stringify({ description: this.homework_description.value })
+                        });
+                        const homeworkData = await homeworkRes.json();
+                        if (homeworkRes.ok) {
+                            formData.append('homework', homeworkData.id);
+                        }
+                    } catch (err) {
+                        console.error("Failed to create homework", err);
+                    }
                 }
+            }
+            
+            // Handle file uploads
+            if (this.video.files[0]) {
+                formData.append('video_url', this.video.files[0]);
+            }
+            if (this.image.files[0]) {
+                formData.append('image', this.image.files[0]);
+            }
+            
+            try {
+                const token = localStorage.getItem("accessToken");
+                const res = await fetch(`/lesson_detail/${lessonId}/`, { 
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                if (res.status === 401) {
+                    const newToken = await refreshAccessToken();
+                    const retryRes = await fetch(`/lesson_detail/${lessonId}/`, {
+                        method: "PUT",
+                        headers: {
+                            "Authorization": `Bearer ${newToken}`
+                        },
+                        body: formData
+                    });
+                    
+                    if (retryRes.ok) {
+                        showMsg("lessonContentMsg", "Lesson updated successfully!", false);
+                        await fetchGroupLessons(currentGroup.id);
+                        await viewLessonDetail(lessonId);
+                    } else {
+                        const data = await retryRes.json();
+                        showMsg("lessonContentMsg", JSON.stringify(data));
+                    }
+                } else if (res.ok) {
+                    showMsg("lessonContentMsg", "Lesson updated successfully!", false);
+                    await fetchGroupLessons(currentGroup.id);
+                    await viewLessonDetail(lessonId);
+                } else {
+                    const data = await res.json();
+                    showMsg("lessonContentMsg", JSON.stringify(data));
+                }
+            } catch (err) {
+                showMsg("lessonContentMsg", "Something went wrong");
             }
         });
 
         // ========== SAVE ATTENDANCE ==========
         document.getElementById("saveAttendanceBtn").addEventListener("click", async function() {
-            if (!currentGroup) return;
+            if (!currentLesson) return;
 
             const absentStudents = [];
             document.querySelectorAll('input[name="absent_students"]:checked').forEach(cb => {
                 absentStudents.push(parseInt(cb.value));
             });
 
-            const lessonId = document.getElementById("attendanceLessonSelect").value;
-            
-            if (!lessonId) {
-                showMsg("attendanceMsg", "Please select a lesson first!");
-                return;
-            }
-
             const payload = {
                 teacher_id: teacherId,
                 group_id: currentGroup.id,
-                // lesson: lessonId ? parseInt(lessonId) : null,
-                lesson: parseInt(lessonId),
+                lesson: currentLesson.id,
                 absent_students: absentStudents
             };
 
-
             try {
-                // POST /attendense/ - create attendance record
                 const res = await authorizedFetch("/attendense/", {
                     method: "POST",
                     body: JSON.stringify(payload)
@@ -674,10 +831,8 @@
 
                 if (res.ok) {
                     showMsg("attendanceMsg", "Attendance saved successfully!", false);
-                    // Uncheck all checkboxes
                     document.querySelectorAll('input[name="absent_students"]').forEach(cb => cb.checked = false);
-                    document.getElementById("attendanceLessonSelect").value = "";
-                    await fetchGroupAttendanceHistory(currentGroup.id);
+                    await fetchLessonAttendance(currentLesson.id);
                 } else {
                     showMsg("attendanceMsg", JSON.stringify(data));
                 }
@@ -686,30 +841,10 @@
             }
         });
 
-        // ========== DELETE ATTENDANCE ==========
-        async function deleteAttendance(attendanceId) {
-            if (!confirm("Delete this attendance record?")) return;
-            try {
-                // DELETE /attendense/<id>/ - delete attendance record
-                const res = await authorizedFetch(`/attendense/${attendanceId}/`, { method: "DELETE" });
-                console.log(attendanceId)
-                console.log('delete')
-                if (res.ok) {
-                    showMsg("attendanceMsg", "Attendance deleted successfully!", false);
-                    await fetchGroupAttendanceHistory(currentGroup.id);
-                } else {
-                    showMsg("attendanceMsg", "Failed to delete attendance");
-                }
-            } catch (err) {
-                showMsg("attendanceMsg", "Something went wrong");
-            }
-        }
-
-        // ========== FETCH STUDENT HOMEWORK ==========
+        // ========== FETCH STUDENT HOMEWORK (ALL) ==========
         async function fetchStudentHomework(groupId = null) {
             try {
-                // GET /api/homework/ - fetch all homework submissions
-                const res = await authorizedFetch("/api/homework/");
+                const res = await authorizedFetch("/api/homework_get/");
                 const data = await res.json();
                 const container = document.getElementById("homeworkList");
                 container.innerHTML = "";
@@ -719,10 +854,12 @@
 
                     // Filter by group if selected
                     if (groupId) {
-                        filteredHomework = data.filter(hw => {
-                            const lesson = currentGroupLessons.find(l => l.id === hw.lesson);
-                            return lesson && lesson.group === parseInt(groupId);
-                        });
+                        // First, get all lessons for this group
+                        const lessonsRes = await authorizedFetch("/create_lesson/");
+                        const lessonsData = await lessonsRes.json();
+                        const groupLessonIds = lessonsData.filter(l => l.group === parseInt(groupId)).map(l => l.id);
+                        
+                        filteredHomework = data.filter(hw => groupLessonIds.includes(hw.lesson));
                     }
 
                     if (filteredHomework.length === 0) {
@@ -735,11 +872,10 @@
                         card.className = "homework-card";
                         
                         const studentName = hw.student?.name || 'Unknown Student';
-                        const lessonTitle = hw.lesson?.title || 'Unknown Lesson';
                         const submittedDate = hw.uploaded_at ? new Date(hw.uploaded_at).toLocaleString() : 'N/A';
                         const badge = hw.is_checked ? 
                             '<span class="badge checked">✓ Checked</span>' : 
-                            '<span class="badge unchecked">⚠ Pending</span>';
+                            '<span class="badge unchecked">⚠ Not Checked</span>';
 
                         let contentHTML = '';
                         if (hw.text) contentHTML += `<p><strong>Text:</strong> ${hw.text}</p>`;
@@ -747,7 +883,7 @@
                         if (hw.photo) contentHTML += `<p><strong>Photo:</strong> <a href="${hw.photo}" target="_blank">View</a></p>`;
 
                         card.innerHTML = `
-                            <h4>${studentName} - ${lessonTitle}</h4>
+                            <h4>${studentName}</h4>
                             ${badge}
                             <p><strong>Submitted:</strong> ${submittedDate}</p>
                             ${contentHTML}
@@ -770,17 +906,16 @@
         });
 
         // ========== GRADE HOMEWORK ==========
-        document.getElementById("homeworkList").addEventListener("click", function(e) {
+        document.addEventListener("click", function(e) {
             if (e.target.classList.contains("gradeHomeworkBtn")) {
                 const hw = JSON.parse(e.target.dataset.json);
                 const form = document.getElementById("homeworkGradeForm");
-                form.homework_id.value = hw.id;
+                form.homework_upload_id.value = hw.id;
                 form.mark.value = hw.mark || '';
-                form.is_checked.checked = hw.is_checked || false;
 
                 let contentHTML = '<div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 15px;">';
                 contentHTML += `<p><strong>Student:</strong> ${hw.student?.name || 'Unknown'}</p>`;
-                contentHTML += `<p><strong>Lesson:</strong> ${hw.lesson?.title || 'Unknown'}</p>`;
+                contentHTML += `<p><strong>Status:</strong> ${hw.is_checked ? 'Checked' : 'Not Checked'}</p>`;
                 if (hw.text) contentHTML += `<p><strong>Text:</strong> ${hw.text}</p>`;
                 if (hw.file) contentHTML += `<p><a href="${hw.file}" target="_blank">View File</a></p>`;
                 if (hw.photo) contentHTML += `<p><a href="${hw.photo}" target="_blank">View Photo</a></p>`;
@@ -793,27 +928,42 @@
 
         document.getElementById("homeworkGradeForm").addEventListener("submit", async function(e) {
             e.preventDefault();
-            const id = this.homework_id.value;
-            const payload = {
-                mark: parseInt(this.mark.value),
-                is_checked: this.is_checked.checked
-            };
+            const id = this.homework_upload_id.value;
+            const mark = parseInt(this.mark.value);
 
             try {
-                // PUT /api/homework/<id>/ - update homework with grade
-                const res = await authorizedFetch(`/api/homework/${id}/`, {
+                // First, update the mark
+                const markRes = await authorizedFetch(`/api/homework/${id}/`, {
                     method: "PUT",
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ mark: mark })
                 });
-                const data = await res.json();
 
-                if (res.ok) {
+                if (!markRes.ok) {
+                    const data = await markRes.json();
+                    showMsg("homeworkGradeFormMsg", JSON.stringify(data));
+                    return;
+                }
+
+                // Then, check the homework
+                const checkRes = await authorizedFetch(`/api/check_homework/${id}/`, {
+                    method: "POST",
+                    body: JSON.stringify({})
+                });
+
+                const checkData = await checkRes.json();
+
+                if (checkRes.ok) {
                     document.getElementById("homeworkGradeModal").style.display = "none";
-                    showMsg("homeworkMsg", "Homework graded successfully!", false);
+                    showMsg("homeworkMsg", "Homework graded and checked successfully!", false);
+                    
+                    // Refresh the appropriate view
+                    if (currentLesson) {
+                        await fetchLessonHomework(currentLesson.id);
+                    }
                     const groupFilter = document.getElementById("homeworkGroupFilter").value;
                     await fetchStudentHomework(groupFilter);
                 } else {
-                    showMsg("homeworkGradeFormMsg", JSON.stringify(data));
+                    showMsg("homeworkGradeFormMsg", JSON.stringify(checkData));
                 }
             } catch (err) {
                 showMsg("homeworkGradeFormMsg", "Failed to grade homework");
@@ -843,7 +993,6 @@
             };
 
             try {
-                // POST /api/change_password/ - change password
                 const res = await authorizedFetch("/api/change_password/", {
                     method: "POST",
                     body: JSON.stringify(payloadData)
@@ -864,10 +1013,9 @@
         // ========== LOGOUT ==========
         document.getElementById("logoutBtn").addEventListener("click", async function() {
             try {
-                // POST /api/logout/ - logout user
                 await fetch("/api/logout/", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: authHeader(),
                     body: JSON.stringify({ refresh: refreshToken })
                 });
             } catch(e) {

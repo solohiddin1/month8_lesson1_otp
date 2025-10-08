@@ -7,6 +7,15 @@ from app.serializers_f.homework_serializer import HomeworkSerializer
 @permission_classes([IsAuthenticated])
 class HomeworkView(APIView):
 
+
+    def post(self, request):
+        serializer = HomeworkSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Homework created"}, status=201)
+        return Response({"error": serializer.errors}, status=400)
+
+
     def get(self, request):
         homeworks = Homework.objects.all()
         serializer = HomeworkSerializer(homeworks, many=True)

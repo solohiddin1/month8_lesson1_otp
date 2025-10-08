@@ -104,14 +104,16 @@ class LessonDetailView(APIView):
         # print(teacher.user_id)
         print(request.data,'----data-------')
         print(pk,'pk=-----')
-        data = request.data.copy()
+        data = request.data
+        data._mutable = True
+        files = request.FILES
         lesson = get_object_or_404(Lesson,pk=pk)
         data['teacher'] = lesson.teacher_id
         # lesson = get_object_or_404(Lesson,pk=pk,teacher_id=teacher.user_id)
         print(data,'data======')
 
         homework_serializer = LessonSerializer(lesson, data=data, partial=True)
-
+        homeworkserializer  = homeworkserializer()
         if homework_serializer.is_valid():
             homework_serializer.save()
             return Response({"message":"lesson updated"},status=status.HTTP_200_OK)

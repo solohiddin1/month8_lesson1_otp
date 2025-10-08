@@ -6,7 +6,7 @@ from app.models.homework import Homework
 
 class Lesson(models.Model):
     title = models.CharField(max_length=200)
-    content = models.TextField()
+    content = models.TextField(blank=True,null=True)
     homework = models.OneToOneField(Homework,on_delete=models.SET_NULL,blank=True,null=True,related_name='lesson')
     video_url = models.FileField(upload_to=settings.VIDEO_PATH, blank=True, null=True,default=settings.DEFAULT_VIDEO_PATH)
     image = models.ImageField(upload_to=settings.PHOTO_PATH, blank=True, null=True,default=settings.DEFAULT_PHOTO_PATH)
