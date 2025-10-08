@@ -1,5 +1,6 @@
 from django.urls import path
 from app.models.attendence import Attendence
+from app.views.media import media
 from app.views.admin import TeacherCrud, admin_panel, teacher_panel
 from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
 from app.views.homework import HomeworkDetailView, HomeworkView
@@ -21,7 +22,11 @@ urlpatterns = [
     # path('user/',UserCreateView.as_view()),
     # path('login/',login,name='login'),
     # path('verify/',verify,name='verify'),
-    
+
+    # media
+    # path('media/default.jpg/',media),
+
+
     # homework
     path('api/homework/',HomeworkView.as_view(), name='api_homework'),
     path('api/homework/',HomeworkDetailView.as_view(), name='api_homework_detail'),
