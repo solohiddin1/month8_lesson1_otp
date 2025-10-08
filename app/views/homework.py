@@ -2,7 +2,7 @@ from rest_framework.decorators import APIView, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from app.models.homework import Homework
 from rest_framework.response import Response
-from app.serializers_f.homework_serializer import HomeworkSerializer, HomeworkUploadSerializer
+from app.serializers_f.homework_serializer import HomeworkSerializer
 
 @permission_classes([IsAuthenticated])
 class HomeworkView(APIView):
@@ -25,7 +25,7 @@ class HomeworkView(APIView):
 class HomeworkDetailView(APIView):
 
     def post(self, request,pk):
-        serializer = HomeworkUploadSerializer(data=request.data)
+        serializer = HomeworkSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "Homework created"}, status=201)
