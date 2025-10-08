@@ -3,7 +3,7 @@ from app.models.attendence import Attendence
 from app.views.media import media
 from app.views.admin import TeacherCrud, admin_panel, teacher_panel
 from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
-from app.views.homework import HomeworkDetailView, HomeworkView
+from app.views.homework import HomeworkDetailView, HomeworkPutMarkView, HomeworkUploadView, HomeworkView
 from app.views.lesson import LessonDetailView, LessonView
 from app.views.student import StudentView, StudentsView
 from app.views.user import register_view
@@ -29,8 +29,9 @@ urlpatterns = [
 
     # homework
     path('api/homework_get/',HomeworkView.as_view(), name='api_homework'),
-    path('api/homework/<int:pk>',HomeworkDetailView.as_view(), name='api_homework_detail'),
-    path('api/homework/<int:pk>',HomeworkDetailView.as_view(), name='api_homework_detail'),
+    path('api/homework/<int:pk>/',HomeworkDetailView.as_view(), name='api_homework_detail'),
+    path('api/homework_put_mark/<int:pk>/',HomeworkPutMarkView.as_view(), name='api_homework_detail'),
+    path('api/homework_upload/',HomeworkUploadView.as_view(), name='api_homework_detail'),
 
     # student
     path('api/student/',StudentView.as_view(), name='student'),

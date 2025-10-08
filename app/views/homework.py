@@ -1,8 +1,45 @@
+from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.decorators import APIView, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from app.models.homework import Homework
+from app.models.homework import Homework, HomeworkUpload
 from rest_framework.response import Response
-from app.serializers_f.homework_serializer import HomeworkSerializer
+from app.serializers_f.homework_serializer import HomeworkSerializer, HomeworkUploadSerializer
+
+
+@permission_classes([IsAuthenticated])
+class HomeworkUploadView(APIView):
+    
+    def post(self, request):
+        # pk = request.data.get('id')
+        print(request.data)
+    
+        serializer = HomeworkUploadSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Homework saved"}, status=status.HTTP_201_CREATED)
+        return Response({"error": serializer.errors}, status=400)
+
+
+
+@permission_classes([IsAuthenticated])
+class HomeworkPutMarkView(APIView):
+
+    def put(self, request,pk):
+        # pk = request.data.get('id')
+        print(request.data)
+        if not pk:
+            return Response({"error": "Homework ID is required"}, status=400)
+        try:
+            homework = HomeworkUpload.objects.get(pk=pk)
+        except HomeworkUpload.DoesNotExist:
+            return Response({"error": "Homework not found"}, status=404)
+        serializer = HomeworkUploadSerializer(homework, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Homework updated"}, status=200)
+        return Response({"error": serializer.errors}, status=400)
+
 
 @permission_classes([IsAuthenticated])
 class HomeworkView(APIView):
@@ -31,8 +68,9 @@ class HomeworkDetailView(APIView):
             return Response({"message": "Homework created"}, status=201)
         return Response({"error": serializer.errors}, status=400)
 
-    def put(self, request):
-        pk = request.data.get('id')
+    def put(self, request,pk):
+        # pk = request.data.get('id')
+        print(request.data)
         if not pk:
             return Response({"error": "Homework ID is required"}, status=400)
         try:

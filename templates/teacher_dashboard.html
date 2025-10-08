@@ -933,7 +933,7 @@
 
             try {
                 // First, update the mark
-                const markRes = await authorizedFetch(`/api/homework/${id}/`, {
+                const markRes = await authorizedFetch(`/api/homework_put_mark/${id}/`, {
                     method: "PUT",
                     body: JSON.stringify({ mark: mark })
                 });
@@ -945,7 +945,7 @@
                 }
 
                 // Then, check the homework
-                const checkRes = await authorizedFetch(`/api/check_homework/${id}/`, {
+                const checkRes = await authorizedFetch(`/api/homework_put_mark/${id}/`, {
                     method: "POST",
                     body: JSON.stringify({})
                 });

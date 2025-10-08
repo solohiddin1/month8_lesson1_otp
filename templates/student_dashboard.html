@@ -418,11 +418,15 @@
             
             try {
                 // PUT /lesson_detail/<id>/ - update lesson with homework
-                const res = await fetch(`/lesson_detail/${lessonId}/`, {
-                    method: "PUT",
-                    headers: authHeader(),
+                    const res = await fetch(`/api/homework_upload/`, {
+                    method: "POST",
+                    headers: {
+                        ...authHeader(),
+                        "Content-Type": "application/json"
+                    },
                     body: JSON.stringify(payload)
                 });
+
                 const data = await res.json();
                 
                 if (res.ok) {
@@ -441,6 +445,7 @@
             }
         });
 
+        
         // ========== CHANGE PASSWORD ==========
         document.getElementById("changePasswordBtn").addEventListener("click", () => {
             document.getElementById("passwordForm").reset();
