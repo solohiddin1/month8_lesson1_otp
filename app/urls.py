@@ -36,11 +36,13 @@ urlpatterns = [
     path('student_groups/',StudentGroupsView.as_view(), name="student_groups"),
     path('students/',StudentsView.as_view(), name='students'),
     
+    # lesson
+    path('create_lesson/',LessonView.as_view(),name="lesson"),
+    
     # teacher
     path('api/teacher_profile/',TeacherProfileView.as_view(),name='teacher_profie_view'),
     path('api/teachers/',TeacherCreateView.as_view(),name='create_teacher_view'),
     path('api/teachers/<int:pk>/',TeacherCreateView.as_view(),name='teacher_detail'),
-    path('create_lesson/',LessonView.as_view(),name="lesson"),
     path('teacher_crud/',TeacherCrud, name='teacher_crud'),
     path('api/teacher/groups/',TeacherGroups.as_view(), name='teacher_groups'),
 
@@ -51,7 +53,10 @@ urlpatterns = [
     path('create_groups/<int:pk>/',GroupDetailView.as_view(),name="group-detail"),
     path('api/group/<int:pk>/students/',StudentsIngroupView.as_view(),name="students_in_group"),
 
-    # lesson
+    # homework
+    # path('homework_detail/<int:pk>/',LessonDetailView.as_view(),name="lesson_detail"),
+    
+    # lesson detail
     path('lesson_detail/<int:pk>/',LessonDetailView.as_view(),name="lesson_detail"),
 
     # attendence
