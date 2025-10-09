@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from ..models import Student
-# from app.serializers_f.user_serializer import UserSerializer
+from app.serializers_f.user_serializer import UserSerializer
 from app.models import User
 
 class StudentSerializer(serializers.ModelSerializer):   
-    # user = UserSerializer(required=True)
+    user = UserSerializer(required=True)
 
     class Meta:
         model = Student
@@ -15,3 +15,11 @@ class StudentSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**user_data)
         student = Student.objects.create(user=user, **validated_data)
         return student
+    
+
+class StudentGetSerializer(serializers.ModelSerializer):   
+    # user = UserSerializer(required=True)
+
+    class Meta:
+        model = Student
+        fields = '__all__'

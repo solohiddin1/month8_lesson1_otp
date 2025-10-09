@@ -22,7 +22,7 @@ def register_view(request):
 
 @swagger_auto_schema(method='post', request_body=StudentSerializer)
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([AllowAny])
 def register(request):
     print('user register')
     serializer = StudentSerializer(data=request.data)
@@ -67,6 +67,7 @@ def register(request):
     #     ] 
     )
 @api_view(["DELETE"])
+@permission_classes([IsAdminUser])
 def delete_user(request, pk):
     try:
         print(pk,'1111')

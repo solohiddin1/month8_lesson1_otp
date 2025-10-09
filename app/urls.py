@@ -18,6 +18,8 @@ from app.views.groups import AddStudentGroupView, GroupCreate, GroupDetailView, 
 
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 
+from app.views.student import StudentAllView
+
 urlpatterns = [
     # path('user/',UserCreateView.as_view()),
     # path('login/',login,name='login'),
@@ -34,6 +36,7 @@ urlpatterns = [
     path('api/homework_upload/',HomeworkUploadView.as_view(), name='api_homework_detail'),
 
     # student
+    path('get_all_students/',StudentAllView.as_view(), name='get_all_students'),
     path('api/student/',StudentView.as_view(), name='student'),
     path('student_groups/',StudentGroupsView.as_view(), name="student_groups"),
     path('students/',StudentsView.as_view(), name='students'),
