@@ -78,8 +78,18 @@ def userlogin_view(request):
 
 @swagger_auto_schema(method='post', request_body=LoginUserSerializer)
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def userlogin(request):
-    serializer = LoginUserSerializer(data=request.data)
+    # Handle both JSON and form data
+    if request.content_type == 'application/json':
+        data = request.data
+    else:
+        data = {
+            'email': request.POST.get('email'),
+            'password': request.POST.get('password')
+        }
+    
+    serializer = LoginUserSerializer(data=data)
     print('user here')
     if serializer.is_valid():
         print('user here2 ---')

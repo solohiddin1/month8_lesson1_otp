@@ -8,7 +8,7 @@ from app.serializers_f.student_serizlizer import StudentSerializer, StudentGetSe
 
 
 
-@permission_classes([AllowAny])  
+@permission_classes([IsAdminUser])  
 class StudentAllView(APIView):
 
     def get(self,request):
@@ -25,7 +25,7 @@ class StudentAllView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 
-@permission_classes([IsAdminUser])  
+@permission_classes([IsAuthenticated])  
 class StudentView(APIView):
 
     def get(self,request):

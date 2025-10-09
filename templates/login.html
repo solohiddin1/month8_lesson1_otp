@@ -1,33 +1,69 @@
-<form id="login-form">
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block header %}Login{% endblock %}
+
+{% block content %}
+<h2>Login to Verify Email</h2>
+
+<form id="loginForm">
     {% csrf_token %}
     <label>Email:</label>
-    <input type="email" name="email" placeholder="email" required><br>
+    <input type="email" name="email" id="email" placeholder="Enter your email" required><br>
+
     <label>Password:</label>
-    <input type="password" name="password" placeholder="password" required><br>
+    <input type="password" name="password" id="password" placeholder="Enter your password" required><br>
+
     <button type="submit">Send OTP</button>
 </form>
 
+<p id="message" style="color:red; margin-top:10px;"></p>
+
 <script>
-document.getElementById("login-form").onsubmit = async (e) => {
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
     e.preventDefault();
-    let formData = new FormData(e.target);
 
-    let response = await fetch("{% url 'userlogin' %}", {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": formData.get("csrfmiddlewaretoken")
-        },
-        body: formData
-    });
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const messageEl = document.getElementById("message");
 
-    let data = await response.json();
+    messageEl.style.color = "black";
+    messageEl.innerText = "Sending OTP...";
 
-    if (data.success) {
-        // alert(data.message);
-        // redirect user to OTP verification page
-        window.location.href = "{% url 'verify_user_otp_view' %}";
-    } else {
-        alert(data.message || "Login failed. Try again.");
+    try {
+        const payload = {
+            email: email,
+            password: password
+        };
+
+        const response = await fetch("{% url 'userlogin' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            messageEl.style.color = "green";
+            messageEl.innerText = data.message || "OTP sent to your email!";
+            
+            // Redirect to OTP verification page
+            setTimeout(() => {
+                window.location.href = "{% url 'verify_user_otp_view' %}";
+            }, 1000);
+        } else {
+            messageEl.style.color = "red";
+            messageEl.innerText = data.message || "Invalid credentials.";
+        }
+    } catch (error) {
+        console.error(error);
+        messageEl.style.color = "red";
+        messageEl.innerText = "Something went wrong!";
     }
-};
+});
 </script>
+{% endblock %}

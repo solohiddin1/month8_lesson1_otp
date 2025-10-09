@@ -14,6 +14,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 from app.serializers_f.student_serizlizer import StudentSerializer
+from app.models.student import Student
 
 @permission_classes([IsAdminUser])
 def register_view(request):
@@ -29,11 +30,14 @@ def register(request):
 
     if serializer.is_valid():
         
+        # student.is_student = True
         student = serializer.save()
-        student.is_student = True
         student.save()
         user = student.user
 
+        user.is_student = True
+        user.save()
+        print(user.email,'---')
         # Send OTP
         # otp = random.randint(1000, 9999)
         # cache.set(user.email, otp, timeout=300)
@@ -71,7 +75,11 @@ def register(request):
 def delete_user(request, pk):
     try:
         print(pk,'1111')
-        user = User.objects.get(pk=pk)
+        student = Student.objects.get(pk=pk)
+        user = student.user
+        print(user,'---')
+        print(student,'---')
+        student.delete()
         user.delete()
         return Response({"success":True, "message":"User deleted successfully!"},status=200
         )
