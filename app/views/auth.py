@@ -395,5 +395,6 @@ def loginexistinguser(request):
                 # 'role': role,
                 'access': str(refresh.access_token), 
                 'refresh': str(refresh)})
+        
         return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
     return Response(serializer.errors, status=400)
