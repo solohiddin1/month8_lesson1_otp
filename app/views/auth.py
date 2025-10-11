@@ -44,6 +44,7 @@ def login(request):
                 fail_silently=False,
             )
             return Response({'success': True, 'message': 'OTP sent to email.'})
+        
 
         return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
 
