@@ -8,8 +8,8 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 # Create your models here.
 
 class BaseModel(models.Model):
-    created_ed = models.DateField(auto_now_add=True)
-    updated_ed = models.DateField(auto_now=True)
+    created_at = models.DateField(auto_now_add=True,null=True)
+    updated_at = models.DateField(auto_now=True,null=True)
 
     class Meta:
         abstract = True
@@ -38,7 +38,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(phone_number, email, password, **extra_fields)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(BaseModel,AbstractBaseUser, PermissionsMixin):
     phone_regex = RegexValidator(
         regex=r'^\+998\d{9}$',
         message="Telefon raqam '+998XXXXXXXXX' formatida bo'lishi kerak!"

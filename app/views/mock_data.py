@@ -7,6 +7,7 @@ from app.models.student import Student
 from drf_yasg.utils import swagger_auto_schema
 from app.serializers_f.attendence import AttendenceSerializer
 from app.models.user import User
+from app.serializers_f.student_serizlizer import StudentSerializer
 
 class MockDataView(APIView):
     permission_classes = ([AllowAny])
@@ -20,14 +21,16 @@ class MockDataView(APIView):
             month = int(month)
         except ValueError:
             return Response({"error": "Invalid year or month"}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.all()
+        students = Student.objects.filter(user__created_at__year=year,user__created_at__month=month)
 
-        students = User.objects.filter(created_at__year=year, created_at__month=month)
+        # students = User.objects.filter(created_at__year=year, created_at__month=month)
 
 
 
-        serializer = AttendenceSerializer(students, many=True)
+        serializer = StudentSerializer(students, many=True)
         data = {
-            "message": "This is mock data",
+            "message": "mock data",
             "status": "success",
             "year": year,
             "month": month,
