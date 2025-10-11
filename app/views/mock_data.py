@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from app.models.student import Student
 from drf_yasg.utils import swagger_auto_schema
 from app.serializers_f.attendence import AttendenceSerializer
@@ -14,7 +14,7 @@ from app.models.groups import Group
 
 
 class MockDataView(APIView):
-    permission_classes = ([AllowAny])
+    permission_classes = ([IsAdminUser])
     
     def get(self, request, year, month):
         year = request.query_params.get('year', year)
@@ -42,7 +42,7 @@ class MockDataView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-@permission_classes([AllowAny])
+@permission_classes([IsAdminUser])
 class MockDataActiveStudents(APIView):
 
     def get(self,request):
