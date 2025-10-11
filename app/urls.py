@@ -5,6 +5,7 @@ from app.views.admin import TeacherCrud, admin_panel, teacher_panel
 from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
 from app.views.homework import HomeworkDetailView, HomeworkPutMarkView, HomeworkUploadView, HomeworkView
 from app.views.lesson import LessonDetailView, LessonView
+from app.views.mock_data import MockDataView
 from app.views.student import StudentView, StudentsView
 from app.views.user import register_view
 from app.views.auth import (forgot_password_view, logout_view ,change_password_page, forgot_password, 
@@ -28,6 +29,8 @@ urlpatterns = [
     # media
     # path('media/default.jpg/',media),
 
+    # mock data
+    path('mock_data/<int:year>/<int:month>/',MockDataView.as_view(),name='mock_data'),
 
     # homework
     path('api/homework_get/',HomeworkView.as_view(), name='api_homework'),
