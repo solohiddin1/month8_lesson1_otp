@@ -10,11 +10,12 @@ from app.models.user import User
 from app.serializers_f.student_serizlizer import StudentSerializer
 from app.serializers_f.group_serializer import GroupSerializer
 from app.models.groups import Group
-
+from django.db.models.functions import TruncMonth, TruncYear
+from django.db.models import Count
 
 
 class MockDataView(APIView):
-    permission_classes = ([IsAdminUser])
+    permission_classes = ([AllowAny])
     
     def get(self, request, year, month):
         year = request.query_params.get('year', year)
@@ -26,23 +27,26 @@ class MockDataView(APIView):
         except ValueError:
             return Response({"error": "Invalid year or month"}, status=status.HTTP_400_BAD_REQUEST)
         user = User.objects.all()
-        students = Student.objects.filter(user__created_at__year=year,user__created_at__month=month)
-
+        print(month)
+        # students = Student.objects.filter(user__created_at__year=year,user__created_at__month=month)
+        students = Student.objects.annotate(month=TruncMonth('user__created_at')).values('month').annotate(total=Count('id')).order_by('month')
+        
+        print(students)
         # students = User.objects.filter(created_at__year=year, created_at__month=month)
 
 
-        serializer = StudentSerializer(students, many=True)
+        # serializer = StudentSerializer(students, many=True)
         data = {
             "message": "mock data",
             "status": "success",
             "year": year,
             "month": month,
-            "data": serializer.data
+            "data": students
         }
         return Response(data, status=status.HTTP_200_OK)
 
 
-@permission_classes([IsAdminUser])
+@permission_classes([AllowAny])
 class MockDataActiveStudents(APIView):
 
     def get(self,request):
