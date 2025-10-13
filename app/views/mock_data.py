@@ -61,17 +61,39 @@ class MockDataActiveStudents(APIView):
         student_serializer = StudentSerializer(students,many=True)
         group_serializer = GroupSerializer(groups,many=True)
         all_students = []
+        # data = {}
+
         for g in groups:
-            all_students += g.students_set.all()
+            students_in_group = g.students_set.all()
+            all_students.extend(students_in_group)
             print(g.name)
-        # print(all_students,'students====')
+        
+        # total_students_in_group = Group.objects.annotate(total_students=Count('students_set')).values('total_students')
+
+        # Optionally, remove the following loop if not needed
+        # for s in Student.objects.all():
+        #     students_in_group = Group.objects.filter(students_set=s.id)
+        # print(students_in_group,' students====')
 
         # for s in all_students:
         #     print(s.name)
+        groups_data = []
+        for group in groups:
+            students_in_group = group.students_set.all()
+            students_serializer = StudentSerializer(students_in_group, many=True)
+            count = group.student_count
+            # print(count)
+            groups_data.append({
+            "group_name": group.name,
+            "student_count": count,
+            "students": students_serializer.data
+            })
+        group_serializer_student = StudentSerializer(all_students, many=True)
+        # group_serializer_student = StudentSerializer(groups_students,many=True)
+        # data = {"data":all_students}
+        # print(group_serializer_student.data,'-----------group_serializer_student====')
 
-        group_serializer_studnet = StudentSerializer(all_students,many=True)
-        # group_serializer_studnet = StudentSerializer(groups_students,many=True)
-        
-        return Response({"data":group_serializer_studnet.data})
+        return Response({"data":groups_data},status=status.HTTP_200_OK)
+        # return Response({"data":group_serializer_student.data})
 
         # return Response({"data":student_serializer.data,"groups":group_serializer.data})
