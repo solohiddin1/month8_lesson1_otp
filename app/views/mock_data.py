@@ -29,7 +29,9 @@ class MockDataView(APIView):
         user = User.objects.all()
         print(month)
         # students = Student.objects.filter(user__created_at__year=year,user__created_at__month=month)
-        students = Student.objects.annotate(month=TruncMonth('user__created_at')).values('month').annotate(total=Count('id')).order_by('month')
+        students = Student.objects.filter(user__created_at__year = year, user__created_at__month = month).values('user__created_at__year', 'user__created_at__month').annotate(total = Count('id'))
+        # students = Student.objects.values('user__created_at__year' , 'user__created_at__month').annotate(total = Count('id')).order_by('user__created_at__year')
+        # students = Student.objects.annotate(month=TruncMonth('user__created_at')).values('month').annotate(total=Count('id')).order_by('month')
         
         print(students)
         # students = User.objects.filter(created_at__year=year, created_at__month=month)
