@@ -20,6 +20,7 @@ from app.views.groups import AddStudentGroupView, GroupCreate, GroupDetailView, 
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 
 from app.views.student import StudentAllView
+from app.views.mock_data import MockTwoMonth
 
 urlpatterns = [
     # path('user/',UserCreateView.as_view()),
@@ -32,6 +33,7 @@ urlpatterns = [
     # mock data
     path('mock_data/<int:year>/<int:month>/',MockDataView.as_view(),name='mock_data'),
     path('mock_data/active_students/',MockDataActiveStudents.as_view(),name='mock_data_active_students'),
+    path('mock_2/<str:date1>/<str:date2>/',MockTwoMonth.as_view(),name='mock_data_two_months'),
 
     # homework
     path('api/homework_get/',HomeworkView.as_view(), name='api_homework'),
