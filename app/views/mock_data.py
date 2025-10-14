@@ -12,6 +12,8 @@ from app.serializers_f.group_serializer import GroupSerializer
 from app.models.groups import Group
 from django.db.models.functions import TruncMonth, TruncYear
 from django.db.models import Count
+from django.utils.dateparse import parse_date
+from django.db.models import Exists, OuterRef
 
 
 
@@ -23,28 +25,35 @@ class MockTwoMonth(APIView):
         date1 = request.query_params.get('date1', date1)
         date2 = request.query_params.get('date2', date2)
 
-        from django.utils.dateparse import parse_date
 
         date1_parsed = parse_date(str(date1))
         date2_parsed = parse_date(str(date2))
 
         if not date1_parsed or not date2_parsed:
             return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
-        students = Student.objects.filter(
-            user__created_at__gte=date1_parsed,
-            user__created_at__lte=date2_parsed
-        ).annotate(
-            month=TruncMonth('user__created_at')
-        ).values('month', 'id', 'name', 'surname', 'user__email')
-        # .values('month').annotate(count=Count('id')).values('month', 'count')
 
+        students = Student.objects.annotate(
+            in_group=Exists(Group.students_set.through.objects.filter(student_id=OuterRef('pk')))
+        ).values('id', 'name', 'surname', 'user__email', 'in_group')
+
+        # students = Student.objects.filter(
+        #     user__created_at__gte=date1_parsed,
+        #     user__created_at__lte=date2_parsed
+        # ).annotate(
+        #     month=TruncMonth('user__created_at')
+        # ).values('month', 'id', 'name', 'surname', 'user__email')
+
+        # .values('month').annotate(count=Count('id')).values('month', 'count')
+        in_group_students = students.filter(in_group=True)
+        out_group_students = students.filter(in_group=False)
         print(students, '11111')
 
         # Mock data generation logic
         data = {
             "message": "mock data",
             "status": "success",
-            "students": students,
+            "in group": in_group_students,
+            "out group": out_group_students,
             "date1": date1,
             "date2": date2,
         }
