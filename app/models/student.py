@@ -8,6 +8,7 @@ class Student(models.Model):
     surname = models.CharField(max_length=100)
     age = models.PositiveIntegerField()
     # homework = models.ForeignKey('Homework',on_delete=models.CASCADE,null=True)
+    is_finished = models.BooleanField(blank=True)
 
     def __str__(self):
         return self.name

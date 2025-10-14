@@ -35,17 +35,12 @@ class MockTwoMonth(APIView):
         students = Student.objects.annotate(
             in_group=Exists(Group.students_set.through.objects.filter(student_id=OuterRef('pk')))
         ).values('id', 'name', 'surname', 'user__email', 'in_group')
-
-        # students = Student.objects.filter(
-        #     user__created_at__gte=date1_parsed,
-        #     user__created_at__lte=date2_parsed
-        # ).annotate(
-        #     month=TruncMonth('user__created_at')
-        # ).values('month', 'id', 'name', 'surname', 'user__email')
-
+        
         # .values('month').annotate(count=Count('id')).values('month', 'count')
-        in_group_students = students.filter(in_group=True)
-        out_group_students = students.filter(in_group=False)
+        in_group_students = students.filter(in_group=True).count()
+        # in_group_students = students.filter(in_group=True)
+        out_group_students = students.filter(in_group=False).count()
+        # out_group_students = students.filter(in_group=False)
         print(students, '11111')
 
         # Mock data generation logic
@@ -56,6 +51,34 @@ class MockTwoMonth(APIView):
             "out group": out_group_students,
             "date1": date1,
             "date2": date2,
+        }
+        # print(data)
+        return Response(data, status=status.HTTP_200_OK)
+
+
+@permission_classes([AllowAny])
+class MockTwoCount(APIView):
+
+    def get(self, request, date1, date2):
+
+        date1 = request.query_params.get('date1', date1)
+        date2 = request.query_params.get('date2', date2)
+
+
+        date1_parsed = parse_date(str(date1))
+        date2_parsed = parse_date(str(date2))
+
+        if not date1_parsed or not date2_parsed:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+
+        students = Student.objects.filter(user__created_at__range=(date1_parsed, date2_parsed))
+
+        data = {
+            "message": "mock data",
+            "status": "success",
+            "date1": date1,
+            "date2": date2,
+            "count": students.count()
         }
         # print(data)
         return Response(data, status=status.HTTP_200_OK)
@@ -93,6 +116,28 @@ class MockDataView(APIView):
             "data": students
         }
         return Response(data, status=status.HTTP_200_OK)
+
+
+@permission_classes([AllowAny])
+class MockDataFinished(APIView):
+
+    def get(self,request):
+        finished = Student.objects.filter(is_finished=1).values('id','name','surname')
+        not_finished = Student.objects.filter(is_finished=0).values('id','name','surname')
+        
+        data = {
+        "count": {
+                "finished":finished.count(),
+                "not finished": not_finished.count(),
+            },
+        "all_students": {
+            "finished":list(finished),
+            "not finished": list(not_finished),
+        }
+        }
+
+        return Response(data,status=status.HTTP_200_OK)
+
 
 
 @permission_classes([AllowAny])
