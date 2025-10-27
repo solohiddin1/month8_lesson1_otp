@@ -12,7 +12,7 @@ from app.pagination import CustomPagination
 from app.serializers_f.attendence import AttendenceSerializer
 from rest_framework.response import Response
 from rest_framework import status
-
+from app.permissions import TeacherPermissions
 
 @permission_classes([IsAuthenticated])
 class AttendenceGetView(ListAPIView):
@@ -22,12 +22,16 @@ class AttendenceGetView(ListAPIView):
 
 
 class AttendenceView(APIView):
-    permission_classes = ([IsAuthenticated])
+    permission_classes = ([TeacherPermissions])
+
     @swagger_auto_schema(request_body=AttendenceSerializer)
     def post(self, request):
         # students = request.data
         students = request.data
-        teacher_id = Teacher.objects.get(user_id=request.data['teacher_id'])
+        try:
+            teacher_id = Teacher.objects.get(user_id=request.data['teacher_id'])
+        except Teacher.DoesNotExist:
+            return Response({"error": "Teacher not found"}, status=status.HTTP_404_NOT_FOUND)
         # students = request.data.get("attendance",[])
         
         print(students)
@@ -55,7 +59,7 @@ class AttendenceView(APIView):
             return Response({"message":"Created"},status=status.HTTP_201_CREATED)
         return Response({"error":serializer.errors},status=status.HTTP_400_BAD_REQUEST)
 
-    # @swagger_auto_schema(request_body=AttendenceSerializer)
+    # @permission_classes([TeacherPermissions])
     def get(self,request):
         try:
             at = Attendence.objects.all()

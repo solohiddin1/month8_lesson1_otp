@@ -1,4 +1,4 @@
-from django.auth import permissions
+from rest_framework import permissions
 
 class TeacherPermissions(permissions.BasePermission):
     """
