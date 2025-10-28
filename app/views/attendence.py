@@ -13,6 +13,9 @@ from app.serializers_f.attendence import AttendenceSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from app.permissions import TeacherPermissions
+from log.log import setup_logger
+
+logger = setup_logger()
 
 @permission_classes([IsAuthenticated])
 class AttendenceGetView(ListAPIView):
@@ -26,16 +29,14 @@ class AttendenceView(APIView):
 
     @swagger_auto_schema(request_body=AttendenceSerializer)
     def post(self, request):
-        # students = request.data
         students = request.data
         try:
             teacher_id = Teacher.objects.get(user_id=request.data['teacher_id'])
         except Teacher.DoesNotExist:
             return Response({"error": "Teacher not found"}, status=status.HTTP_404_NOT_FOUND)
         # students = request.data.get("attendance",[])
-        
-        print(students)
-        print("requested here---")
+        logger.debug('Attendance post data: %s', students)
+        logger.info('AttendenceView.post called')
         # group_id = students["group_id"]
         
         

@@ -12,7 +12,10 @@ from app.models.user import User
 from app.serializers_f.student_serizlizer import StudentSerializer
 from app.serializers_f.teacher_serializer import TeacherCreateSerializer, TeacherAddUserSerializer, TeacherSerializer
 from drf_yasg.utils import swagger_auto_schema
+from log.log import setup_logger
 
+
+logger = setup_logger()
 
 @permission_classes([IsAuthenticated])
 class TeacherProfileView(APIView):

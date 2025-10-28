@@ -1,6 +1,9 @@
 # import email
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
+from log.log import setup_logger
+
+logger = setup_logger()
 
 class EmailBackend(ModelBackend):
 
@@ -13,13 +16,13 @@ class EmailBackend(ModelBackend):
 
         UserModel = get_user_model()
         try:
-            print("authenticating ---")
+            logger.info("Authenticating email=%s", normalized_email)
             user = UserModel.objects.get(email__iexact=normalized_email)
-            print(user, '=====')
+            logger.debug('Found user: %s', user)
         except UserModel.DoesNotExist:
             return None
 
         if user.check_password(raw_password) and self.user_can_authenticate(user):
-            print(f"checked password of {user}")
+            logger.info('Password check passed for user %s', user)
             return user
         return None

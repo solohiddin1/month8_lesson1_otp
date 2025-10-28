@@ -5,6 +5,9 @@ from rest_framework.authtoken.models import Token
 from django.db.models.signals import m2m_changed
 
 from app.models.groups import Group
+from log.log import setup_logger
+
+logger = setup_logger()
 
 
 @receiver(m2m_changed,sender=Group.students_set.through)
@@ -18,6 +21,6 @@ def delete_user_token(sender, instance, **kwargs):
     try:
         token = Token.objects.get(user=instance)
         token.delete()
-        print(f"Token deleted successfully for user {instance}.")
+        logger.info("Token deleted successfully for user %s.", instance)
     except Token.DoesNotExist:
         pass

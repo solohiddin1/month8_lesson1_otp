@@ -9,7 +9,7 @@ from app.views.mock_data import MockDataActiveStudents, MockDataFinished, MockDa
 from app.views.student import StudentView, StudentsView
 from app.views.user import register_view
 from app.views.auth import (forgot_password_view, logout_view ,change_password_page, forgot_password, 
-    home, reset_page, reset_password, student_dashboard, userlogin, userlogin_view, loginexistinguser,
+    home, reset_page, reset_password, student_dashboard, UserLogin, userlogin_view, loginexistinguser,
     loginexistinguser_view, verify_user_email_view,
     verify, login, verify_user_email, change_password)
 from app.views.teacher import TeacherCreateView, TeacherProfileView
@@ -79,7 +79,7 @@ urlpatterns = [
     path('attendense/<int:pk>/',AttendanceDetailView.as_view()),
     
     # login
-    path('userlogin/',userlogin,name='userlogin'),
+    path('userlogin/',UserLogin.as_view(),name='userlogin'),
     path('userlogin/view/',userlogin_view,name='userlogin_view'),
 
     path('login_existing_user/',loginexistinguser,name='login_existing_user'),

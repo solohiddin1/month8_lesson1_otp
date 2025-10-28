@@ -23,9 +23,9 @@ class LessonView(APIView):
     # @swagger_auto_schema(request_body=LessonSerializer)
     def post(self, request):
         lessons = request.data
-        print(request.data['teacher'],'----')
+        # print(request.data['teacher'],'----')
         teacher_id = Teacher.objects.get(user_id=request.data['teacher'])
-        print(lessons)
+        # print(lessons)
         data = lessons.copy()
         data['teacher'] = teacher_id.id
         serializer = LessonSerializer(data=data)

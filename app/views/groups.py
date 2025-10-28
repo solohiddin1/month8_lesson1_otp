@@ -9,6 +9,9 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework import generics
+from log.log import setup_logger
+
+logger = setup_logger()
 
 from app.serializers_f.student_serizlizer import StudentSerializer
 from app.views import student
@@ -36,16 +39,16 @@ class StudentsIngroupView(APIView):
 class TeacherGroups(APIView):
     def get(self,request):
         try:
-            print(request.user)
+            logger.debug('TeacherGroups.get request.user: %s', request.user)
             teacher = Teacher.objects.get(user=request.user)
             # for 
-            print(teacher.id,teacher.name,)
+            logger.debug('Found teacher id=%s name=%s', teacher.id, teacher.name)
         except Teacher.DoesNotExist:
             return Response({"error":"Teacher with this id did not found!"},status=status.HTTP_404_NOT_FOUND)
         groups = Group.objects.filter(teacher_id=teacher)
 
         serializer = GroupSerializer(groups,many=True)
-        print(serializer.data)
+        logger.debug('Teacher groups serializer data: %s', serializer.data)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 
@@ -83,7 +86,7 @@ class StudentGroupsView(APIView):
         try:
             student = Student.objects.get(user=request.user)
             groups = student.student_groups.all()
-            print(groups)
+            logger.debug('Student groups for user %s: %s', request.user, groups)
         except Student.DoesNotExist:
             return Response({"error": "Student not found for this user."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:

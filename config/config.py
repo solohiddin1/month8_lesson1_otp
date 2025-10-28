@@ -25,4 +25,7 @@ class Settings(BaseSettings):
     # EMAIL_HOST: str = os.getenv("EMAIL_HOST", "smtp.example.com")
 
 settings = Settings()
-print("Settings loaded:", settings)
+from log.log import setup_logger
+
+logger = setup_logger()
+logger.info("Settings loaded: %s", settings)

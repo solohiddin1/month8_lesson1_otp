@@ -1,5 +1,8 @@
 from django.conf import settings
 from django.core.mail.backends.smtp import EmailBackend as SmtpEmailBackend
+from log.log import setup_logger
+
+logger = setup_logger()
 
 
 class EmailBackend(SmtpEmailBackend):
@@ -8,7 +11,7 @@ class EmailBackend(SmtpEmailBackend):
         kwargs['fail_silently'] = False
         super(EmailBackend, self).__init__(*args, **kwargs)
         kwargs['fail_silently'] = fail_silently
-        print('email')
+        logger.info('EmailBackend initialized')
 
         host = getattr(settings, 'ALTERNATIVE_EMAIL_HOST', None)
         port = getattr(settings, 'ALTERNATIVE_EMAIL_PORT', None)
@@ -27,17 +30,17 @@ class EmailBackend(SmtpEmailBackend):
 
     def send_messages(self, email_messages):
         try:
-            print('trying')
+            logger.debug('Attempting to send messages')
 
-            return super(EmailBackend, self).send_messages(email_messages)
-            print('sent')
+            result = super(EmailBackend, self).send_messages(email_messages)
+            logger.info('Email send result: %s', result)
+            return result
         except Exception as e:
-            print('error')
+            logger.exception('Error sending email messages')
             if self._alternative_backend:
-                print("shit happened here")
+                logger.warning('Using alternative email backend due to error')
                 return self._alternative_backend.send_messages(email_messages)
             else:
-                print('raised e')
                 raise e
 
 

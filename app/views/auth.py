@@ -21,6 +21,9 @@ from drf_yasg.utils import swagger_auto_schema
 from app.serializers_f.email_serializers import SendEmail, LoginSerializer
 from app.serializers_f.user_serializer import LoginUserSerializer, ChangePasswordSerializer
 # from app.serializers_f.student_serizlizer import StudentSerializer
+from log.log import setup_logger
+
+logger = setup_logger()
 
 
 @swagger_auto_schema(method='post', request_body=LoginSerializer)
@@ -77,44 +80,42 @@ def userlogin_view(request):
     return render(request,'login.html')
 
 
-@swagger_auto_schema(method='post', request_body=LoginUserSerializer)
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def userlogin(request):
-    # Handle both JSON and form data
-    if request.content_type == 'application/json':
-        data = request.data
-    else:
-        data = {
-            'email': request.POST.get('email'),
-            'password': request.POST.get('password')
-        }
-    
-    serializer = LoginUserSerializer(data=data)
-    print('user here')
-    if serializer.is_valid():
-        print('user here2 ---')
-        email = serializer.validated_data.get("email", "").strip().lower()
-        password = serializer.validated_data.get("password", "").strip()
-        print(email,password,'email password ---')
-        print(f"[{email}], [{password}]")
-        user = authenticate(request, email=email, password=password)
-        print(user)
-        if user:
-            otp = random.randint(1000, 9999)
-            cache.set(email,otp,timeout=300)
-            print("start email")
-            send_mail(
-                 "Your code sent",
-                    f"Your code is {otp}. It is valid for 5 minutes.",
-                    settings.EMAIL_HOST_USER,
-                    [email],
-                    fail_silently=False,
-            )
-            # token, created = Token.objects.get_or_create(user=user)
-            return Response({'success': True, 'message': 'OTP sent to email.'},status=status.HTTP_200_OK)
-        return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
-    return Response(serializer.errors, status=400)
+class UserLogin(APIView):
+    def post(self, request):
+        # Handle both JSON and form data
+        if request.content_type == 'application/json':
+            data = request.data
+        else:
+            data = {
+                'email': request.POST.get('email'),
+                'password': request.POST.get('password')
+            }
+        
+        serializer = LoginUserSerializer(data=data)
+        logger.info("UserLogin.post called")
+        if serializer.is_valid():
+            logger.info('Login serializer is valid')
+            email = serializer.validated_data.get("email", "").strip().lower()
+            password = serializer.validated_data.get("password", "").strip()
+            # Do not log passwords
+            logger.info("Attempting login for email=%s", email)
+            user = authenticate(request, email=email, password=password)
+            logger.debug("authenticate returned: %s", user)
+            if user:
+                otp = random.randint(1000, 9999)
+                cache.set(email,otp,timeout=300)
+                logger.info("Sending OTP email to %s", email)
+                send_mail(
+                    "Your code sent",
+                        f"Your code is {otp}. It is valid for 5 minutes.",
+                        settings.EMAIL_HOST_USER,
+                        [email],
+                        fail_silently=False,
+                )
+                # token, created = Token.objects.get_or_create(user=user)
+                return Response({'success': True, 'message': 'OTP sent to email.'},status=status.HTTP_200_OK)
+            return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
+        return Response(serializer.errors, status=400)
 
 def verify_user_email_view(request):
     return render(request,'verify_otp.html')
@@ -130,10 +131,10 @@ def verify_user_email(request):
     otp = request.data.get('otp')
 
     cached_otp = cache.get(email)
-    print(cached_otp)
-    print('user is being verified')
+    logger.debug("Cached OTP for %s: %s", email, cached_otp)
+    logger.info('verify_user_email called for %s', email)
     if cached_otp and str(cached_otp) == str(otp):
-        print("email cache")
+        logger.debug("OTP matched for %s (deleting cache)", email)
         cache.delete(email)
 
         user = User.objects.filter(email=email).first()
@@ -165,7 +166,7 @@ def logout_view(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def change_password(request):
-    print('111111')
+    logger.info('change_password called')
 
     serializer = ChangePasswordSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -173,31 +174,30 @@ def change_password(request):
     old_password = serializer.validated_data['old_password']
     new_password = serializer.validated_data['new_password']
     confirm_password = serializer.validated_data['confirm_password']
-    print(new_password)
-    print('user changing password')
+    # Avoid logging raw passwords
+    logger.info('Password change requested for %s', email)
 
     try:
         user1 = User.objects.get(email=email)
     
     except Exception as e:
-        print(e)
+        logger.exception('Error fetching user for email %s', email)
         return Response({"error":str(e)})
-    print(user1)
+    logger.debug('Fetched user: %s', user1)
     if old_password == new_password:
         return Response({"message":"please enter new password"},status=status.HTTP_400_BAD_REQUEST)
     if new_password != confirm_password:
         return Response({"message":"new password should match to confirm password!"},status=status.HTTP_400_BAD_REQUEST)
 
     user = authenticate(request._request,email=email,password=old_password)
-    print(user)
+    logger.debug('authenticate returned: %s', user)
     if user is None:
         return Response({"error":"Password is incorrect"},status=status.HTTP_400_BAD_REQUEST)
     if user:
-        print('user here!')
+        logger.info('User authenticated for password change: %s', email)
         if not user1.email_verified:
             return Response({'success': False, 'message': 'email not verified'}, status=HTTP_400_BAD_REQUEST)
-        
-        print(f"user { user}")
+        logger.debug("user %s", user)
         
         if user:
             user.set_password(new_password)
@@ -222,8 +222,7 @@ def change_password_page(request):
 # @permission_classes([AllowAny])
 # def forgot_password(request):
     serializer = LoginSerializer(data=request.data)
-    
-    print(request.data)
+    logger.debug('forgot_password serializer data: %s', request.data)
     if serializer.is_valid():
         email = serializer.validated_data['email']
         try:
@@ -233,7 +232,7 @@ def change_password_page(request):
         if user:
             otp = random.randint(1000,9999)
             cache.set(email,otp,timeout=300)
-            print("otp sent")
+            logger.info("OTP sent to %s for forgot_password", email)
             send_mail(
                  "Your code sent",
                     f"Your code is {otp}. It is valid for 5 minutes.",
@@ -296,8 +295,7 @@ def reset_password(request, uidb64, token):
     try:
         uid = urlsafe_base64_decode(uidb64).decode()
         user = User.objects.get(pk=uid)
-        print(user)
-        print(user.email)
+        logger.debug('reset_password link for user: %s email:%s', user, user.email)
     except Exception:
         return Response({"error": "Invalid link"}, status=400)
 
@@ -362,9 +360,9 @@ def student_dashboard(request):
 @permission_classes([AllowAny])
 def loginexistinguser(request):
     serializer = LoginUserSerializer(data=request.data)
-    print('user here')
+    logger.info('loginexistinguser called')
     if serializer.is_valid():
-        print('user here2 ---')
+        logger.info('loginexistinguser serializer valid')
         email = serializer.validated_data.get("email", "").strip().lower()
         try:
             userin = User.objects.get(email=email)
@@ -373,29 +371,28 @@ def loginexistinguser(request):
         # if userin is None:
         #     return Response({"error":"User not found!"},status=status.HTTP_404_NOT_FOUND)
         password = serializer.validated_data.get("password", "").strip()
-        print(email,password,'email password ---')
-        
+        logger.info('Attempting existing login for email=%s', email)
         user = authenticate(request=request._request, email=email, password=password)
-        print(user,'tthis user is good')
-        print(userin,'userin -------- here ')
+        logger.debug('authenticate returned: %s', user)
+        logger.debug('userin: %s', userin)
         if user is None:
             return Response({"error":"Invalid credentials"},status=status.HTTP_400_BAD_REQUEST)
         if not userin.email_verified:
             return Response({"error": "email is not verified"}, status=status.HTTP_400_BAD_REQUEST)
-    
+
         if user:
             django_login(request._request, user)  # Log the user in
             refresh = RefreshToken.for_user(user)
-            role = 'admin' if userin.is_admin else 'teacher'if userin.is_teacher else 'student' if userin.is_student else 'User' 
+            role = 'admin' if userin.is_admin else 'teacher' if userin.is_teacher else 'student' if userin.is_student else 'User'
             refresh['role'] = role
-            print(role)
-            print(refresh)
+            logger.info('User %s logged in with role %s', email, role)
+            logger.debug('Refresh token info: %s', refresh)
             return Response({
-                'success': True, 
-                'message': 'user logged in successfully.', 
+                'success': True,
+                'message': 'user logged in successfully.',
                 # 'role': role,
-                'access': str(refresh.access_token), 
+                'access': str(refresh.access_token),
                 'refresh': str(refresh)})
-        
+
         return Response({'success': False, 'message': 'Invalid credentials.'}, status=400)
     return Response(serializer.errors, status=400)
