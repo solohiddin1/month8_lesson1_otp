@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     DEFAULT_PHOTO_PATH: str 
     VIDEO_PATH: str 
     DEFAULT_VIDEO_PATH: str 
+    ALTERNATIVE_EMAIL_HOST_USER : str
+    ALTERNATIVE_EMAIL_HOST_PASSWORD: str
 
 
     class Config:

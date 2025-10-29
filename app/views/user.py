@@ -15,6 +15,9 @@ from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 from app.serializers_f.student_serizlizer import StudentSerializer
 from app.models.student import Student
+from log.log import setup_logger
+logger = setup_logger()
+
 
 @permission_classes([IsAdminUser])
 def register_view(request):
@@ -31,24 +34,23 @@ def register(request):
     if serializer.is_valid():
         
         # student.is_student = True
-        student = serializer.save()
-        student.save()
-        user = student.user
-
-        user.is_student = True
-        user.save()
-        print(user.email,'---')
-        # Send OTP
         # otp = random.randint(1000, 9999)
         # cache.set(user.email, otp, timeout=300)
 
+        student = serializer.save()
+        user = student.user
         send_mail(
             "You are registered",
             f"you can login using your email and password, Your email is {user.email} , your password is 123456",
-            settings.EMAIL_HOST_USER,
+            settings.ALTERNATIVE_EMAIL_HOST_USER,
             [user.email],
             fail_silently=False,
         )
+        student.save()
+        logger.info(f"Student registered successfully: {user.email}")
+        user.is_student = True
+        user.save()
+        logger.info(f"User registered successfully: {user.email}")
         return Response({"success": True, "message": "User registered successfully."}, status=201)
     print(serializer.errors)
     return Response({"Error":serializer.errors},status=status.HTTP_400_BAD_REQUEST)

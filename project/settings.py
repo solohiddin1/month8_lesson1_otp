@@ -200,14 +200,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'app.User'
 
+from config.config import settings
+
 EMAIL_BACKEND = 'django_smtp_alternative.EmailBackend'
 ALTERNATIVE_EMAIL_HOST = 'smtp.gmail.com'
 ALTERNATIVE_EMAIL_PORT = 587
 # ALTERNATIVE_EMAIL_PORT = 25
-ALTERNATIVE_EMAIL_HOST_USER = "sirojiddinovsolohiddin961@gmail.com"
+ALTERNATIVE_EMAIL_HOST_USER = settings.ALTERNATIVE_EMAIL_HOST_USER
+ALTERNATIVE_EMAIL_HOST_PASSWORD = settings.ALTERNATIVE_EMAIL_HOST_PASSWORD
 ALTERNATIVE_EMAIL_USE_TLS = True
+
 # ALTERNATIVE_EMAIL_HOST_PASSWORD = 'my password'
-ALTERNATIVE_EMAIL_HOST_PASSWORD = 'tqhe kcdy oemn srwy'
 
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_HOST = 'smtp.gmail.com'
