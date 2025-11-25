@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
 
     class Config:
-        env_file = "config/.env"
+        env_file = ".env"
         env_file_encoding = "utf-8"
 
 
@@ -30,4 +30,4 @@ settings = Settings()
 from log.log import setup_logger
 
 logger = setup_logger()
-logger.info("Settings loaded: %s", settings)
+# logger.info("Settings loaded: %s", settings)
