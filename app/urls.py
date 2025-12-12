@@ -8,13 +8,15 @@ from app.views.lesson import LessonDetailView, LessonView
 from app.views.mock_data import MockDataActiveStudents, MockDataFinished, MockDataView, MockTwoCount
 from app.views.student import StudentView, StudentsView
 from app.views.user import register_view
-from app.views.auth import (forgot_password_view, logout_view ,change_password_page, forgot_password, 
-    home, reset_page, reset_password, student_dashboard, UserLogin, userlogin_view, loginexistinguser,
+from app.views.auth import (
+    forgot_password_view, change_password_page, 
+    home, reset_page, student_dashboard, UserLogin, userlogin_view,
     loginexistinguser_view, verify_user_email_view,
-    verify, login, verify_user_email, change_password)
+    LoginAPIView, VerifyOTPAPIView, VerifyUserEmailAPIView, LogoutAPIView,
+    ChangePasswordAPIView, ForgotPasswordAPIView, ResetPasswordAPIView, LoginExistingUserAPIView
+)
 from app.views.teacher import TeacherCreateView, TeacherProfileView
-from app.views.user import (register, 
-     delete_user)
+from app.views.user import (register_view, StudentRegistrationAPIView, DeleteUserAPIView)
 from app.views.groups import AddStudentGroupView, GroupCreate, GroupDetailView, GroupListView, StudentGroupsView, StudentsIngroupView, TeacherGroups
 
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
@@ -23,9 +25,9 @@ from app.views.student import StudentAllView
 from app.views.mock_data import MockTwoMonth
 
 urlpatterns = [
-    # path('user/',UserCreateView.as_view()),
-    path('login/',login,name='login'),
-    path('verify/',verify,name='verify'),
+    # Authentication endpoints
+    path('login/', LoginAPIView.as_view(), name='login'),
+    path('verify/', VerifyOTPAPIView.as_view(), name='verify'),
 
     # media
     path('media/default.jpg/',media),
@@ -82,30 +84,28 @@ urlpatterns = [
     path('userlogin/',UserLogin.as_view(),name='userlogin'),
     path('userlogin/view/',userlogin_view,name='userlogin_view'),
 
-    path('login_existing_user/',loginexistinguser,name='login_existing_user'),
-    path('login_existing_user/view',loginexistinguser_view,name='login_existing_user_view'),
+    path('login_existing_user/', LoginExistingUserAPIView.as_view(), name='login_existing_user'),
+    path('login_existing_user/view', loginexistinguser_view, name='login_existing_user_view'),
 
+    # Logout
+    path('api/logout/', LogoutAPIView.as_view(), name='logout'),
 
-    # log out0
-    path('api/logout/',logout_view,name='logout'),
-
-
-    # password
-    path('change_password_page/',change_password_page,name='change_password_page'),
-    path('api/change_password/',change_password,name='change_password'),
-    path('forgot_password/',forgot_password,name='forgot_password'),
-    path('forgot_password/view/',forgot_password_view,name='forgot_password_view'),
+    # Password management
+    path('change_password_page/', change_password_page, name='change_password_page'),
+    path('api/change_password/', ChangePasswordAPIView.as_view(), name='change_password'),
+    path('forgot_password/', ForgotPasswordAPIView.as_view(), name='forgot_password'),
+    path('forgot_password/view/', forgot_password_view, name='forgot_password_view'),
     
-    path('reset-password/<uidb64>/<token>/',reset_password, name='reset_password'),
-    path('api/reset-password/<uiid64>/<token>/',reset_page, name='reset_page'),
+    path('reset-password/<uidb64>/<token>/', ResetPasswordAPIView.as_view(), name='reset_password'),
+    path('api/reset-password/<uiid64>/<token>/', reset_page, name='reset_page'),
 
+    # Email verification
+    path('verify_user_otp/', VerifyUserEmailAPIView.as_view(), name='verify_user_otp'),
+    path('verify_user_otp/view', verify_user_email_view, name='verify_user_otp_view'),
 
-    # auth
-    path('verify_user_otp/',verify_user_email,name='verify_user_otp'),
-    path('verify_user_otp/view',verify_user_email_view,name='verify_user_otp_view'),
-
-    path('register_user/',register,name='register_user'),
-    path('delete_user/<int:pk>/',delete_user, name="delete"),
+    # User management
+    path('register_user/', StudentRegistrationAPIView.as_view(), name='register_user'),
+    path('delete_user/<int:pk>/', DeleteUserAPIView.as_view(), name="delete"),
     
     # token
     path('api/token/',TokenObtainPairView.as_view()),

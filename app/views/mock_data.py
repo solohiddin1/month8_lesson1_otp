@@ -5,6 +5,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from app.models.student import Student
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from app.serializers_f.attendence import AttendenceSerializer
 from app.models.user import User
 from app.serializers_f.student_serizlizer import StudentSerializer
@@ -19,7 +20,24 @@ from django.db.models import Exists, OuterRef
 
 @permission_classes([AllowAny])
 class MockTwoMonth(APIView):
+    """
+    API endpoint for student enrollment statistics between two dates.
+    
+    Returns count of students in groups vs. not in groups for a date range.
+    """
 
+    @swagger_auto_schema(
+        operation_summary="Get Student Statistics by Date Range",
+        operation_description="Get count of students enrolled in groups vs. not enrolled between two dates.",
+        manual_parameters=[
+            openapi.Parameter('date1', openapi.IN_PATH, description="Start date (YYYY-MM-DD)", type=openapi.TYPE_STRING),
+            openapi.Parameter('date2', openapi.IN_PATH, description="End date (YYYY-MM-DD)", type=openapi.TYPE_STRING),
+        ],
+        responses={
+            200: 'Statistics data',
+            400: 'Invalid date format'
+        }
+    )
     def get(self, request, date1, date2):
 
         date1 = request.query_params.get('date1', date1)
@@ -58,7 +76,24 @@ class MockTwoMonth(APIView):
 
 @permission_classes([AllowAny])
 class MockTwoCount(APIView):
+    """
+    API endpoint for counting new students between two dates.
+    
+    Returns the count of students created within a specific date range.
+    """
 
+    @swagger_auto_schema(
+        operation_summary="Count Students by Date Range",
+        operation_description="Get the count of students registered between two dates.",
+        manual_parameters=[
+            openapi.Parameter('date1', openapi.IN_PATH, description="Start date (YYYY-MM-DD)", type=openapi.TYPE_STRING),
+            openapi.Parameter('date2', openapi.IN_PATH, description="End date (YYYY-MM-DD)", type=openapi.TYPE_STRING),
+        ],
+        responses={
+            200: 'Student count',
+            400: 'Invalid date format'
+        }
+    )
     def get(self, request, date1, date2):
 
         date1 = request.query_params.get('date1', date1)
@@ -85,8 +120,25 @@ class MockTwoCount(APIView):
 
 
 class MockDataView(APIView):
+    """
+    API endpoint for student statistics by month and year.
+    
+    Returns the count of students registered in a specific month and year.
+    """
     permission_classes = ([AllowAny])
     
+    @swagger_auto_schema(
+        operation_summary="Get Student Statistics by Month/Year",
+        operation_description="Get student registration count for a specific month and year.",
+        manual_parameters=[
+            openapi.Parameter('year', openapi.IN_PATH, description="Year (e.g., 2024)", type=openapi.TYPE_INTEGER),
+            openapi.Parameter('month', openapi.IN_PATH, description="Month (1-12)", type=openapi.TYPE_INTEGER),
+        ],
+        responses={
+            200: 'Student statistics',
+            400: 'Invalid year or month'
+        }
+    )
     def get(self, request, year, month):
         year = request.query_params.get('year', year)
         month = request.query_params.get('month', month)
@@ -120,8 +172,20 @@ class MockDataView(APIView):
 
 @permission_classes([AllowAny])
 class MockDataFinished(APIView):
+    """
+    API endpoint for student completion statistics.
+    
+    Returns counts and lists of students who have finished vs. not finished.
+    """
 
-    def get(self,request):
+    @swagger_auto_schema(
+        operation_summary="Get Student Completion Statistics",
+        operation_description="Get count and list of students who have finished their course vs. those who haven't.",
+        responses={
+            200: 'Student completion statistics'
+        }
+    )
+    def get(self, request):
         finished = Student.objects.filter(is_finished=1).values('id','name','surname')
         not_finished = Student.objects.filter(is_finished=0).values('id','name','surname')
         
@@ -142,8 +206,20 @@ class MockDataFinished(APIView):
 
 @permission_classes([AllowAny])
 class MockDataActiveStudents(APIView):
+    """
+    API endpoint for active students grouped by their groups.
+    
+    Returns all groups with their enrolled students and student counts.
+    """
 
-    def get(self,request):
+    @swagger_auto_schema(
+        operation_summary="Get Active Students by Groups",
+        operation_description="Get all groups with their enrolled students and student counts.",
+        responses={
+            200: 'Groups with active students'
+        }
+    )
+    def get(self, request):
         students = Student.objects.all()
         groups = Group.objects.all()
         # print(groups)
