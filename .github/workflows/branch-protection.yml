@@ -1,0 +1,31 @@
+name: Branch Protection
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+jobs:
+  check-branch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Check if push is to main branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "::error::Direct pushes to main branch are not allowed!"
+          echo "::error::Please create a feature branch and submit a pull request instead."
+          echo "::error::See CONTRIBUTING.md for guidelines."
+          exit 1
+      
+      - name: PR to main is allowed
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "✓ Pull request workflow - this is the correct way to contribute!"
+          echo "Thank you for following the contribution guidelines."

@@ -72,3 +72,13 @@ Notes
     Uploaded files are stored in MEDIA_ROOT paths defined in .env.
 
     Tokens are automatically deleted when a user is deleted.
+
+## Contributing
+
+**⚠️ Important:** Direct commits to the `main` branch are not allowed. Please create a feature branch for your changes and submit a pull request.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on:
+- Branching strategy
+- How to submit changes
+- Code quality standards
+- Commit message conventions
