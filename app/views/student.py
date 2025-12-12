@@ -4,7 +4,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from app.models.student import Student
-from app.serializers_f.student_serizlizer import StudentSerializer, StudentGetSerializer
+from app.serializers.student_serializer import StudentSerializer, StudentGetSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 

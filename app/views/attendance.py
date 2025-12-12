@@ -1,4 +1,3 @@
-from pickletools import pystring
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -6,11 +5,10 @@ from rest_framework.decorators import permission_classes
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from app.models.attendence import Attendence
-from app.models.groups import Group
+from app.models.attendance import Attendance
 from app.models.teacher import Teacher
 from app.pagination import CustomPagination
-from app.serializers_f.attendence import AttendenceSerializer
+from app.serializers.attendance import AttendanceSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from app.permissions import TeacherPermissions
@@ -19,18 +17,18 @@ from log.log import setup_logger
 logger = setup_logger()
 
 @permission_classes([IsAuthenticated])
-class AttendenceGetView(ListAPIView):
+class AttendanceGetView(ListAPIView):
     """
     API endpoint to retrieve attendance records.
     
     Returns a paginated list of all attendance records.
     """
-    queryset = Attendence.objects.all()
-    serializer_class = AttendenceSerializer
+    queryset = Attendance.objects.all()
+    serializer_class = AttendanceSerializer
     pagination_class = CustomPagination
 
 
-class AttendenceView(APIView):
+class AttendanceView(APIView):
     """
     API endpoint for managing attendance records.
     
@@ -41,7 +39,7 @@ class AttendenceView(APIView):
     @swagger_auto_schema(
         operation_summary="Create Attendance Record",
         operation_description="Create a new attendance record for students. Teacher access required.",
-        request_body=AttendenceSerializer,
+        request_body=AttendanceSerializer,
         responses={
             201: 'Attendance record created',
             404: 'Teacher not found',
@@ -62,14 +60,14 @@ class AttendenceView(APIView):
             )
         
         logger.debug('Attendance post data: %s', students)
-        logger.info('AttendenceView.post called')
+        logger.info('AttendanceView.post called')
 
         # Update data with teacher ID
         data = request.data.copy()
         data['teacher_id'] = teacher_id.id
         
         # Create attendance record
-        serializer = AttendenceSerializer(data=data)
+        serializer = AttendanceSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             logger.info(f"Attendance created by teacher {teacher_id.id}")
@@ -87,19 +85,19 @@ class AttendenceView(APIView):
         operation_summary="List All Attendance Records",
         operation_description="Retrieve all attendance records. Teacher access required.",
         responses={
-            200: openapi.Response('List of attendance records', AttendenceSerializer(many=True)),
+            200: openapi.Response('List of attendance records', AttendanceSerializer(many=True)),
             400: 'Error retrieving attendance'
         }
     )
     def get(self, request):
         """Retrieve all attendance records."""
         try:
-            at = Attendence.objects.all()
+            at = Attendance.objects.all()
         except Exception as e:
             logger.error(f"Error retrieving attendance: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
-        serializer = AttendenceSerializer(at, many=True)
+        serializer = AttendanceSerializer(at, many=True)
         if serializer:
             return Response(serializer.data, status=status.HTTP_200_OK)
         
@@ -119,7 +117,7 @@ class AttendanceDetailView(APIView):
     @swagger_auto_schema(
         operation_summary="Update Attendance Record",
         operation_description="Update an existing attendance record. Teacher access required.",
-        request_body=AttendenceSerializer,
+        request_body=AttendanceSerializer,
         responses={
             200: 'Attendance updated',
             404: 'Attendance record not found',
@@ -128,8 +126,8 @@ class AttendanceDetailView(APIView):
     )
     def put(self, request, pk):
         """Update an attendance record."""
-        attendance = get_object_or_404(Attendence, pk=pk)
-        serializer = AttendenceSerializer(attendance, data=request.data, partial=False)
+        attendance = get_object_or_404(Attendance, pk=pk)
+        serializer = AttendanceSerializer(attendance, data=request.data, partial=False)
         
         if serializer.is_valid():
             serializer.save()
@@ -148,7 +146,7 @@ class AttendanceDetailView(APIView):
     )
     def delete(self, request, pk):
         """Delete an attendance record."""
-        at = get_object_or_404(Attendence, pk=pk)
+        at = get_object_or_404(Attendance, pk=pk)
         at.delete()
         logger.info(f"Attendance {pk} deleted")
         return Response({"message": "Attendance deleted!"})

@@ -5,7 +5,7 @@ from app.models.student import Student
 from app.models.lessons import Lesson
 
 
-class Attendence(models.Model):
+class Attendance(models.Model):
     teacher_id = models.ForeignKey(Teacher,on_delete=models.CASCADE)
     group_id = models.ForeignKey(Group,on_delete=models.CASCADE)
     absent_students = models.ManyToManyField(Student,blank=True,related_name="absents")

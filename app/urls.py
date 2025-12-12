@@ -1,8 +1,8 @@
 from django.urls import path
-from app.models.attendence import Attendence
+from app.models.attendance import Attendance
 from app.views.media import media
 from app.views.admin import TeacherCrud, admin_panel, teacher_panel
-from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
+from app.views.attendance import AttendanceDetailView, AttendanceGetView, AttendanceView
 from app.views.homework import HomeworkDetailView, HomeworkPutMarkView, HomeworkUploadView, HomeworkView
 from app.views.lesson import LessonDetailView, LessonView, GroupLessonsView
 from app.views.mock_data import MockDataActiveStudents, MockDataFinished, MockDataView, MockTwoCount
@@ -76,9 +76,9 @@ urlpatterns = [
     # lesson detail
     path('lesson_detail/<int:pk>/',LessonDetailView.as_view(),name="lesson_detail"),
 
-    # attendence
-    path('attendense/',AttendenceView.as_view()),
-    path('attendense/',AttendenceGetView.as_view()),
+    # attendance
+    path('attendense/',AttendanceView.as_view()),
+    path('attendense/',AttendanceGetView.as_view()),
     path('attendense/<int:pk>/',AttendanceDetailView.as_view()),
     
     # login

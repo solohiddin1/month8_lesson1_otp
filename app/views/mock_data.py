@@ -6,10 +6,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from app.models.student import Student
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from app.serializers_f.attendence import AttendenceSerializer
+from app.serializers.attendance import AttendenceSerializer
 from app.models.user import User
-from app.serializers_f.student_serizlizer import StudentSerializer
-from app.serializers_f.group_serializer import GroupSerializer
+from app.serializers.student_serializer import StudentSerializer
+from app.serializers.group_serializer import GroupSerializer
 from app.models.groups import Group
 from django.db.models.functions import TruncMonth, TruncYear
 from django.db.models import Count
