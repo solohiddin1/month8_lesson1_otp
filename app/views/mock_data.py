@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from app.models.student import Student
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from app.serializers.attendance import AttendanceSerializer
+from app.serializers.attendance import AttendenceSerializer
 from app.models.user import User
 from app.serializers.student_serializer import StudentSerializer
 from app.serializers.group_serializer import GroupSerializer
