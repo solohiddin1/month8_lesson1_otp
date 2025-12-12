@@ -30,8 +30,8 @@ class StudentsIngroupView(APIView):
             return Response({"error":str(e)},status=status.HTTP_400_BAD_REQUEST)
         students = group.students_set.all()
         if students is not None:
-            serizlizer = StudentSerializer(students,many=True)
-            return Response(serizlizer.data,status=status.HTTP_200_OK)
+            serializer = StudentSerializer(students,many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
         return Response({"error":"Nothing"},status=status.HTTP_400_BAD_REQUEST)
 
 
