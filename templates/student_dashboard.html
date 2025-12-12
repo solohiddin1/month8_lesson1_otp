@@ -327,14 +327,14 @@
             document.getElementById("backToGroupsBtn").style.display = "inline-block";
             
             try {
-                // GET /create_lesson/ - fetch all lessons and filter by group
-                const res = await fetch("/create_lesson/", { headers: authHeader() });
+                // GET /api/group/{group_id}/lessons/ - fetch lessons for specific group
+                const res = await fetch(`/api/group/${groupId}/lessons/`, { headers: authHeader() });
                 const data = await res.json();
                 const container = document.getElementById("lessonsList");
                 container.innerHTML = "";
                 
                 if (res.ok && Array.isArray(data)) {
-                    currentGroupLessons = data.filter(l => l.group === groupId);
+                    currentGroupLessons = data;
                     
                     if (currentGroupLessons.length === 0) {
                         container.innerHTML = '<div class="empty-state"><h3>No lessons yet</h3><p>No lessons have been created for this group.</p></div>';

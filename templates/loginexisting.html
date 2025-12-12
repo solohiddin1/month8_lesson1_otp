@@ -3,27 +3,32 @@
 {% block header %}Login{% endblock %}
 
 {% block content %}
-<h2>Login</h2>
+<h2>Welcome Back</h2>
 
 <form id="loginForm">
-    <label>Email:</label>
-    <input type="email" id="email" required><br>
+    <div>
+        <label>Email</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
+    </div>
 
-    <label>Password:</label>
-    <input type="password" id="password" required><br>
+    <div>
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
+    </div>
 
     <button type="submit">Login</button>
-</form>
-
-<!-- Forgot password button -->
-<p>
+    
     <button type="button" onclick="window.location.href='{% url 'forgot_password_view' %}'">
         Forgot Password?
     </button>
-</p>
+</form>
 
-<p id="message" style="color:red;"></p>
-<div id="verifyButtonContainer"></div> <!-- For email verification button -->
+<p id="message"></p>
+<div id="verifyButtonContainer"></div>
+
+<div class="links">
+    <p>Need to verify email? <a href="{% url 'userlogin_view' %}">Verify here</a></p>
+</div>
 
 <script>
 document.getElementById("loginForm").addEventListener("submit", async function(e) {
