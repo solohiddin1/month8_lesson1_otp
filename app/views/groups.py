@@ -177,14 +177,6 @@ class GroupListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = GroupSerializer
 
-    @swagger_auto_schema(
-        operation_summary="List All Groups",
-        operation_description="Retrieve a list of all groups. Admin access required.",
-        responses={
-            200: openapi.Response('List of all groups', GroupSerializer(many=True))
-        }
-    )
-
 @permission_classes([IsAuthenticated])
 class StudentGroupsView(APIView):
     """
@@ -235,15 +227,6 @@ class GroupCreate(generics.CreateAPIView):
     """
     serializer_class = GroupSerializer
     permission_classes = [IsAdminUser]
-
-    @swagger_auto_schema(
-        operation_summary="Create Group",
-        operation_description="Create a new group. Admin access required.",
-        responses={
-            201: openapi.Response('Group created successfully', GroupSerializer),
-            400: 'Validation error'
-        }
-    )
 
 class GroupDetailView(generics.RetrieveUpdateDestroyAPIView):
     """

@@ -29,14 +29,6 @@ class AttendenceGetView(ListAPIView):
     serializer_class = AttendenceSerializer
     pagination_class = CustomPagination
 
-    @swagger_auto_schema(
-        operation_summary="List Attendance Records",
-        operation_description="Retrieve a paginated list of all attendance records.",
-        responses={
-            200: openapi.Response('Paginated attendance records', AttendenceSerializer(many=True))
-        }
-    )
-
 
 class AttendenceView(APIView):
     """

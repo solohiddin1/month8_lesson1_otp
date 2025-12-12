@@ -5,6 +5,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from app.models.student import Student
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from app.serializers_f.attendence import AttendenceSerializer
 from app.models.user import User
 from app.serializers_f.student_serizlizer import StudentSerializer
