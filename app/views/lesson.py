@@ -149,9 +149,6 @@ class LessonDetailView(APIView):
     )
     def put(self, request, pk):
         """Update lesson information."""
-        print(request.data, '----data-------')
-        print(pk, 'pk=-----')
-        
         # Prepare data with files
         data = request.data.copy()
         data.update(request.FILES)
@@ -207,3 +204,54 @@ class LessonDetailView(APIView):
             )
         
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@permission_classes([IsAuthenticated])
+class GroupLessonsView(APIView):
+    """
+    API endpoint for retrieving lessons for a specific group.
+    
+    Students can view lessons only for groups they are enrolled in.
+    """
+
+    @swagger_auto_schema(
+        operation_summary="Get Group Lessons",
+        operation_description="Retrieve all lessons for a specific group. Students only see lessons for their groups.",
+        responses={
+            200: openapi.Response('List of lessons for the group', LessonSerializer(many=True)),
+            403: 'Student not enrolled in this group',
+            404: 'Group not found',
+            400: 'Error retrieving lessons'
+        }
+    )
+    def get(self, request, group_id):
+        """Retrieve lessons for a specific group."""
+        try:
+            # Verify group exists
+            group = get_object_or_404(Group, pk=group_id)
+            
+            # If user is a student, verify they're enrolled in this group
+            try:
+                student = Student.objects.get(user=request.user)
+                if not group.students_set.filter(id=student.id).exists():
+                    return Response(
+                        {"error": "You are not enrolled in this group"},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            except Student.DoesNotExist:
+                # Non-students (teachers/admin) can view any group's lessons
+                pass
+            
+            # Get lessons for this group
+            lessons = Lesson.objects.filter(group=group).order_by('-created_at')
+            serializer = LessonSerializer(lessons, many=True)
+            
+            logger.info(f"Retrieved {lessons.count()} lessons for group {group_id}")
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error retrieving lessons for group {group_id}: {str(e)}")
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )

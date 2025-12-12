@@ -54,6 +54,7 @@ urlpatterns = [
     
     # lesson
     path('create_lesson/',LessonView.as_view(),name="lesson"),
+    path('api/group/<int:group_id>/lessons/',GroupLessonsView.as_view(),name="group_lessons"),
     
     # teacher
     path('api/teacher_profile/',TeacherProfileView.as_view(),name='teacher_profie_view'),

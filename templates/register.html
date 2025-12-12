@@ -2,22 +2,46 @@
 {% block title %}Register{% endblock %}
 {% block header %}Register{% endblock %}
 
-{% block content %}<form id="register-form">
+{% block content %}
+<h2>Create Account</h2>
+
+<form id="register-form">
     {% csrf_token %}
-    <label>Name:</label>
-    <input type="text" name="name" required><br>
-    <label>Surname:</label>
-    <input type="text" name="surname" required><br>
-    <label>Age:</label>
-    <input type="number" name="age" min="1" required><br>
+    <div>
+        <label>Name</label>
+        <input type="text" name="name" placeholder="Enter your name" required>
+    </div>
+    
+    <div>
+        <label>Surname</label>
+        <input type="text" name="surname" placeholder="Enter your surname" required>
+    </div>
+    
+    <div>
+        <label>Age</label>
+        <input type="number" name="age" min="1" placeholder="Enter your age" required>
+    </div>
+    
     <hr>
-    <label>Email:</label>
-    <input type="email" name="email" required><br>
-    <label>Phone number:</label>
-    <input type="text" name="phone_number" required pattern="^\+998\d{9}$" title="Phone must be in +998XXXXXXXXX format"><br>
-    <button type="number">Register</button>
+    
+    <div>
+        <label>Email</label>
+        <input type="email" name="email" placeholder="your@email.com" required>
+    </div>
+    
+    <div>
+        <label>Phone Number</label>
+        <input type="text" name="phone_number" placeholder="+998XXXXXXXXX" required pattern="^\+998\d{9}$" title="Phone must be in +998XXXXXXXXX format">
+    </div>
+    
+    <button type="submit">Register</button>
 </form>
-<p id="register-message" style="color:red;"></p>
+
+<p id="register-message"></p>
+
+<div class="links">
+    <p>Already have an account? <a href="{% url 'login_existing_user_view' %}">Login here</a></p>
+</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {

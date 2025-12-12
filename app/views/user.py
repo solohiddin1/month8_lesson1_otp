@@ -117,13 +117,8 @@ class DeleteUserAPIView(generics.DestroyAPIView):
         """Delete student and associated user."""
         try:
             pk = kwargs.get('pk')
-            print(pk, '1111')
-            
             student = Student.objects.get(pk=pk)
             user = student.user
-            
-            print(user, '---')
-            print(student, '---')
             
             # Delete student and user
             student.delete()
@@ -142,7 +137,6 @@ class DeleteUserAPIView(generics.DestroyAPIView):
                 status=404
             )
         except Exception as e:
-            print(str(e))
             logger.error(f"Error deleting user: {str(e)}")
             return Response(
                 {"success": False, "error": str(e)}, 
