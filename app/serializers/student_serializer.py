@@ -15,11 +15,9 @@ class StudentSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**user_data)
         student = Student.objects.create(user=user, **validated_data)
         return student
-    
 
-class StudentGetSerializer(serializers.ModelSerializer):   
-    # user = UserSerializer(required=True)
 
+class StudentGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = '__all__'

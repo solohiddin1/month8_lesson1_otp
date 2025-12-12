@@ -1,4 +1,3 @@
-from typing import Required
 from rest_framework import serializers
 from app.models.teacher import Teacher
 from app.serializers.user_serializer import UserSerializer
@@ -31,7 +30,7 @@ class TeacherAddUserSerializer(serializers.Serializer):
 
 class TeacherCreateSerializer(serializers.ModelSerializer):
     user = UserSerializer(required=True)
-    # teacher = TeacherSerializer(required=True)
+
     class Meta:
         model = Teacher
         fields = "__all__"
@@ -43,6 +42,5 @@ class TeacherCreateSerializer(serializers.ModelSerializer):
         user_data['is_student'] = False
         user = User.objects.create_user(**user_data)
 
-        # teacher_data = validated_data.pop('teacher')
         teacher = Teacher.objects.create(user=user, **validated_data)
         return teacher

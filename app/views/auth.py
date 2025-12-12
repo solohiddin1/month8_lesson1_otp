@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from app.serializers.user_serializer import UserSerializer
 from drf_yasg.utils import swagger_auto_schema
@@ -9,21 +9,22 @@ from app.models import User
 from rest_framework import permissions
 from rest_framework.decorators import api_view, APIView, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, login as django_login
+from django.contrib.auth.tokens import PasswordResetTokenGenerator, default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
-import random
 from django.core.cache import cache
-from drf_yasg.utils import swagger_auto_schema
+from django.utils.http import urlsafe_base64_decode
+import random
 from app.serializers.email_serializers import SendEmail, LoginSerializer
 from app.serializers.user_serializer import LoginUserSerializer, ChangePasswordSerializer
-# from app.serializers.student_serializer import StudentSerializer
+from app.utils import generate_reset_password_link
 from log.log import setup_logger
 
 logger = setup_logger()
+token_generator = PasswordResetTokenGenerator()
 
 
 @swagger_auto_schema(method='post', request_body=LoginSerializer)
@@ -213,50 +214,7 @@ def change_password(request):
 
 @permission_classes(IsAuthenticated)
 def change_password_page(request):
-
     return render(request,'change_password.html')
-
-
-# @swagger_auto_schema(method='post', request_body=LoginSerializer)
-# @api_view(['POST'])
-# @permission_classes([AllowAny])
-# def forgot_password(request):
-    serializer = LoginSerializer(data=request.data)
-    logger.debug('forgot_password serializer data: %s', request.data)
-    if serializer.is_valid():
-        email = serializer.validated_data['email']
-        try:
-            user = User.objects.get(email=serializer.validated_data['email'])
-        except Exception as e:
-            return Response({"error":str(e)})
-        if user:
-            otp = random.randint(1000,9999)
-            cache.set(email,otp,timeout=300)
-            logger.info("OTP sent to %s for forgot_password", email)
-            send_mail(
-                 "Your code sent",
-                    f"Your code is {otp}. It is valid for 5 minutes.",
-                    settings.EMAIL_HOST_USER,
-                    [email],
-                    fail_silently=False,
-                    )
-            return Response({"message":"please verify your email, we sent code to your email"}) 
-        return Response({"error":"User not found"})
-    return Response({"error":serializer.errors})
-
-
-
-
-
-# from django.contrib.auth.models import User
-from django.utils.http import urlsafe_base64_decode
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from django.contrib.auth.tokens import PasswordResetTokenGenerator, default_token_generator
-from app.utils import generate_reset_password_link
-
-token_generator = PasswordResetTokenGenerator()
 
 def forgot_password_view(request):
     return render(request,'forgot_password.html')
@@ -281,7 +239,6 @@ def forgot_password(request):
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=404)
 
-from rest_framework import serializers
 
 class Reset(serializers.Serializer):
     new_password = serializers.CharField()

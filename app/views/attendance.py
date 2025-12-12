@@ -1,4 +1,3 @@
-from pickletools import pystring
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import  swagger_auto_schema
 from rest_framework.decorators import permission_classes
@@ -6,7 +5,6 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from app.models.attendance import Attendance
-from app.models.groups import Group
 from app.models.teacher import Teacher
 from app.pagination import CustomPagination
 from app.serializers.attendance import AttendanceSerializer
