@@ -1,7 +1,7 @@
 from app.models.groups import Group
 from app.models.student import Student
 from app.models.teacher import Teacher
-from app.serializers_f.group_serializer import GroupSerializer
+from app.serializers.group_serializer import GroupSerializer
 
 from rest_framework.decorators import api_view, APIView, permission_classes
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
@@ -13,7 +13,7 @@ from log.log import setup_logger
 
 logger = setup_logger()
 
-from app.serializers_f.student_serizlizer import StudentSerializer
+from app.serializers.student_serializer import StudentSerializer
 from app.views import student
 
 

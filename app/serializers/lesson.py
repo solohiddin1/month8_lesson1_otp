@@ -2,7 +2,7 @@ from pickle import FALSE
 from rest_framework  import serializers
 from app.models.homework import Homework
 from app.models.lessons import Lesson
-from app.serializers_f.homework_serializer import HomeworkSerializer
+from app.serializers.homework_serializer import HomeworkSerializer
 
 class LessonSerializer(serializers.ModelSerializer):
     homework = serializers.PrimaryKeyRelatedField(

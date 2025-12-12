@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
-from app.models.attendence import Attendence
+from app.models.attendance import Attendance
 
 
-class AttendenceSerializer(serializers.ModelSerializer):
+class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Attendence
+        model = Attendance
         fields = ["teacher_id", "group_id", "lesson", "absent_students"]

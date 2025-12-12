@@ -1,10 +1,8 @@
 from typing import Required
 from rest_framework import serializers
 from app.models.teacher import Teacher
-from app.serializers_f.user_serializer import UserSerializer
+from app.serializers.user_serializer import UserSerializer
 from app.models import User
-# from app.serializers_f.teacher_serializer import TeacherSerializer
-from app import serializers_f
 
 class TeacherSerializer(serializers.ModelSerializer):   
     user = UserSerializer()

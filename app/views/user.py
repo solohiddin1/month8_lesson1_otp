@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.status import HTTP_400_BAD_REQUEST
-from app.serializers_f.user_serializer import UserSerializer
+from app.serializers.user_serializer import UserSerializer
 from drf_yasg.utils import swagger_auto_schema
 from app.models import User
 from rest_framework import permissions
@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from django.core.mail import send_mail
 from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
-from app.serializers_f.student_serizlizer import StudentSerializer
+from app.serializers.student_serializer import StudentSerializer
 from app.models.student import Student
 from log.log import setup_logger
 logger = setup_logger()

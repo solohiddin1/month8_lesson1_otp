@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from app.models.homework import Homework, HomeworkUpload
 from rest_framework.response import Response
 from app.models.student import Student
-from app.serializers_f.homework_serializer import HomeworkSerializer, HomeworkUploadSerializer
+from app.serializers.homework_serializer import HomeworkSerializer, HomeworkUploadSerializer
 
 
 @permission_classes([IsAuthenticated])

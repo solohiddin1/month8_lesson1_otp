@@ -7,9 +7,9 @@ from app.models.groups import Group
 from app.models.homework import Homework
 from app.models.student import Student
 from app.models.teacher import Teacher
-from app.serializers_f import lesson
-from app.serializers_f.homework_serializer import HomeworkSerializer
-from app.serializers_f.lesson import LessonSerializer
+from app.serializers import lesson
+from app.serializers.homework_serializer import HomeworkSerializer
+from app.serializers.lesson import LessonSerializer
 
 from rest_framework.views import APIView
 from app.models.lessons import Lesson
