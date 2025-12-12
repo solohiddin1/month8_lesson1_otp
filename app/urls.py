@@ -23,7 +23,6 @@ from app.views.student import StudentAllView
 from app.views.mock_data import MockTwoMonth
 
 urlpatterns = [
-    # path('user/',UserCreateView.as_view()),
     path('login/',login,name='login'),
     path('verify/',verify,name='verify'),
 
@@ -33,8 +32,6 @@ urlpatterns = [
     # mock data
     path('mock_data/<int:year>/<int:month>/',MockDataView.as_view(),name='mock_data'),
     path('mock_2/<str:date1>/<str:date2>/',MockTwoMonth.as_view(),name='mock_data_two_months'),
-
-    # path('mock_data/active_students/',MockDataActiveStudents.as_view(),name='mock_data_active_students'),
     path('mock_2_count/<str:date1>/<str:date2>/',MockTwoCount.as_view(),name='mock_data_two_months'),
     path('mock_2_finished/',MockDataFinished.as_view(),name='mock_data_two_months_finished'),
 
@@ -67,9 +64,6 @@ urlpatterns = [
     path('create_groups/<int:pk>/',GroupDetailView.as_view(),name="group-detail"),
     path('api/group/<int:pk>/students/',StudentsIngroupView.as_view(),name="students_in_group"),
 
-    # homework
-    # path('homework_detail/<int:pk>/',LessonDetailView.as_view(),name="lesson_detail"),
-    
     # lesson detail
     path('lesson_detail/<int:pk>/',LessonDetailView.as_view(),name="lesson_detail"),
 
@@ -116,7 +110,5 @@ urlpatterns = [
     path('teacher_dashboard/',teacher_panel, name='teacher_dashboard'),
     path('student_dashboard/',student_dashboard,name='student_dashboard'),
 
-
-    # path('register/', register, name='register'),
     path('register_view/', register_view, name='register_view'),
 ]

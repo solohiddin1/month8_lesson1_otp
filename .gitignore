@@ -16,3 +16,10 @@ Thumbs.db
 .env
 
 migrations/
+
+# Database
+db.sqlite3
+*.db
+
+# Media files
+media/
