@@ -4,7 +4,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from app.models.groups import Group
-from app.models.homework import Homework
+from app.models.homework import Homework, HomeworkUpload
 from app.models.student import Student
 from app.models.teacher import Teacher
 from app.serializers_f import lesson
@@ -117,7 +117,15 @@ class LessonDetailView(APIView):
                 student = Student.objects.get(user=request.user)
                 # Student view: get lesson and their homework
                 lesson = get_object_or_404(Lesson, pk=pk, group__students_set=student)
-                homework = Homework.objects.filter(lesson=lesson, student=student)
+                
+                # Filter homework for this specific lesson and student
+                if lesson.homework:
+                    homework = HomeworkUpload.objects.filter(
+                        student=student, 
+                        homework=lesson.homework
+                    )
+                else:
+                    homework = HomeworkUpload.objects.none()
                 
                 lesson_serializer = LessonSerializer(lesson)
                 homework_serializer = HomeworkSerializer(homework, many=True)
@@ -133,8 +141,7 @@ class LessonDetailView(APIView):
                 return Response({"lesson": lesson_serializer.data})
                 
         except Exception as e:
-            print(e)
-            logger.error(f"Error retrieving lesson {pk}: {str(e)}")
+            logger.exception(f"Error retrieving lesson {pk}")
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
@@ -156,8 +163,6 @@ class LessonDetailView(APIView):
         # Get lesson
         lesson = get_object_or_404(Lesson, pk=pk)
         data['teacher'] = lesson.teacher_id
-        
-        print(data, 'data======')
         
         # Create homework if provided
         homeworkserializer = HomeworkSerializer(data=request.data)

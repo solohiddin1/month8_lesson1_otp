@@ -25,8 +25,18 @@
         .group-card { background: #ecf0f1; padding: 15px; margin: 10px 0; border-radius: 5px; cursor: pointer; transition: all 0.3s; }
         .group-card:hover { background: #d5dbdb; }
         .group-card h3 { color: #2c3e50; }
-        .lesson-card { background: white; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .lesson-card { background: white; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; cursor: pointer; transition: all 0.3s; }
+        .lesson-card:hover { background: #f8f9fa; border-color: #9b59b6; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .lesson-card h4 { color: #2980b9; margin-bottom: 10px; }
+        .lesson-card.compact { padding: 12px; }
+        .lesson-card.compact .lesson-preview { color: #7f8c8d; font-size: 0.9em; margin-top: 8px; }
+        .lesson-detail-view { display: none; }
+        .back-btn { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; font-size: 14px; }
+        .back-btn:hover { background: #5a6268; }
+        .lesson-media { margin: 15px 0; border-radius: 8px; overflow: hidden; }
+        .homework-status { display: inline-block; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 13px; margin: 10px 0; }
+        .homework-status.submitted { background: #d4edda; color: #155724; }
+        .homework-status.pending { background: #fff3cd; color: #856404; }
         .lesson-content { margin: 10px 0; }
         .lesson-content p { margin: 5px 0; }
         .lesson-media { margin: 15px 0; }
@@ -343,54 +353,21 @@
                     
                     currentGroupLessons.forEach(lesson => {
                         const card = document.createElement("div");
-                        card.className = "lesson-card";
+                        card.className = "lesson-card compact";
+                        card.onclick = () => viewLessonDetail(lesson.id);
                         
-                        let mediaHTML = '';
-                        if (lesson.video_url) {
-                            mediaHTML += `<div class="lesson-media">
-                                <video controls><source src="${lesson.video_url}" type="video/mp4">Your browser does not support video.</video>
-                            </div>`;
-                        }
-                        if (lesson.image) {
-                            mediaHTML += `<div class="lesson-media"><img src="${lesson.image}" alt="Lesson image"></div>`;
-                        }
-                        
-                        const homeworkStatus = lesson.homework_submitted ? 
-                            '<span class="homework-status submitted">✓ Submitted</span>' : 
-                            '<span class="homework-status pending">⚠ Pending</span>';
+                        const contentPreview = lesson.content ? 
+                            (lesson.content.length > 100 ? lesson.content.substring(0, 100) + '...' : lesson.content) : 
+                            'No content available';
                         
                         card.innerHTML = `
                             <h4>${lesson.title || 'Untitled Lesson'}</h4>
-                            <div class="lesson-content">
-                                <p><strong>Content:</strong></p>
-                                <p>${lesson.content || 'No content available'}</p>
+                            <div class="lesson-preview">
                                 <p><strong>Time:</strong> ${lesson.start_time || 'N/A'} - ${lesson.end_time || 'N/A'}</p>
-                                <p><strong>Days per week:</strong> ${lesson.days_week || 0}</p>
-                            </div>
-                            ${mediaHTML}
-                            <div class="homework-section">
-                                <h4>Homework</h4>
-                                <p>${lesson.homework || 'No homework assigned'}</p>
-                                ${homeworkStatus}
-                                <br>
-                                <button class="uploadHomeworkBtn" 
-                                    data-lesson-id="${lesson.id}" 
-                                    data-homework-id="${lesson.homework?.id || lesson.homework || ''}">
-
-                                    Upload Homework
-                                </button>
-
-
+                                <p>${contentPreview}</p>
                             </div>
                         `;
                         container.appendChild(card);
-                    });
-                    document.querySelectorAll('.uploadHomeworkBtn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const lessonId = this.dataset.lessonId;
-                            const homeworkId = this.dataset.homeworkId;
-                            openHomeworkModal(lessonId, homeworkId);
-                        });
                     });
 
                 } else {
@@ -398,6 +375,84 @@
                 }
             } catch (err) {
                 showMsg("lessonsMsg", "Failed to fetch lessons");
+            }
+        }
+
+        // ========== VIEW LESSON DETAIL ==========
+        async function viewLessonDetail(lessonId) {
+            try {
+                const res = await fetch(`/lesson_detail/${lessonId}/`, { headers: authHeader() });
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    showMsg("lessonsMsg", data.error || "Failed to load lesson details");
+                    return;
+                }
+                
+                const container = document.getElementById("lessonsList");
+                container.innerHTML = "";
+                
+                const lessonData = data.lesson || data;
+                const homeworkData = data.homework || [];
+                
+                const detailCard = document.createElement("div");
+                detailCard.className = "lesson-card";
+                
+                let mediaHTML = '';
+                if (lessonData.video_url && lessonData.video_url !== '/media/static/videos/default.mp4') {
+                    mediaHTML += `<div class="lesson-media">
+                        <video controls style="width: 100%; max-height: 400px;"><source src="${lessonData.video_url}" type="video/mp4">Your browser does not support video.</video>
+                    </div>`;
+                }
+                if (lessonData.image && lessonData.image !== '/media/static/images/default.jpg') {
+                    mediaHTML += `<div class="lesson-media"><img src="${lessonData.image}" alt="Lesson image" style="max-width: 100%; height: auto;"></div>`;
+                }
+                
+                // Check homework status
+                let homeworkStatus = '';
+                let homeworkDetails = '';
+                if (Array.isArray(homeworkData) && homeworkData.length > 0) {
+                    const hw = homeworkData[0];
+                    const isChecked = hw.is_checked;
+                    homeworkStatus = isChecked ? 
+                        `<span class="homework-status submitted">✓ Checked - Grade: ${hw.mark || 'N/A'}</span>` : 
+                        '<span class="homework-status pending">⚠ Pending Review</span>';
+                    
+                    if (hw.text) {
+                        homeworkDetails = `<p><strong>Your Submission:</strong> ${hw.text}</p>`;
+                    }
+                } else {
+                    homeworkStatus = '<span class="homework-status pending">⚠ Not Submitted</span>';
+                }
+                
+                detailCard.innerHTML = `
+                    <button class="back-btn" onclick="viewGroupLessons(${currentGroupId}, document.getElementById('lessonsTitle').textContent.replace('Lessons in ', ''))">← Back to Lessons</button>
+                    <h4>${lessonData.title || 'Untitled Lesson'}</h4>
+                    <div class="lesson-content">
+                        <p><strong>Schedule:</strong> ${lessonData.start_time || 'N/A'} - ${lessonData.end_time || 'N/A'}</p>
+                        <p><strong>Days per week:</strong> ${lessonData.days_week || 'Not specified'}</p>
+                        <hr style="margin: 15px 0;">
+                        <p><strong>Content:</strong></p>
+                        <p>${lessonData.content || 'No content available'}</p>
+                    </div>
+                    ${mediaHTML}
+                    <div class="homework-section">
+                        <h4>Homework</h4>
+                        ${homeworkStatus}
+                        ${homeworkDetails}
+                        <br>
+                        <button class="uploadHomeworkBtn" 
+                            onclick="openHomeworkModal(${lessonId}, ${lessonData.homework || 'null'})">
+                            ${Array.isArray(homeworkData) && homeworkData.length > 0 ? 'Update Homework' : 'Upload Homework'}
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(detailCard);
+                
+            } catch (err) {
+                console.error("Error loading lesson detail:", err);
+                showMsg("lessonsMsg", "Failed to fetch lesson details");
             }
         }
 

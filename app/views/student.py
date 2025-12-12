@@ -32,13 +32,11 @@ class StudentAllView(APIView):
         try:
             # Get all students from database
             student = Student.objects.all()
-            print(student, '---')
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
         # Serialize student data
         serializer = StudentGetSerializer(student, many=True)
-        print(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -65,7 +63,6 @@ class StudentView(APIView):
         try:
             # Get student associated with current user
             student = Student.objects.get(user=request.user)
-            print(student, '---')
         except Student.DoesNotExist:
             return Response({"error": "Student not found"}, status=404)
         except Exception as e:
@@ -78,7 +75,6 @@ class StudentView(APIView):
         # Add user email and phone number to response
         data['email'] = student.user.email
         data['phone_number'] = student.user.phone_number
-        print(data)
         
         return Response(data, status=status.HTTP_200_OK)
 
