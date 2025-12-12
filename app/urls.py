@@ -4,7 +4,7 @@ from app.views.media import media
 from app.views.admin import TeacherCrud, admin_panel, teacher_panel
 from app.views.attendence import AttendanceDetailView, AttendenceGetView, AttendenceView
 from app.views.homework import HomeworkDetailView, HomeworkPutMarkView, HomeworkUploadView, HomeworkView
-from app.views.lesson import LessonDetailView, LessonView
+from app.views.lesson import LessonDetailView, LessonView, GroupLessonsView
 from app.views.mock_data import MockDataActiveStudents, MockDataFinished, MockDataView, MockTwoCount
 from app.views.student import StudentView, StudentsView
 from app.views.user import register_view
