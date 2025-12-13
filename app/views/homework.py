@@ -8,6 +8,9 @@ from app.models.student import Student
 from app.serializers.homework_serializer import HomeworkSerializer, HomeworkUploadSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from log.log import setup_logger
+
+logger = setup_logger()
 
 
 @permission_classes([IsAuthenticated])
@@ -30,7 +33,6 @@ class HomeworkUploadView(APIView):
     )
     def post(self, request):
         """Upload homework submission."""
-        print(request.data)
         try:
             # Get student from user reference
             student = Student.objects.get(user=request.data['student'])
@@ -44,6 +46,20 @@ class HomeworkUploadView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+        # Check if homework already submitted for this lesson
+        lesson_id = request.data.get('lesson')
+        if lesson_id:
+            existing = HomeworkUpload.objects.filter(
+                student=student,
+                lesson_id=lesson_id
+            ).first()
+            
+            if existing:
+                return Response(
+                    {"error": "Homework already submitted for this lesson"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
         # Update data with student ID
         data = request.data.copy()
@@ -78,7 +94,6 @@ class HomeworkPutMarkView(APIView):
     )
     def post(self, request, pk):
         """Grade and mark homework as checked."""
-        print(request.data)
         if not pk:
             return Response({"error": "Homework ID is required"}, status=400)
         
@@ -88,7 +103,7 @@ class HomeworkPutMarkView(APIView):
         except HomeworkUpload.DoesNotExist:
             return Response({"error": "Homework not found"}, status=404)
         
-        print(homework.is_checked)
+        logger.info(f"Grading homework {pk}, current status: {homework.is_checked}")
         # Mark homework as checked
         homework.is_checked = True
         

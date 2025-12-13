@@ -564,6 +564,7 @@
             <form id="homeworkForm">
                 <input type="hidden" name="student">
                 <input type="hidden" name="homework">
+                <input type="hidden" name="lesson">
 
                 <label>Homework Text:</label>
                 <textarea name="text" placeholder="Enter your homework solution or answer here..."></textarea>
@@ -853,7 +854,10 @@
                 // Check homework status
                 let homeworkStatus = '';
                 let homeworkDetails = '';
-                if (Array.isArray(homeworkData) && homeworkData.length > 0) {
+                let uploadButton = '';
+                const hasSubmitted = Array.isArray(homeworkData) && homeworkData.length > 0;
+                
+                if (hasSubmitted) {
                     const hw = homeworkData[0];
                     const isChecked = hw.is_checked;
                     homeworkStatus = isChecked ? 
@@ -863,8 +867,13 @@
                     if (hw.text) {
                         homeworkDetails = `<p><strong>Your Submission:</strong> ${hw.text}</p>`;
                     }
+                    uploadButton = '<p style="color: #6c757d; font-style: italic;">Homework already submitted</p>';
                 } else {
                     homeworkStatus = '<span class="homework-status pending">⚠ Not Submitted</span>';
+                    uploadButton = `<button class="uploadHomeworkBtn" 
+                        onclick="openHomeworkModal(${lessonId}, ${lessonData.homework || 'null'})">
+                        Upload Homework
+                    </button>`;
                 }
                 
                 detailCard.innerHTML = `
@@ -883,10 +892,7 @@
                         ${homeworkStatus}
                         ${homeworkDetails}
                         <br>
-                        <button class="uploadHomeworkBtn" 
-                            onclick="openHomeworkModal(${lessonId}, ${lessonData.homework || 'null'})">
-                            ${Array.isArray(homeworkData) && homeworkData.length > 0 ? 'Update Homework' : 'Upload Homework'}
-                        </button>
+                        ${uploadButton}
                     </div>
                 `;
                 
@@ -924,8 +930,9 @@
         function openHomeworkModal(lessonId, homeworkId) {
             const form = document.getElementById("homeworkForm");
             form.reset();
-            form.querySelector('[name="student"]').value = studentId; // ✅ this one is correct
+            form.querySelector('[name="student"]').value = studentId;
             form.querySelector('[name="homework"]').value = homeworkId;
+            form.querySelector('[name="lesson"]').value = lessonId;
             document.getElementById("homeworkModal").style.display = "block";
         }
 
@@ -940,6 +947,7 @@
             const formData = new FormData();
             formData.append("student", form.student.value);
             formData.append("homework", form.homework.value);
+            formData.append("lesson", form.lesson.value);
             formData.append("text", form.text.value);
 
             if (form.file.files[0]) formData.append("file", form.file.files[0]);
@@ -956,6 +964,11 @@
                 if (res.ok) {
                     document.getElementById("homeworkModal").style.display = "none";
                     showMsg("homeworkFormMsg", "Homework submitted successfully!", false);
+                    // Refresh lesson detail to show updated status
+                    const lessonId = form.lesson.value;
+                    if (lessonId && currentGroupId) {
+                        setTimeout(() => viewLessonDetail(lessonId), 500);
+                    }
                 } else {
                     showMsg("homeworkFormMsg", data.error || JSON.stringify(data));
                 }
