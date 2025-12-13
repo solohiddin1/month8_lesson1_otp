@@ -6,98 +6,538 @@
     <title>Student Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 5px; }
-        h1 { margin-bottom: 10px; color: #2c3e50; }
-        h2 { color: #34495e; margin-bottom: 15px; }
-        h3 { color: #7f8c8d; margin: 10px 0; }
-        .user-info { margin-bottom: 20px; padding: 15px; background: #9b59b6; color: white; border-radius: 3px; }
-        .user-info h3 { margin-bottom: 5px; color: white; }
-        .top-actions { margin-bottom: 20px; }
-        .top-actions button { margin-right: 10px; padding: 8px 15px; cursor: pointer; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
-        .tab { padding: 10px 20px; cursor: pointer; background: #f8f9fa; border: 1px solid #ddd; border-bottom: none; border-radius: 5px 5px 0 0; }
-        .tab.active { background: white; border-bottom: 2px solid white; margin-bottom: -2px; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; overflow-x: hidden; }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(180deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 100;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .user-info {
+            padding: 10px 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            font-size: 13px;
+            word-break: break-word;
+        }
+        
+        .user-info strong {
+            display: block;
+            margin-top: 5px;
+            color: #fff;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 0 10px;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .nav-link::before {
+            content: '▸';
+            margin-right: 10px;
+            font-size: 12px;
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            margin-top: 20px;
+        }
+        
+        .sidebar-footer button {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .sidebar-footer button:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            min-height: 100vh;
+        }
+        
+        .content-header {
+            margin-bottom: 30px;
+        }
+        
+        .content-header h2 {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .content-header p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        /* Tab Content */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        button { padding: 5px 10px; cursor: pointer; border: 1px solid #ddd; background: #9b59b6; color: white; border-radius: 3px; }
-        button:hover { background: #8e44ad; }
-        .group-card { background: #ecf0f1; padding: 15px; margin: 10px 0; border-radius: 5px; cursor: pointer; transition: all 0.3s; }
-        .group-card:hover { background: #d5dbdb; }
-        .group-card h3 { color: #2c3e50; }
-        .lesson-card { background: white; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; cursor: pointer; transition: all 0.3s; }
-        .lesson-card:hover { background: #f8f9fa; border-color: #9b59b6; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .lesson-card h4 { color: #2980b9; margin-bottom: 10px; }
-        .lesson-card.compact { padding: 12px; }
-        .lesson-card.compact .lesson-preview { color: #7f8c8d; font-size: 0.9em; margin-top: 8px; }
-        .lesson-detail-view { display: none; }
-        .back-btn { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; font-size: 14px; }
-        .back-btn:hover { background: #5a6268; }
-        .lesson-media { margin: 15px 0; border-radius: 8px; overflow: hidden; }
-        .homework-status { display: inline-block; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 13px; margin: 10px 0; }
-        .homework-status.submitted { background: #d4edda; color: #155724; }
-        .homework-status.pending { background: #fff3cd; color: #856404; }
-        .lesson-content { margin: 10px 0; }
-        .lesson-content p { margin: 5px 0; }
-        .lesson-media { margin: 15px 0; }
-        .lesson-media video { max-width: 100%; height: auto; border-radius: 5px; }
-        .lesson-media img { max-width: 100%; height: auto; border-radius: 5px; }
-        .homework-section { background: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #ffc107; }
-        .homework-status { display: inline-block; padding: 5px 10px; border-radius: 3px; font-weight: bold; margin: 10px 0; }
-        .homework-status.submitted { background: #d4edda; color: #155724; }
-        .homework-status.pending { background: #f8d7da; color: #721c24; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
-        .modal-content { position: relative; margin: 50px auto; padding: 20px; background: white; width: 90%; max-width: 600px; border-radius: 5px; max-height: 80vh; overflow-y: auto; }
-        .modal-content h3 { margin-bottom: 15px; color: #2c3e50; }
-        .modal-content label { display: block; margin-top: 10px; font-weight: bold; }
-        .modal-content input, .modal-content textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 3px; }
-        .modal-content textarea { min-height: 100px; }
-        .modal-actions { margin-top: 20px; display: flex; gap: 10px; }
-        .msg { padding: 10px; margin: 10px 0; border-radius: 3px; }
-        .msg.error { background: #fadbd8; color: #c0392b; }
-        .msg.success { background: #d5f4e6; color: #229954; }
-        .back-btn { background: #95a5a6; margin-bottom: 15px; }
-        .back-btn:hover { background: #7f8c8d; }
-        .empty-state { text-align: center; padding: 40px; color: #95a5a6; }
-        .profile-card { background: #ecf0f1; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .profile-card p { margin: 5px 0; }
-        .profile-card strong { color: #2c3e50; }
+        
+        /* Cards and Sections */
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        
+        .profile-card p {
+            margin: 12px 0;
+            font-size: 15px;
+            color: #2c3e50;
+        }
+        
+        .profile-card strong {
+            color: #8e44ad;
+            font-weight: 600;
+        }
+        
+        /* Buttons */
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: #9b59b6;
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        button:hover {
+            background: #8e44ad;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .back-btn {
+            background: #95a5a6;
+            margin-bottom: 15px;
+        }
+        
+        .back-btn:hover {
+            background: #7f8c8d;
+        }
+        
+        /* Group Cards */
+        .group-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #9b59b6;
+        }
+        
+        .group-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.2);
+        }
+        
+        .group-card h3 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .group-card p {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
+        /* Lesson Cards */
+        .lesson-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .lesson-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .lesson-card h4 {
+            color: #8e44ad;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .lesson-card.compact {
+            padding: 18px;
+        }
+        
+        .lesson-card.compact .lesson-preview {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        
+        .lesson-content {
+            margin: 15px 0;
+        }
+        
+        .lesson-content p {
+            margin: 10px 0;
+            font-size: 15px;
+            color: #2c3e50;
+        }
+        
+        .lesson-media {
+            margin: 20px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .lesson-media video,
+        .lesson-media img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Homework Section */
+        .homework-section {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            border-left: 4px solid #ffc107;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .homework-section h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .homework-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 13px;
+            margin: 10px 0;
+        }
+        
+        .homework-status.submitted {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .homework-status.pending {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            position: relative;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            width: 90%;
+            max-width: 550px;
+            border-radius: 12px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-content h3 {
+            margin-bottom: 20px;
+            font-size: 22px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .modal-content label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        
+        .modal-content input,
+        .modal-content textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: #fafafa;
+        }
+        
+        .modal-content input:focus,
+        .modal-content textarea:focus {
+            outline: none;
+            border-color: #9b59b6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.1);
+        }
+        
+        .modal-content textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .modal-actions {
+            margin-top: 25px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .modal-actions button.cancel {
+            background: #95a5a6;
+        }
+        
+        .modal-actions button.cancel:hover {
+            background: #7f8c8d;
+        }
+        
+        /* Messages */
+        .msg {
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .msg.error {
+            background: #ffe6e6;
+            color: #c0392b;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .msg.success {
+            background: #e8f8f5;
+            color: #27ae60;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+        }
+        
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #bdc3c7;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #95a5a6;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar-header h1,
+            .user-info,
+            .nav-link::before {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+                padding: 20px;
+            }
+            
+            .nav-link {
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Student Dashboard</h1>
-        <div class="user-info">
-            <h3 id="studentName">Loading...</h3>
-            <p id="studentEmail"></p>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>Student Dashboard</h1>
+            <div class="user-info">
+                <p>Logged in as:</p>
+                <strong id="studentEmail">Loading...</strong>
+            </div>
         </div>
         
-        <div class="top-actions">
-            <button id="logoutBtn">Logout</button>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a class="nav-link active" data-tab="profile">My Profile</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-tab="groups">My Groups</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-tab="lessons">My Lessons</a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
             <button id="changePasswordBtn">Change Password</button>
+            <button id="logoutBtn">Logout</button>
         </div>
+    </div>
 
-        <div class="tabs">
-            <div class="tab active" data-tab="profile">My Profile</div>
-            <div class="tab" data-tab="groups">My Groups</div>
-            <div class="tab" data-tab="lessons">My Lessons</div>
-        </div>
+    <!-- Main Content Area -->
+    <div class="main-content">
 
         <!-- Profile Tab -->
         <div class="tab-content active" id="profile">
-            <h2>My Profile</h2>
-            <div class="profile-card" id="profileCard">
-                <p><strong>Name:</strong> <span id="profName">-</span></p>
-                <p><strong>Surname:</strong> <span id="profSurname">-</span></p>
-                <p><strong>Email:</strong> <span id="profEmail">-</span></p>
-                <p><strong>Phone:</strong> <span id="profPhone">-</span></p>
-                <p><strong>Age:</strong> <span id="profAge">-</span></p>
+            <div class="content-header">
+                <h2>My Profile</h2>
+                <p>View your personal information</p>
+            </div>
+            <div class="section-card">
+                <div class="profile-card" id="profileCard">
+                    <p><strong>Name:</strong> <span id="profName">-</span></p>
+                    <p><strong>Surname:</strong> <span id="profSurname">-</span></p>
+                    <p><strong>Email:</strong> <span id="profEmail">-</span></p>
+                    <p><strong>Phone:</strong> <span id="profPhone">-</span></p>
+                    <p><strong>Age:</strong> <span id="profAge">-</span></p>
+                </div>
             </div>
         </div>
 
         <!-- Groups Tab -->
         <div class="tab-content" id="groups">
-            <h2>My Groups</h2>
+            <div class="content-header">
+                <h2>My Groups</h2>
+                <p>View all groups you are enrolled in</p>
+            </div>
             <div id="groupsList"></div>
             <p id="groupsMsg" class="msg" style="display:none;"></p>
         </div>
@@ -106,7 +546,10 @@
         <div class="tab-content" id="lessons">
             <div id="lessonsView">
                 <button class="back-btn" id="backToGroupsBtn" style="display:none;">← Back to Groups</button>
-                <h2 id="lessonsTitle">Select a group to view lessons</h2>
+                <div class="content-header">
+                    <h2 id="lessonsTitle">Select a group to view lessons</h2>
+                    <p>Access your lessons and homework</p>
+                </div>
                 <div id="lessonsList"></div>
             </div>
             <p id="lessonsMsg" class="msg" style="display:none;"></p>
@@ -233,9 +676,9 @@
         let currentGroupId = null;
 
         // Tab Navigation
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function() {
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
                 document.getElementById(this.dataset.tab).classList.add('active');
@@ -269,7 +712,6 @@
                     console.log(studentData)
                     console.log('student came')
                     if (studentData) {
-                        document.getElementById("studentName").textContent = `${studentData.name} ${studentData.surname || ''}`;
                         document.getElementById("studentEmail").textContent = studentData.user?.email || payload.email;
                         
                         document.getElementById("profName").textContent = studentData.name || '-';
@@ -328,9 +770,9 @@
             currentGroupId = groupId;
             
             // Switch to lessons tab
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector('.tab[data-tab="lessons"]').classList.add('active');
+            document.querySelector('.nav-link[data-tab="lessons"]').classList.add('active');
             document.getElementById('lessons').classList.add('active');
             
             document.getElementById("lessonsTitle").textContent = `Lessons in ${groupName}`;
@@ -464,9 +906,9 @@
             currentGroupId = null;
             
             // Switch to groups tab
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector('.tab[data-tab="groups"]').classList.add('active');
+            document.querySelector('.nav-link[data-tab="groups"]').classList.add('active');
             document.getElementById('groups').classList.add('active');
         });
 
