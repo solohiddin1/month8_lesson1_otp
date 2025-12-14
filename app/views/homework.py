@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import APIView, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from app.models.homework import Homework, HomeworkUpload
+from app.models.lessons import Lesson
 from rest_framework.response import Response
 from app.models.student import Student
 from app.serializers.homework_serializer import HomeworkSerializer, HomeworkUploadSerializer
@@ -228,7 +229,6 @@ class LessonHomeworkView(APIView):
     def get(self, request, lesson_id):
         """Retrieve homework submissions for a specific lesson."""
         try:
-            from app.models.lessons import Lesson
             # Verify lesson exists
             lesson = get_object_or_404(Lesson, pk=lesson_id)
             
