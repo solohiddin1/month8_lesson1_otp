@@ -106,7 +106,7 @@ class HomeworkPutMarkView(APIView):
         logger.info(f"Grading homework {pk}, current status: {homework.is_checked}")
         
         # Prepare data with is_checked set to True
-        data = request.data.copy()
+        data = dict(request.data)
         data['is_checked'] = True
         
         # Update homework with grade/feedback and mark as checked
@@ -176,14 +176,18 @@ class HomeworkByLessonView(APIView):
     )
     def get(self, request, lesson_id):
         """Retrieve homework submissions for a specific lesson."""
+        from app.models.lessons import Lesson
+        
+        # Verify lesson exists
         try:
-            # Get all homework uploads for this lesson
-            homework_uploads = HomeworkUpload.objects.filter(lesson_id=lesson_id)
-            serializer = HomeworkUploadReadSerializer(homework_uploads, many=True)
-            return Response(serializer.data, status=200)
-        except Exception as e:
-            logger.error(f"Error retrieving homework for lesson {lesson_id}: {str(e)}")
-            return Response({"error": str(e)}, status=400)
+            Lesson.objects.get(pk=lesson_id)
+        except Lesson.DoesNotExist:
+            return Response({"error": "Lesson not found"}, status=404)
+        
+        # Get all homework uploads for this lesson
+        homework_uploads = HomeworkUpload.objects.filter(lesson_id=lesson_id)
+        serializer = HomeworkUploadReadSerializer(homework_uploads, many=True)
+        return Response(serializer.data, status=200)
 
 
 class HomeworkDetailView(APIView):
