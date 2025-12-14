@@ -228,6 +228,8 @@ class LessonHomeworkView(APIView):
     )
     def get(self, request, lesson_id):
         """Retrieve homework submissions for a specific lesson."""
+        from django.db import DatabaseError
+        
         # Verify lesson exists (raises Http404 if not found)
         lesson = get_object_or_404(Lesson, pk=lesson_id)
         
@@ -240,8 +242,14 @@ class LessonHomeworkView(APIView):
             
             return Response(serializer.data, status=200)
             
+        except DatabaseError as e:
+            logger.error(f"Database error retrieving homework for lesson {lesson_id}: {str(e)}")
+            return Response(
+                {"error": "Database error occurred while retrieving homework"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         except Exception as e:
-            logger.error(f"Error retrieving homework for lesson {lesson_id}: {str(e)}")
+            logger.exception(f"Unexpected error retrieving homework for lesson {lesson_id}")
             return Response(
                 {"error": "An unexpected error occurred while retrieving homework"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
