@@ -109,13 +109,16 @@ class HomeworkPutMarkView(APIView):
             return Response({"error": "Homework not found"}, status=404)
         
         logger.info(f"Grading homework {pk}, current status: {homework.is_checked}")
-        # Mark homework as checked
-        homework.is_checked = True
         
-        # Update homework with grade/feedback
-        serializer = HomeworkUploadSerializer(homework, data=request.data, partial=True)
+        # Prepare data with is_checked set to True
+        data = dict(request.data)
+        data['is_checked'] = True
+        
+        # Update homework with grade/feedback and mark as checked
+        serializer = HomeworkUploadSerializer(homework, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            logger.info(f"Homework {pk} graded successfully, new status: checked")
             return Response({"message": "Homework updated"}, status=200)
         return Response({"error": serializer.errors}, status=400)
 
@@ -149,13 +152,46 @@ class HomeworkView(APIView):
         operation_summary="List All Homework Submissions",
         operation_description="Retrieve all homework submissions from students.",
         responses={
-            200: openapi.Response('List of homework submissions', HomeworkUploadSerializer(many=True))
+            200: openapi.Response('List of homework submissions', HomeworkUploadReadSerializer(many=True))
         }
     )
     def get(self, request):
         """Retrieve all homework submissions."""
         homeworks = HomeworkUpload.objects.all()
-        serializer = HomeworkUploadSerializer(homeworks, many=True)
+        serializer = HomeworkUploadReadSerializer(homeworks, many=True)
+        return Response(serializer.data, status=200)
+
+
+@permission_classes([IsAuthenticated])
+class HomeworkByLessonView(APIView):
+    """
+    API endpoint to get homework submissions for a specific lesson.
+    
+    Allows teachers to view all student homework submissions for a specific lesson.
+    """
+
+    @swagger_auto_schema(
+        operation_summary="Get Homework Submissions by Lesson",
+        operation_description="Retrieve all homework submissions for a specific lesson. Teacher access.",
+        responses={
+            200: openapi.Response('List of homework submissions for the lesson', HomeworkUploadReadSerializer(many=True)),
+            404: 'Lesson not found',
+            400: 'Error retrieving homework'
+        }
+    )
+    def get(self, request, lesson_id):
+        """Retrieve homework submissions for a specific lesson."""
+        from app.models.lessons import Lesson
+        
+        # Verify lesson exists
+        try:
+            Lesson.objects.get(pk=lesson_id)
+        except Lesson.DoesNotExist:
+            return Response({"error": "Lesson not found"}, status=404)
+        
+        # Get all homework uploads for this lesson
+        homework_uploads = HomeworkUpload.objects.filter(lesson_id=lesson_id)
+        serializer = HomeworkUploadReadSerializer(homework_uploads, many=True)
         return Response(serializer.data, status=200)
 
 
