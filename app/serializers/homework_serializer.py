@@ -16,7 +16,7 @@ class HomeworkUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeworkUpload
         fields = '__all__'
-        read_only_fields = ['uploaded_at','updated_at']
+        read_only_fields = ['uploaded_at', 'updated_at']
     
     def get_student(self, obj):
         """Return student details including name."""

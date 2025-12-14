@@ -2,9 +2,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import APIView, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from app.models.homework import Homework, HomeworkUpload
 from app.models.lessons import Lesson
-from rest_framework.response import Response
 from app.models.student import Student
 from app.serializers.homework_serializer import HomeworkSerializer, HomeworkUploadSerializer
 from drf_yasg.utils import swagger_auto_schema
