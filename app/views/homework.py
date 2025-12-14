@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.db import DatabaseError
 from rest_framework import status
 from rest_framework.decorators import APIView, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -228,8 +229,6 @@ class LessonHomeworkView(APIView):
     )
     def get(self, request, lesson_id):
         """Retrieve homework submissions for a specific lesson."""
-        from django.db import DatabaseError
-        
         # Verify lesson exists (raises Http404 if not found)
         lesson = get_object_or_404(Lesson, pk=lesson_id)
         
