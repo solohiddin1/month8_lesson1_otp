@@ -119,13 +119,10 @@ class LessonDetailView(APIView):
                 lesson = get_object_or_404(Lesson, pk=pk, group__students_set=student)
                 
                 # Filter homework for this specific lesson and student
-                if lesson.homework:
-                    homework = HomeworkUpload.objects.filter(
-                        student=student, 
-                        homework=lesson.homework
-                    )
-                else:
-                    homework = HomeworkUpload.objects.none()
+                homework = HomeworkUpload.objects.filter(
+                    student=student, 
+                    lesson_id=pk
+                )
                 
                 lesson_serializer = LessonSerializer(lesson)
                 homework_serializer = HomeworkUploadSerializer(homework, many=True)
