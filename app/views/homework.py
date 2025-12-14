@@ -109,11 +109,13 @@ class HomeworkPutMarkView(APIView):
             return Response({"error": "Homework not found"}, status=404)
         
         logger.info(f"Grading homework {pk}, current status: {homework.is_checked}")
-        # Mark homework as checked
-        homework.is_checked = True
         
-        # Update homework with grade/feedback
-        serializer = HomeworkUploadSerializer(homework, data=request.data, partial=True)
+        # Prepare data with is_checked set to True
+        data = dict(request.data)
+        data['is_checked'] = True
+        
+        # Update homework with grade/feedback and mark as checked
+        serializer = HomeworkUploadSerializer(homework, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "Homework updated"}, status=200)
