@@ -856,8 +856,13 @@
                 let homeworkDetails = '';
                 let uploadButton = '';
                 const hasSubmitted = Array.isArray(homeworkData) && homeworkData.length > 0;
+                const hasHomework = lessonData.homework && lessonData.homework !== null;
                 
-                if (hasSubmitted) {
+                if (!hasHomework) {
+                    // No homework assigned for this lesson
+                    homeworkStatus = '<span class="homework-status" style="background: #e9ecef; color: #495057;">ℹ No Homework Assigned</span>';
+                    uploadButton = '';
+                } else if (hasSubmitted) {
                     const hw = homeworkData[0];
                     const isChecked = hw.is_checked;
                     homeworkStatus = isChecked ? 
@@ -871,7 +876,7 @@
                 } else {
                     homeworkStatus = '<span class="homework-status pending">⚠ Not Submitted</span>';
                     uploadButton = `<button class="uploadHomeworkBtn" 
-                        onclick="openHomeworkModal(${lessonId}, ${lessonData.homework || 'null'})">
+                        onclick="openHomeworkModal(${lessonId}, ${lessonData.homework})">
                         Upload Homework
                     </button>`;
                 }

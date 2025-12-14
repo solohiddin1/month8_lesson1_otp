@@ -52,6 +52,14 @@ class HomeworkUploadView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        # Validate homework_id
+        homework_id = request.data.get('homework')
+        if not homework_id or homework_id == 'null':
+            return Response(
+                {"error": "No homework assigned for this lesson"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         # Check if homework already submitted for this lesson
         lesson_id = request.data.get('lesson')
         if lesson_id:
