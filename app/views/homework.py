@@ -228,10 +228,10 @@ class LessonHomeworkView(APIView):
     )
     def get(self, request, lesson_id):
         """Retrieve homework submissions for a specific lesson."""
+        # Verify lesson exists (raises Http404 if not found)
+        lesson = get_object_or_404(Lesson, pk=lesson_id)
+        
         try:
-            # Verify lesson exists
-            lesson = get_object_or_404(Lesson, pk=lesson_id)
-            
             # Get all homework uploads for this lesson
             homework_uploads = HomeworkUpload.objects.filter(lesson=lesson).select_related('student', 'homework')
             
@@ -243,6 +243,6 @@ class LessonHomeworkView(APIView):
         except Exception as e:
             logger.error(f"Error retrieving homework for lesson {lesson_id}: {str(e)}")
             return Response(
-                {"error": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "An unexpected error occurred while retrieving homework"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

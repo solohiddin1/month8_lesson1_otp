@@ -23,7 +23,6 @@ class HomeworkUploadSerializer(serializers.ModelSerializer):
         if obj.student:
             return {
                 'id': obj.student.id,
-                'name': obj.student.name,
-                'user': obj.student.user_id
+                'name': obj.student.name
             }
         return None
