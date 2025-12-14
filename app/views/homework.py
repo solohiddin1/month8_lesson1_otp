@@ -1,15 +1,18 @@
-from django.shortcuts import get_object_or_404
 from django.db import DatabaseError
+from django.shortcuts import get_object_or_404
+
 from rest_framework import status
 from rest_framework.decorators import APIView, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 from app.models.homework import Homework, HomeworkUpload
 from app.models.lessons import Lesson
 from app.models.student import Student
 from app.serializers.homework_serializer import HomeworkSerializer, HomeworkUploadSerializer
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 from log.log import setup_logger
 
 logger = setup_logger()
@@ -237,7 +240,7 @@ class LessonHomeworkView(APIView):
             homework_uploads = HomeworkUpload.objects.filter(lesson=lesson).select_related('student', 'homework')
             
             serializer = HomeworkUploadSerializer(homework_uploads, many=True)
-            logger.info(f"Retrieved {homework_uploads.count()} homework submissions for lesson {lesson_id}")
+            logger.info(f"Retrieved {len(serializer.data)} homework submissions for lesson {lesson_id}")
             
             return Response(serializer.data, status=200)
             
