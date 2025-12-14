@@ -223,7 +223,7 @@ class LessonHomeworkView(APIView):
         responses={
             200: openapi.Response('List of homework submissions for the lesson', HomeworkUploadSerializer(many=True)),
             404: 'Lesson not found',
-            400: 'Error retrieving homework'
+            500: 'Unexpected error retrieving homework'
         }
     )
     def get(self, request, lesson_id):
