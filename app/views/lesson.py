@@ -8,7 +8,7 @@ from app.models.homework import Homework, HomeworkUpload
 from app.models.student import Student
 from app.models.teacher import Teacher
 from app.serializers import lesson
-from app.serializers.homework_serializer import HomeworkSerializer
+from app.serializers.homework_serializer import HomeworkSerializer, HomeworkUploadReadSerializer
 from app.serializers.lesson import LessonSerializer
 
 from rest_framework.views import APIView
@@ -119,16 +119,13 @@ class LessonDetailView(APIView):
                 lesson = get_object_or_404(Lesson, pk=pk, group__students_set=student)
                 
                 # Filter homework for this specific lesson and student
-                if lesson.homework:
-                    homework = HomeworkUpload.objects.filter(
-                        student=student, 
-                        homework=lesson.homework
-                    )
-                else:
-                    homework = HomeworkUpload.objects.none()
+                homework = HomeworkUpload.objects.filter(
+                    student=student, 
+                    lesson_id=pk
+                )
                 
                 lesson_serializer = LessonSerializer(lesson)
-                homework_serializer = HomeworkSerializer(homework, many=True)
+                homework_serializer = HomeworkUploadReadSerializer(homework, many=True)
 
                 return Response({
                     "lesson": lesson_serializer.data,
