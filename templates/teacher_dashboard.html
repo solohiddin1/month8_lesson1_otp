@@ -1173,19 +1173,18 @@
         // ========== FETCH LESSON HOMEWORK SUBMISSIONS ==========
         async function fetchLessonHomework(lessonId) {
             try {
-                const res = await authorizedFetch("/api/homework_get/");
+                const res = await authorizedFetch(`/api/lesson/${lessonId}/homework/`);
                 const data = await res.json();
                 const container = document.getElementById("lessonHomeworkList");
                 container.innerHTML = "";
 
                 if (res.ok && Array.isArray(data)) {
-                    const lessonHomework = data.filter(hw => hw.homework.id === lessonId);
-                    if (lessonHomework.length === 0) {
+                    if (data.length === 0) {
                         container.innerHTML = '<p style="color: #999; text-align: center;">No homework submissions yet</p>';
                         return;
                     }
 
-                    lessonHomework.forEach(hw => {
+                    data.forEach(hw => {
                         const card = document.createElement("div");
                         card.className = "homework-card";
                         

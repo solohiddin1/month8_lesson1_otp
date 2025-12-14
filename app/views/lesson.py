@@ -128,7 +128,8 @@ class LessonDetailView(APIView):
                     homework = HomeworkUpload.objects.none()
                 
                 lesson_serializer = LessonSerializer(lesson)
-                homework_serializer = HomeworkSerializer(homework, many=True)
+                from app.serializers.homework_serializer import HomeworkUploadSerializer
+                homework_serializer = HomeworkUploadSerializer(homework, many=True)
 
                 return Response({
                     "lesson": lesson_serializer.data,

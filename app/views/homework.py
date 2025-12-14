@@ -206,3 +206,43 @@ class HomeworkDetailView(APIView):
             serializer.save()
             return Response({"message": "Homework updated"}, status=200)
         return Response({"error": serializer.errors}, status=400)
+
+
+@permission_classes([IsAuthenticated])
+class LessonHomeworkView(APIView):
+    """
+    API endpoint for retrieving homework submissions for a specific lesson.
+    
+    Useful for teachers to view all student submissions for a particular lesson.
+    """
+
+    @swagger_auto_schema(
+        operation_summary="Get Homework Submissions for a Lesson",
+        operation_description="Retrieve all homework submissions for a specific lesson. Teachers can see all submissions.",
+        responses={
+            200: openapi.Response('List of homework submissions for the lesson', HomeworkUploadSerializer(many=True)),
+            404: 'Lesson not found',
+            400: 'Error retrieving homework'
+        }
+    )
+    def get(self, request, lesson_id):
+        """Retrieve homework submissions for a specific lesson."""
+        try:
+            from app.models.lessons import Lesson
+            # Verify lesson exists
+            lesson = get_object_or_404(Lesson, pk=lesson_id)
+            
+            # Get all homework uploads for this lesson
+            homework_uploads = HomeworkUpload.objects.filter(lesson=lesson).select_related('student', 'homework')
+            
+            serializer = HomeworkUploadSerializer(homework_uploads, many=True)
+            logger.info(f"Retrieved {homework_uploads.count()} homework submissions for lesson {lesson_id}")
+            
+            return Response(serializer.data, status=200)
+            
+        except Exception as e:
+            logger.error(f"Error retrieving homework for lesson {lesson_id}: {str(e)}")
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
