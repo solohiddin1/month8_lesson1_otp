@@ -8,7 +8,7 @@ from app.models.homework import Homework, HomeworkUpload
 from app.models.student import Student
 from app.models.teacher import Teacher
 from app.serializers import lesson
-from app.serializers.homework_serializer import HomeworkSerializer
+from app.serializers.homework_serializer import HomeworkSerializer, HomeworkUploadSerializer
 from app.serializers.lesson import LessonSerializer
 
 from rest_framework.views import APIView
@@ -128,7 +128,7 @@ class LessonDetailView(APIView):
                     homework = HomeworkUpload.objects.none()
                 
                 lesson_serializer = LessonSerializer(lesson)
-                homework_serializer = HomeworkSerializer(homework, many=True)
+                homework_serializer = HomeworkUploadSerializer(homework, many=True)
 
                 return Response({
                     "lesson": lesson_serializer.data,

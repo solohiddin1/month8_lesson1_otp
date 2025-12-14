@@ -1,13 +1,18 @@
+from django.db import DatabaseError
 from django.shortcuts import get_object_or_404
+
 from rest_framework import status
 from rest_framework.decorators import APIView, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from app.models.homework import Homework, HomeworkUpload
 from rest_framework.response import Response
+
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
+from app.models.homework import Homework, HomeworkUpload
+from app.models.lessons import Lesson
 from app.models.student import Student
 from app.serializers.homework_serializer import HomeworkSerializer, HomeworkUploadSerializer
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 from log.log import setup_logger
 
 logger = setup_logger()
@@ -206,3 +211,48 @@ class HomeworkDetailView(APIView):
             serializer.save()
             return Response({"message": "Homework updated"}, status=200)
         return Response({"error": serializer.errors}, status=400)
+
+
+@permission_classes([IsAuthenticated])
+class LessonHomeworkView(APIView):
+    """
+    API endpoint for retrieving homework submissions for a specific lesson.
+    
+    Useful for teachers to view all student submissions for a particular lesson.
+    """
+
+    @swagger_auto_schema(
+        operation_summary="Get Homework Submissions for a Lesson",
+        operation_description="Retrieve all homework submissions for a specific lesson. Teachers can see all submissions.",
+        responses={
+            200: openapi.Response('List of homework submissions for the lesson', HomeworkUploadSerializer(many=True)),
+            404: 'Lesson not found',
+            500: 'Unexpected error retrieving homework'
+        }
+    )
+    def get(self, request, lesson_id):
+        """Retrieve homework submissions for a specific lesson."""
+        # Verify lesson exists (raises Http404 if not found)
+        lesson = get_object_or_404(Lesson, pk=lesson_id)
+        
+        try:
+            # Get all homework uploads for this lesson
+            homework_uploads = HomeworkUpload.objects.filter(lesson=lesson).select_related('student', 'homework')
+            
+            serializer = HomeworkUploadSerializer(homework_uploads, many=True)
+            logger.info(f"Retrieved {len(serializer.data)} homework submissions for lesson {lesson_id}")
+            
+            return Response(serializer.data, status=200)
+            
+        except DatabaseError as e:
+            logger.error(f"Database error retrieving homework for lesson {lesson_id}: {str(e)}")
+            return Response(
+                {"error": "Database error occurred while retrieving homework"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except Exception as e:
+            logger.exception(f"Unexpected error retrieving homework for lesson {lesson_id}")
+            return Response(
+                {"error": "An unexpected error occurred while retrieving homework"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

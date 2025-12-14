@@ -9,7 +9,23 @@ class HomeworkSerializer(serializers.ModelSerializer):
 
 
 class HomeworkUploadSerializer(serializers.ModelSerializer):
+    # Nested serializers to include student and homework details
+    student = serializers.SerializerMethodField()
+    homework = HomeworkSerializer(read_only=True)
+    
     class Meta:
         model = HomeworkUpload
-        fields = '__all__'
-        read_only_fields = ['uploaded_at','updated_at']
+        fields = [
+            'id', 'student', 'lesson', 'homework', 'file', 'photo', 
+            'text', 'mark', 'is_checked', 'uploaded_at', 'updated_at'
+        ]
+        read_only_fields = ['uploaded_at', 'updated_at']
+    
+    def get_student(self, obj):
+        """Return student details including name."""
+        if obj.student:
+            return {
+                'id': obj.student.id,
+                'name': obj.student.name
+            }
+        return None
